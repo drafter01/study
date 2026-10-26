@@ -44,7 +44,7 @@
 - 미정: 제출 일정, 학교 IRB 규정, 지도교수 피드백
 
 ## 연구자가 확보할 원문 PDF (sources/에 넣을 예정)
-필수: 오지현 외(2021) 트레바리, 신민철 외(2025) 러닝크루, 곽민기 외(2021) UX 역량, Peterson 외(2008) Brief Sense of Community Scale, McMillan & Chavis(1986), 척도 국내 번안 논문 1편
+필수: 오지현 외(2021) 트레바리, 신민철 외(2025) 러닝크루, 곽민지 외(2021) UX 역량, Peterson 외(2008) Brief Sense of Community Scale, McMillan & Chavis(1986), 척도 국내 번안 논문 1편
 선택: Preece(2001), Skocpol(2003) 서론, Lemon & Verhoef(2016), Lynn(1986), Hall(2019)·Boothby 외(2018)·Epley & Schroeder(2014)·Sandstrom & Dunn(2014)
 공개 자료(Claude가 직접 구할 것): Preece & Shneiderman(2009), Lu 외(2017), Pethig 외(2025), Chavis 외(2008) SCI-2, Wenger 외(2011), Rodden 외(2010) HEART, CHI 논문들(Arguello 2006, Cox 2016, Gray 2018), 통계 보도자료
 
