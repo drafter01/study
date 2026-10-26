@@ -50,6 +50,13 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .stage canvas{width:100%;height:100%;display:block}
 .hud{position:absolute;left:14px;top:12px;right:14px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
 .hud .big{font-family:var(--f-display);font-size:22px}
+.key{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);pointer-events:none}
+.key span{display:flex;align-items:center;gap:5px}
+.kp{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+.kl{width:16px;height:2px;background:var(--teal)}
+.ke{width:10px;height:10px;border-radius:50%;border:3px solid var(--accent)}
+.cap{margin-top:10px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;min-height:2.2em;pointer-events:none}
+.cap b{color:var(--teal)}
 .legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
 .lg{display:grid;gap:2px;font-size:12px;color:var(--muted)}
 .lg b{font-family:var(--f-mono);font-size:20px;color:var(--ink);font-weight:500;display:flex;align-items:center;gap:6px}
@@ -128,7 +135,7 @@ function newGame(type){
   clearInterval(timer);
   st={type,phase:'alloc',skills:{open:0,welcome:0,rhythm:0,conn:0,roles:0},lock:{open:0,welcome:0,rhythm:0,conn:0,roles:0},
     points:START_PTS,meeting:0,E:100,people:[],links:[],nid:0,total:0,newSum:0,retSum:0,xp:0,gain:0,
-    stats:{lonelyLeft:0,left:0},floats:[],burn:false};
+    stats:{lonelyLeft:0,left:0},floats:[],tags:[],cap:'',burn:false};
   for(let i=0;i<2;i++)addPerson(2,1);
   st.links.push([st.people[0].id,st.people[1].id]);
   layout(true);
@@ -141,18 +148,27 @@ function addPerson(stage,fromR){
 }
 const alive=()=>st.people.filter(p=>!p.leaving);
 function deg(p){let d=0;for(const l of st.links)if(l[0]===p.id||l[1]===p.id)d++;return d;}
-function link(a,b){if(a.id===b.id)return;if(st.links.some(l=>(l[0]===a.id&&l[1]===b.id)||(l[0]===b.id&&l[1]===a.id)))return;st.links.push([a.id,b.id]);}
+function link(a,b){if(a.id===b.id)return;if(st.links.some(l=>(l[0]===a.id&&l[1]===b.id)||(l[0]===b.id&&l[1]===a.id)))return;st.links.push([a.id,b.id,performance.now()]);
+  // 이어진 사람끼리 가까이 앉아요: 바깥쪽 사람이 안쪽 사람 곁으로
+  const [o,i]=a.stage<b.stage?[a,b]:[b,a];o.a=i.a+(Math.random()-.5)*.5;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function sum(){return Object.values(st.skills).reduce((a,b)=>a+b,0);}
 
 function layout(snap){
+  const TAU=Math.PI*2;
   for(let s=0;s<4;s++){
-    const grp=alive().filter(p=>p.stage===s).sort((a,b)=>a.a-b.a);
-    const off=s*.7;
-    grp.forEach((p,i)=>{const ang=grp.length>1?off+i/grp.length*Math.PI*2:p.a;const r=RING[s]+(i%2?.025:-.025);
-      p.tx=Math.cos(ang)*r;p.ty=Math.sin(ang)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
+    const grp=alive().filter(p=>p.stage===s);
+    grp.forEach(p=>{p.a=((p.a%TAU)+TAU)%TAU;});
+    grp.sort((a,b)=>a.a-b.a);
+    const n=grp.length, ang=grp.map(p=>p.a), gap=Math.min(TAU/Math.max(n,1),[.3,.38,.5,.9][s]);
+    // 자기 자리 근처에 앉되 겹치지 않게 밀어내요
+    for(let it=0;it<30&&n>1;it++)for(let i=0;i<n;i++){const j=(i+1)%n;let df=ang[j]-ang[i];if(j===0)df+=TAU;
+      if(df<gap){const push=(gap-df)/2;ang[i]-=push;ang[j]+=push;}}
+    const W0=.7;
+    grp.forEach((p,i)=>{const r=RING[s]+(i%2?.02:-.02);const t=(((ang[i]%TAU)+TAU)%TAU)/TAU;const A=-Math.PI/2+W0/2+t*(TAU-W0);p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
   }
 }
+function tag(p,text,color){st.tags.push({p,text,color,life:1});}
 function float(text,s,color){const a=-Math.PI/2+(Math.random()-.5)*.6;st.floats.push({text,x:Math.cos(a)*RING[s],y:Math.sin(a)*RING[s]-.04,life:1,color});}
 
 // 한 번의 모임
@@ -164,13 +180,13 @@ function step(){
     if(p.stage===0){
       st.newSum++;
       const pb=(.1+(d>0?.45:0)+.03*k.rhythm-(k.rhythm>=4&&k.welcome<=1?.08:0))*eff;
-      if(Math.random()<pb){p.stage=1;back++;st.retSum++;st.xp+=1;}
-      else{p.leaving=true;gone++;st.stats.left++;if(d===0)st.stats.lonelyLeft++;}
+      if(Math.random()<pb){p.stage=1;back++;st.retSum++;st.xp+=1;tag(p,'다시 옴','teal');}
+      else{p.leaving=true;gone++;st.stats.left++;if(d===0)st.stats.lonelyLeft++;tag(p,d===0?'아무와도 못 이어져 떠남':'떠남','coral');}
     }else if(p.stage===1){
-      if(Math.random()<(.08+.06*k.rhythm+.05*Math.min(d,3))*eff){p.stage=2;settle++;st.xp+=2;}
-      else if(Math.random()<clamp(.3-.1*Math.min(d,2)-.03*k.rhythm,.04,.5)){p.leaving=true;gone++;st.stats.left++;}
+      if(Math.random()<(.08+.06*k.rhythm+.05*Math.min(d,3))*eff){p.stage=2;settle++;st.xp+=2;tag(p,'자리 잡음','teal');}
+      else if(Math.random()<clamp(.3-.1*Math.min(d,2)-.03*k.rhythm,.04,.5)){p.leaving=true;gone++;st.stats.left++;tag(p,'떠남','coral');}
     }else if(p.stage===2){
-      if(Math.random()<(.02+.08*k.roles)*eff){p.stage=3;lead++;st.xp+=3;}
+      if(Math.random()<(.02+.08*k.roles)*eff){p.stage=3;lead++;st.xp+=3;tag(p,'함께 이끎','accent');}
       else if(Math.random()<.03+(k.open>=4?.05:0)+(st.E<15?.1:0)){p.leaving=true;gone++;st.stats.left++;}
     }else if(p.stage===3){
       if(Math.random()<(st.E<=0?.18:.02)){p.leaving=true;gone++;}
@@ -193,11 +209,10 @@ function step(){
   if(st.E<=0)st.burn=true;
   st.links=st.links.filter(l=>{const a=st.people.find(p=>p.id===l[0]),b=st.people.find(p=>p.id===l[1]);return a&&b&&!a.leaving&&!b.leaving;});
   st.meeting++;
-  if(n)float('+'+n,0,'muted');
-  if(back)float('+'+back,1,'teal');
-  if(settle)float('+'+settle,2,'teal');
-  if(lead)float('+'+lead,3,'accent');
-  if(gone)st.floats.push({text:'−'+gone+' 떠남',x:.62,y:.88,life:1,color:'coral'});
+  const CAP=['','바깥에서 처음 온 사람(빈 동그라미)이 들어와요. 누군가와 <b>선</b>이 이어지면 관계가 생긴 거예요.',
+    '선이 이어진 사람은 다시 와서 한 칸 안쪽으로 들어와요. 아무와도 이어지지 못한 사람은 떠나요.',
+    '관계가 쌓인 사람은 자리를 잡고, 그중 일부는 가운데에서 <b>함께 이끄는 사람</b>이 돼요.'];
+  st.cap=CAP[st.meeting]||`새로 온 사람 <b>${n}</b> · 다시 온 사람 <b>${back}</b> · 자리 잡은 사람 <b>${settle}</b> · 떠난 사람 <b>${gone}</b>`;
   for(const p of st.people)if(p.leaving){p.tx=Math.cos(p.a)*1.3;p.ty=Math.sin(p.a)*1.3;}
   layout(false);
 }
@@ -246,7 +261,10 @@ function render(){
   if(!st){intro();return;}
   app.innerHTML=`<div class="game">
     <div><div class="stage"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
-      <div class="hud"><span class="big">${TYPES[st.type].name}</span><span class="label" id="mt"></span></div></div>
+      <div class="hud"><span class="big">${TYPES[st.type].name}</span><span class="label" id="mt"></span></div>
+      </div>
+      <p class="cap" id="cap"></p>
+      <div class="key"><span><i class="kp"></i>사람</span><span><i class="kl"></i>사람 사이의 관계</span><span><i class="ke"></i>가운데: 나(운영자)와 에너지</span><span>↓ 관계가 쌓이면 안쪽으로</span></div>
       <div class="legend" id="legend"></div></div>
     <div class="panel" id="panel"></div></div>`;
   canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
@@ -272,6 +290,7 @@ function energyHTML(){const e=Math.round(st.E);return `<div class="energy"><span
 function renderPanel(){
   const P=document.getElementById('panel');if(!P)return;
   document.getElementById('legend').innerHTML=legendHTML();
+  const cp=document.getElementById('cap');if(cp){cp.innerHTML=st.phase==='alloc'?'스킬을 나누고 모임을 시작하면, 사람들이 바깥에서 안쪽으로 움직여요.':st.phase==='levelup'?'여기까지 4번의 모임이었어요. 스킬을 더 키워 보세요.':st.phase==='report'?'최종 모습이에요. 선이 많을수록 관계가 단단한 모임이에요.':st.cap;}
   document.getElementById('mt').innerHTML=st.phase==='report'?'끝':`모임 <b class="mono">${st.meeting}/${MEETINGS}</b>`;
   if(st.phase==='alloc'||st.phase==='levelup'){
     const lv=st.phase==='levelup';
@@ -286,7 +305,7 @@ function renderPanel(){
       renderPanel();resetIdle();});
     document.getElementById('go').onclick=run;
   }else if(st.phase==='run'){
-    P.innerHTML=`<h2>모임이 열리고 있어요</h2><p class="note">점 하나가 한 사람, 선은 사람 사이의 관계예요. 선이 생긴 사람이 남아요. 가운데는 운영자, 고리는 운영자 에너지예요.</p>
+    P.innerHTML=`<h2>모임이 열리고 있어요</h2><p class="note">누군가와 선으로 이어진 사람이 다시 오고, 안쪽으로 들어와요.</p>
       <div class="skills">${skillRows(false)}</div>${energyHTML()}`;
   }else{
     const v=verdict(),L=alive(),rooted=L.filter(p=>p.stage>=2).length,rate=st.newSum?Math.round(st.retSum/st.newSum*100):0;
@@ -309,36 +328,55 @@ function renderPanel(){
 function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
-  const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.9,cx=W/2,cy=H/2+10*d;
-  const C={ink:css('--ink'),muted:css('--muted'),line:css('--line'),teal:css('--teal'),accent:css('--accent'),coral:css('--coral'),paper:css('--paper')};
+  const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.84,cx=W/2,cy=H/2+6*d;
+  const C={bg:css('--bg'),ink:css('--ink'),muted:css('--muted'),line:css('--line'),teal:css('--teal'),accent:css('--accent'),coral:css('--coral'),paper:css('--paper')};
   ctx.clearRect(0,0,W,H);
-  // 동심원
-  ctx.lineWidth=1*d;ctx.setLineDash([3*d,5*d]);ctx.strokeStyle=C.line;
-  RING.forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r*S,0,Math.PI*2);ctx.stroke();});
-  ctx.setLineDash([]);
-  ctx.fillStyle=C.muted;ctx.font=`${11*d}px "IBM Plex Sans KR",sans-serif`;ctx.textAlign='center';
-  STAGE_NAMES.forEach((n,i)=>{if(i<3)ctx.fillText(n,cx,cy+RING[i]*S+14*d);});
+  // 구역: 바깥에서 안쪽으로 네 칸
+  const B=[.86,.665,.48,.305,.09];
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(cx,cy,B[i]*S,0,Math.PI*2);ctx.fillStyle=i%2?C.paper:C.bg;ctx.fill();}
+  ctx.beginPath();ctx.arc(cx,cy,B[4]*S,0,Math.PI*2);ctx.fillStyle=C.paper;ctx.fill();
+  ctx.lineWidth=1*d;ctx.strokeStyle=C.line;B.slice(0,4).forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r*S,0,Math.PI*2);ctx.stroke();});
+  ctx.font=`500 ${11*d}px "IBM Plex Sans KR",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  const SC=[C.muted,C.teal,C.teal,C.accent];
+  STAGE_NAMES.forEach((n,i)=>{const y=cy-((B[i]+B[i+1])/2)*S;const w=ctx.measureText(n).width+12*d;
+    ctx.fillStyle=C.paper;ctx.globalAlpha=.9;ctx.beginPath();ctx.roundRect(cx-w/2,y-9*d,w,18*d,9*d);ctx.fill();ctx.globalAlpha=1;
+    ctx.fillStyle=SC[i];ctx.fillText(n,cx,y);});
+  // 안쪽을 가리키는 화살표
+  ctx.fillStyle=C.muted;ctx.globalAlpha=.5;ctx.font=`${12*d}px sans-serif`;
+  for(let i=0;i<3;i++)ctx.fillText('↓',cx,cy-B[i+1]*S);
+  ctx.globalAlpha=1;ctx.textBaseline='alphabetic';
   // 사람 움직임
   for(const p of st.people){p.x+=(p.tx-p.x)*.07;p.y+=(p.ty-p.y)*.07;
     if(p.leaving)p.alpha=Math.max(0,p.alpha-.02);else p.alpha=Math.min(1,p.alpha+.05);}
   st.people=st.people.filter(p=>!(p.leaving&&p.alpha<=0));
   // 관계 선
   const byId=new Map(st.people.map(p=>[p.id,p]));
-  ctx.strokeStyle=C.teal;ctx.lineWidth=1.4*d;
+  const now=performance.now();ctx.strokeStyle=C.teal;
   for(const l of st.links){const a=byId.get(l[0]),b=byId.get(l[1]);if(!a||!b)continue;
-    ctx.globalAlpha=.45*Math.min(a.alpha,b.alpha);ctx.beginPath();ctx.moveTo(cx+a.x*S,cy+a.y*S);ctx.lineTo(cx+b.x*S,cy+b.y*S);ctx.stroke();}
+    const fresh=l[2]?Math.max(0,1-(now-l[2])/1500):0;
+    ctx.lineWidth=(2+fresh*4)*d;ctx.globalAlpha=(.6+fresh*.4)*Math.min(a.alpha,b.alpha);
+    ctx.beginPath();ctx.moveTo(cx+a.x*S,cy+a.y*S);ctx.lineTo(cx+b.x*S,cy+b.y*S);ctx.stroke();}
   ctx.globalAlpha=1;
   // 사람
-  for(const p of st.people){const x=cx+p.x*S,y=cy+p.y*S,r=(p.stage===3?10:8)*d;
-    ctx.globalAlpha=p.alpha*(p.leaving?.6:1);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    if(p.leaving){ctx.strokeStyle=C.coral;ctx.lineWidth=2*d;ctx.stroke();}
-    else if(p.stage===0){ctx.fillStyle=C.paper;ctx.fill();ctx.strokeStyle=C.muted;ctx.lineWidth=2*d;ctx.stroke();}
-    else{ctx.fillStyle=p.stage===3?C.accent:C.teal;if(p.stage===1)ctx.globalAlpha*=.55;ctx.fill();}}
+  for(const p of st.people){const x=cx+p.x*S,y=cy+p.y*S,r=(p.stage===3?11:9)*d;
+    ctx.globalAlpha=p.alpha;
+    // 사람 모양: 머리와 어깨
+    const head=()=>{ctx.beginPath();ctx.arc(x,y-r*.45,r*.42,0,Math.PI*2);};
+    const body=()=>{ctx.beginPath();ctx.ellipse(x,y+r*.55,r*.72,r*.5,0,Math.PI,0);ctx.closePath();};
+    let col=p.leaving?C.coral:p.stage===0?C.muted:p.stage===3?C.accent:C.teal;
+    if(p.stage===0||p.leaving){ctx.fillStyle=C.paper;ctx.strokeStyle=col;ctx.lineWidth=1.8*d;head();ctx.fill();ctx.stroke();body();ctx.fill();ctx.stroke();}
+    else{ctx.fillStyle=col;if(p.stage===1)ctx.globalAlpha*=.6;head();ctx.fill();body();ctx.fill();}}
+  // 사람마다 무슨 일이 있었는지
+  ctx.font=`600 ${11*d}px "IBM Plex Sans KR",sans-serif`;ctx.textAlign='center';
+  for(const t of st.tags){t.life-=.008;const p=t.p;ctx.globalAlpha=Math.max(0,Math.min(1,t.life*1.6));
+    ctx.fillStyle=C[t.color]||C.ink;ctx.fillText(t.text,cx+p.x*S,cy+p.y*S-16*d-(1-t.life)*10*d);}
+  st.tags=st.tags.filter(t=>t.life>0);
   ctx.globalAlpha=1;
   // 가운데 운영자와 에너지 고리
-  ctx.beginPath();ctx.arc(cx,cy,9*d,0,Math.PI*2);ctx.fillStyle=C.ink;ctx.fill();
-  ctx.lineWidth=5*d;ctx.strokeStyle=C.line;ctx.beginPath();ctx.arc(cx,cy,17*d,0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle=st.E<30?C.coral:C.accent;ctx.beginPath();ctx.arc(cx,cy,17*d,-Math.PI/2,-Math.PI/2+Math.PI*2*st.E/100);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,11*d,0,Math.PI*2);ctx.fillStyle=C.ink;ctx.fill();
+  ctx.fillStyle=C.paper;ctx.font=`600 ${11*d}px "IBM Plex Sans KR",sans-serif`;ctx.textBaseline='middle';ctx.fillText('나',cx,cy+.5*d);ctx.textBaseline='alphabetic';
+  ctx.lineWidth=5*d;ctx.strokeStyle=C.line;ctx.beginPath();ctx.arc(cx,cy,19*d,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle=st.E<30?C.coral:C.accent;ctx.beginPath();ctx.arc(cx,cy,19*d,-Math.PI/2,-Math.PI/2+Math.PI*2*st.E/100);ctx.stroke();
     // 떠오르는 숫자
   ctx.font=`600 ${16*d}px "IBM Plex Mono",monospace`;
   for(const f of st.floats){f.life-=.012;f.y-=.0012;ctx.globalAlpha=Math.max(0,f.life);ctx.fillStyle=C[f.color]||C.ink;ctx.fillText(f.text,cx+f.x*S,cy+f.y*S);}
