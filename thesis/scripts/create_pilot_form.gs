@@ -1,6 +1,6 @@
 /**
  * 디자이너 대상 예비 설문 구글 폼 자동 생성 스크립트
- * (thesis/21-designer-pilot-survey.md 기준)
+ * (thesis/21-designer-pilot-survey.md 기준, v2: 필수 서술형을 Q4 하나로 줄임)
  *
  * 사용 방법
  * 1. https://script.google.com 접속 → [새 프로젝트]
@@ -10,6 +10,7 @@
  * 5. 아래 [실행 로그]에 나오는 "편집 링크"로 폼을 열어 확인
  *
  * 실행 후 폼 편집 화면에서 직접 해야 할 것
+ * - Q5 객관식의 [옵션 순서 섞기] 켜기 (스크립트로는 설정 불가)
  * - Q6 격자 문항의 [행 순서 섞기] 켜기 (스크립트로는 설정 불가)
  * - [설정] → 이메일 주소 수집: "수집하지 않음" 확인
  */
@@ -57,14 +58,26 @@ function createPilotForm() {
   // 2. 상황 질문
   form.addPageBreakItem()
     .setTitle('2. 상황 질문')
-    .setHelpText('정답은 없어요. 떠오르는 대로, 생각나는 순서대로 적어주세요.');
+    .setHelpText('정답은 없어요. 떠오르는 대로 답해주세요.');
 
   form.addParagraphTextItem()
     .setTitle('Q4. 동네에서 매주 모이는 15명 규모의 독서모임 운영을 맡게 되었습니다. 최근 석 달 동안 매번 3분의 1 정도가 말없이 빠집니다. 어떻게 하시겠어요?')
+    .setHelpText('한두 줄, 키워드만 적어도 괜찮아요.')
     .setRequired(true);
 
-  form.addParagraphTextItem()
-    .setTitle('Q5. 모임에 처음 온 사람이 다음 모임에 다시 오는 경우가 적습니다. 무엇을 확인하고, 무엇을 해보시겠어요?')
+  form.addMultipleChoiceItem()
+    .setTitle('Q5. 모임에 처음 온 사람이 다음 모임에 다시 오는 경우가 적습니다. 가장 먼저 해볼 일 하나를 골라주세요.')
+    .setChoiceValues([
+      '다시 오지 않은 사람들에게 이유를 물어본다',
+      '첫 모임의 진행 방식을 바꿔본다',
+      '모임 소개와 신청·안내 과정을 다시 살펴본다',
+      '처음 온 사람에게 개별 연락해 다시 와달라고 한다',
+      '기존 멤버에게 새로 온 사람을 챙겨달라고 부탁한다',
+      '뒤풀이나 친목 자리를 만든다',
+      '출석 규칙이나 보증금을 만든다',
+      '원래 그런 것이라 크게 신경 쓰지 않는다'
+    ])
+    .showOtherOption(true)
     .setRequired(true);
 
   // 3. 평가 질문
@@ -95,8 +108,8 @@ function createPilotForm() {
     .setRequired(true);
 
   form.addParagraphTextItem()
-    .setTitle('Q8. 위의 일 중 가장 자신 없는 것은 무엇이고, 그 이유는 무엇인가요?')
-    .setRequired(true);
+    .setTitle('Q8. 위의 일 중 가장 자신 없는 것은 무엇이고, 그 이유는 무엇인가요? (선택)')
+    .setRequired(false);
 
   // 4. 마지막 질문 (앞 문항에 영향을 주지 않도록 맨 끝)
   form.addPageBreakItem().setTitle('4. 마지막 질문 (선택)');
