@@ -41,6 +41,9 @@
 | 18-logic-flow.md | 논문 논리 흐름 (v2 머리말이 최신) |
 | 19-logic-review.md | 논리 점검과 보완 |
 | 20-reframing-maker-designer.md | '만드는 디자이너' 관점 재설정과 AI 근거 |
+| 21-designer-pilot-survey.md | 디자이너 예비 설문 v2 (scripts/create_pilot_form.gs로 구글 폼 생성) |
+| 22-community-canvas-review.md | Community Canvas·Community Weaving 비교와 차별점 |
+| 23-framework-elements-draft.md | 프레임워크 요소 초안 v0.0 (누구나 겹 + 디자이너 겹, 요소 8개) |
 | data/, scripts/ | 원티드 공고 목록 CSV, 수집·분석 스크립트(Python 표준 라이브러리만 사용) |
 | sources/ | 원문 PDF와 읽기 노트 (README의 읽기 규칙 따를 것) |
 
@@ -48,7 +51,7 @@
 - RQ1 ✅ 전수 분석 완료 (남은 일: 2개월 뒤 2차 수집, 무작위 30건 교차 분류)
 - RQ2 🟡 2차 자료 17건, 설문 초안 (척도 원문 확보 후 번안, 예비 조사 5명)
 - RQ3 🟡 대응표 초안, 전문가 검토 질문지에 과업 유사성 문항 추가
-- RQ4 🟡 전문가 검토 계획 v0.2, 프레임워크 미착수 ← 다음 작업
+- RQ4 🟡 전문가 검토 계획 v0.2, 프레임워크 요소 초안 v0.0(23번) ← 다음: 구조 결정(요소 vs 단계×요소), 근거 매트릭스
 - 원문 7편: 구글 드라이브에서 읽고 sources/notes/에 노트 완료
 - 미정: 제출 일정, 학교 IRB 규정, 지도교수 피드백
 
