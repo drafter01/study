@@ -1,0 +1,411 @@
+<title>모임 설계자</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 동네 게시판 위의 출석부. 위에서 아래로 모임 현장 → 공동체 의식 → 이번 모임의 선택 */
+:root{
+  --bg:#eef0ea; --paper:#fbfbf7; --ink:#1f2a2e; --muted:#5d6a68; --line:#d3d8cf;
+  --accent:#d9940f; --accent-ink:#5a3b00; --teal:#2f7d78; --coral:#c4553f; --chip:#e3e7dd;
+  --f-display:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161b1c; --paper:#1f2627; --ink:#e7ebe6; --muted:#9aa6a3; --line:#323c3d;
+  --accent:#f0b23a; --accent-ink:#2a1c00; --teal:#5fb3ac; --coral:#e07a63; --chip:#2a3233; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161b1c; --paper:#1f2627; --ink:#e7ebe6; --muted:#9aa6a3; --line:#323c3d;
+  --accent:#f0b23a; --accent-ink:#2a1c00; --teal:#5fb3ac; --coral:#e07a63; --chip:#2a3233; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto;padding-block:20px 40px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:12px;letter-spacing:.06em;color:var(--muted)}
+
+/* 시작 화면 */
+.intro{display:grid;gap:22px;padding-block:24px}
+.intro h1{font-size:clamp(34px,6vw,56px);line-height:1.15}
+.intro h1 mark{background:linear-gradient(transparent 58%,var(--accent) 58%);color:inherit;padding:0 .1em}
+.intro .lead{font-size:17px;max-width:38em;color:var(--ink)}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.type{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:left;display:grid;gap:6px}
+.type:hover{border-color:var(--accent)}
+.type b{font-family:var(--f-display);font-size:20px;font-weight:400}
+.type span{color:var(--muted);font-size:14px}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;font-size:14px;color:var(--muted)}
+.how div{border-top:2px solid var(--ink);padding-top:8px}
+.how b{color:var(--ink);display:block;font-weight:500}
+.note{font-size:12px;color:var(--muted)}
+
+/* 상단 상태 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.top h2{font-size:22px}
+.status{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.pips{display:flex;gap:3px}
+.pip{width:12px;height:18px;border-radius:3px;background:var(--chip);border:1px solid var(--line)}
+.pip.on{background:var(--accent);border-color:var(--accent)}
+.pip.spend{background:repeating-linear-gradient(45deg,var(--accent) 0 3px,var(--chip) 3px 6px)}
+
+/* 모임 현장 */
+.field{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+.cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.col{border-left:1px dashed var(--line);padding-left:10px;min-width:0;display:grid;align-content:start;gap:8px}
+.col:first-child{border-left:0;padding-left:0}
+.col h3{font-size:15px;display:flex;justify-content:space-between;gap:6px}
+.dots{display:flex;flex-wrap:wrap;gap:5px;min-height:28px}
+.dot{width:13px;height:13px;border-radius:50%;background:var(--muted);opacity:.85}
+.dot.new{animation:pop .5s ease-out}
+.c0 .dot{background:transparent;border:2px solid var(--muted)}
+.c1 .dot{background:var(--teal);opacity:.6}
+.c2 .dot{background:var(--teal)}
+.c3 .dot{background:var(--accent)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.story{font-size:14px;color:var(--ink);border-top:1px solid var(--line);padding-top:10px;min-height:2.6em}
+.story em{font-style:normal;color:var(--teal);font-weight:500}
+.story .warn{color:var(--coral)}
+
+/* 공동체 의식 게이지 */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px}
+.g{display:grid;gap:4px}
+.g .row{display:flex;justify-content:space-between;font-size:13px}
+.g .row span:last-child{color:var(--muted)}
+.bar{height:8px;background:var(--chip);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:4px;transition:width .5s}
+.bar.open i{background:var(--ink)}
+.delta{font-family:var(--f-mono);font-size:11px}
+.up{color:var(--teal)} .down{color:var(--coral)}
+
+/* 카드 */
+.choose{display:grid;gap:10px}
+.choose-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.choose-head h3{font-size:19px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:14px;text-align:left;display:grid;gap:6px;align-content:start;position:relative}
+.card:hover:not(:disabled){border-color:var(--ink)}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.card:disabled{opacity:.45;cursor:not-allowed}
+.card .name{font-family:var(--f-display);font-size:18px;padding-right:44px}
+.card .cost{position:absolute;top:12px;right:12px;font-family:var(--f-mono);font-size:12px;background:var(--chip);border-radius:20px;padding:2px 8px}
+.card .flavor{font-size:13px;color:var(--muted)}
+.card .fx{font-size:12px;display:flex;flex-wrap:wrap;gap:4px}
+.fx span{background:var(--chip);border-radius:4px;padding:1px 6px}
+.card .tension{font-size:12px;color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:4px;padding:2px 6px;justify-self:start}
+:root .card .tension{color:var(--ink)}
+.go{justify-self:start;background:var(--ink);color:var(--paper);border:0;border-radius:8px;padding:12px 22px;font-weight:500;font-size:16px}
+.go:disabled{opacity:.5;cursor:not-allowed}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:8px;padding:10px 16px}
+
+/* 사건 */
+.event{background:var(--paper);border:2px solid var(--ink);border-radius:12px;padding:18px;display:grid;gap:12px}
+.event .tag{font-size:12px;letter-spacing:.06em;color:var(--coral)}
+.event h3{font-size:22px}
+.event .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.opt{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:left;display:grid;gap:4px}
+.opt:hover{border-color:var(--accent)}
+.opt b{font-weight:500}
+.opt span{font-size:13px;color:var(--muted)}
+
+/* 리포트 */
+.report{display:grid;gap:18px}
+.verdict{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:10px}
+.verdict h2{font-size:clamp(26px,4.5vw,38px)}
+.verdict .q{font-family:var(--f-display);font-size:18px;border-left:3px solid var(--accent);padding-left:12px}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{border-top:2px solid var(--ink);padding-top:8px;display:grid;gap:2px}
+.stat .big{font-family:var(--f-mono);font-size:30px}
+.stat.vanity{border-top-color:var(--line);color:var(--muted)}
+.tensions{display:grid;gap:10px}
+.ten{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);gap:10px;align-items:center;font-size:13px}
+.ten span:first-child{text-align:right}
+.scale{height:8px;background:var(--chip);border-radius:4px;position:relative}
+.scale i{position:absolute;top:-4px;width:16px;height:16px;border-radius:50%;background:var(--accent);transform:translateX(-50%);border:2px solid var(--paper)}
+.message{font-size:16px;max-width:40em}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+@media (max-width:560px){
+  .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .col:nth-child(3){border-left:0;padding-left:0}
+  .ten{grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+const TYPES={
+  book:{name:'동네 독서모임',desc:'한 달에 한 권, 매주 모여 이야기해요',act:'책 이야기'},
+  run:{name:'저녁 러닝크루',desc:'퇴근 후 함께 5km를 달려요',act:'달리기'},
+  plog:{name:'플로깅 봉사 모임',desc:'비영리 단체와 함께 동네를 걸으며 쓰레기를 주워요',act:'플로깅'}
+};
+const GAUGES=[
+  {k:'belong',name:'소속감',hint:'나는 이 모임의 일원이다'},
+  {k:'roles',name:'영향력',hint:'내가 모임에 무언가를 보탤 수 있다'},
+  {k:'rhythm',name:'욕구 충족',hint:'여기 오면 얻는 것이 있다'},
+  {k:'conn',name:'정서적 연결',hint:'함께한 경험과 관계가 쌓인다'},
+  {k:'open',name:'열린 정도',hint:'처음 온 사람이 들어오기 쉬운가',open:true}
+];
+const GN={belong:'소속감',roles:'영향력',rhythm:'욕구 충족',conn:'정서적 연결',open:'열린 정도'};
+const CARDS=[
+  {id:'open_door',name:'문턱 낮추기',flavor:'신청만 하면 누구나 와요',cost:1,fx:{open:15,belong:-4},inflow:2,ten:['friction',-1],tl:'낮은 문턱'},
+  {id:'friction',name:'의도된 마찰',flavor:'참여 전에 짧은 자기소개를 받아요',cost:1,fx:{open:-10,belong:8,conn:4},ten:['friction',1],tl:'의도된 마찰'},
+  {id:'welcome',name:'처음 온 사람 맞이',flavor:'첫 모임에서 혼자 남지 않게 챙겨요',cost:2,fx:{conn:6},welcome:.15},
+  {id:'fixed',name:'정해진 리듬',flavor:'매주 같은 요일, 같은 시간에 모여요',cost:1,fx:{rhythm:14,open:-4},ten:['rhythm',1],tl:'정해진 리듬'},
+  {id:'free',name:'자유로운 참여',flavor:'오고 싶을 때 와도 괜찮아요',cost:0,fx:{rhythm:-8,open:8},ten:['rhythm',-1],tl:'자유로운 참여'},
+  {id:'after',name:'뒤풀이',flavor:'모임이 끝나고 함께 밥 한 끼',cost:2,fx:{conn:10,belong:8,open:-4},ten:['belong',1],tl:'끈끈함'},
+  {id:'mix',name:'섞이는 활동',flavor:'오래된 멤버와 새 멤버를 한 조로',cost:2,fx:{conn:8,belong:-2},welcome:.08,ten:['belong',-1],tl:'열린 관계'},
+  {id:'roles',name:'역할 나누기',flavor:'기록, 장소, 공지를 나눠 맡아요',cost:2,fx:{roles:18}},
+  {id:'core',name:'핵심 멤버 모임',flavor:'자리 잡은 사람들과 따로 계획해요',cost:2,fx:{roles:10,belong:10,open:-8},ten:['core',1],tl:'핵심층'},
+  {id:'ask',name:'의견 듣기',flavor:'모임 끝에 짧게 회고하고 다음에 반영해요',cost:1,fx:{belong:4,roles:5},insight:true},
+  {id:'promo',name:'홍보하기',flavor:'SNS에 모임 소개를 올려요',cost:2,fx:{belong:-5,conn:-3},inflow:5,ten:['core',-1],tl:'넓히기'},
+  {id:'share',name:'나눔 시간',flavor:'돌아가며 각자의 이야기를 꺼내요',cost:1,fx:{conn:8,belong:3}},
+  {id:'online',name:'온라인 공간 열기',flavor:'모임 사이에도 이야기 나누는 단톡방',cost:1,fx:{conn:4,rhythm:5}},
+  {id:'rest',name:'쉬어가기',flavor:'이번 모임은 운영을 가볍게 해요',cost:0,fx:{},energy:3}
+];
+const TENSIONS=[
+  {k:'friction',l:'낮은 문턱',r:'의도된 마찰'},
+  {k:'rhythm',l:'자유로운 참여',r:'정해진 리듬'},
+  {k:'belong',l:'열린 관계',r:'끈끈함'},
+  {k:'core',l:'넓히기',r:'핵심층'}
+];
+const EVENTS=[
+  {id:'drop',when:g=>g.m.r+g.m.s>=5,title:'매번 3분의 1 정도가 말없이 빠져요',
+    a:{t:'출석 규칙을 만들어요',d:'리듬은 생기지만 부담을 느낀 사람이 떠날 수 있어요',run:g=>{add(g,{rhythm:12,open:-8});const k=Math.ceil(g.m.r*.3);g.m.r-=k;return k?`규칙이 부담스러웠던 ${k}명이 떠났어요.`:'규칙이 자리를 잡았어요.';},ten:['rhythm',1]},
+    b:{t:'빠진 이유를 물어봐요',d:'에너지가 들지만 진짜 이유를 알 수 있어요',run:g=>{g.energy=Math.max(0,g.energy-2);add(g,{belong:6,conn:4});return '이유를 들어 보니 '+weakest(g)+'이(가) 약했어요.';}}},
+  {id:'clique',when:g=>g.m.s+g.m.l>=4,title:'오래된 멤버끼리만 이야기해요. 새로 온 사람이 겉돌아요',
+    a:{t:'섞이는 자리를 만들어요',d:'에너지가 들지만 새 사람이 들어올 틈이 생겨요',run:g=>{g.energy=Math.max(0,g.energy-2);add(g,{conn:8,open:6});g.welcome+=.08;return '처음 온 사람도 대화에 끼기 시작했어요.';},ten:['belong',-1]},
+    b:{t:'자연스러운 일이니 둬요',d:'오래된 멤버는 편하지만 벽이 높아져요',run:g=>{add(g,{belong:5,conn:-6,open:-8});return '오래된 멤버끼리는 더 가까워졌어요.';},ten:['belong',1]}},
+  {id:'rude',when:g=>g.round>=2,title:'분위기를 흐리는 멤버가 있어요',
+    a:{t:'따로 만나 이야기해요',d:'에너지가 많이 들어요',run:g=>{g.energy=Math.max(0,g.energy-3);add(g,{belong:8,roles:3});return '모임의 약속이 분명해졌어요.';}},
+    b:{t:'조금 더 지켜봐요',d:'에너지는 아끼지만 다른 사람들이 불편해할 수 있어요',run:g=>{add(g,{belong:-10,conn:-5});const k=Math.min(g.m.r,1);g.m.r-=k;return k?'불편함을 느낀 1명이 조용히 떠났어요.':'분위기가 조금 가라앉았어요.';}}},
+  {id:'burn',when:g=>g.m.l===0&&g.round>=3,title:'운영자 혼자 모든 일을 하고 있어요',
+    a:{t:'도움을 요청해요',d:'누군가 일을 나눠 맡을 수 있어요',run:g=>{add(g,{roles:15});g.energy=Math.min(10,g.energy+2);return '두 명이 공지와 장소를 맡겠다고 했어요.';}},
+    b:{t:'조금만 더 버텨요',d:'모임은 그대로지만 운영자가 지쳐요',run:g=>{g.energy=Math.max(0,g.energy-3);add(g,{rhythm:4});return '이번에도 혼자 해냈지만 많이 지쳤어요.';}}},
+  {id:'viral',when:g=>g.round>=3,title:'모임이 입소문을 탔어요. 신청이 몰려요',
+    a:{t:'모두 받아요',d:'사람은 늘지만 분위기가 바뀔 수 있어요',run:g=>{g.surge=8;add(g,{belong:-10,open:10});return '다음 모임에 처음 오는 사람이 크게 늘 거예요.';},ten:['core',-1]},
+    b:{t:'인원을 제한해요',d:'분위기는 지키지만 문이 좁아져요',run:g=>{add(g,{open:-10,belong:6});return '대기 명단이 생겼어요.';},ten:['core',1]}},
+  {id:'place',when:g=>g.round>=2,title:'모임 장소를 더 이상 쓸 수 없게 됐어요',
+    a:{t:'새 장소를 찾아요',d:'에너지가 들어요',run:g=>{g.energy=Math.max(0,g.energy-3);return '조금 멀지만 아늑한 곳을 찾았어요.';}},
+    b:{t:'잠시 온라인으로 모여요',d:'편하지만 함께하는 경험이 얕아져요',run:g=>{add(g,{conn:-8,rhythm:-4,open:5});return '화면으로 만나니 이야기가 짧아졌어요.';}}}
+];
+const EVENT_ROUNDS=[2,4,6];
+const MAX_ROUND=8, MAX_E=10;
+
+let g=null, idleTimer=null;
+const app=document.getElementById('app');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const binom=(n,p)=>{let k=0;for(let i=0;i<n;i++)if(Math.random()<p)k++;return k;};
+function add(g,fx){for(const k in fx){g.gauges[k]=clamp(g.gauges[k]+fx[k],0,100);}}
+function weakest(g){const ks=['belong','roles','rhythm','conn'];ks.sort((a,b)=>g.gauges[a]-g.gauges[b]);return GN[ks[0]];}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function newGame(type){
+  g={type,round:1,energy:6,m:{n:0,r:0,s:2,l:0},gauges:{belong:30,roles:10,rhythm:30,conn:25,open:60},
+    total:0,newSum:0,retSum:0,left:0,welcome:0,surge:0,burnouts:0,tension:{friction:0,rhythm:0,belong:0,core:0},
+    hand:[],sel:[],story:`<b>${TYPES[type].name}</b>을(를) 시작했어요. 지금은 운영자인 당신과 친구 2명뿐이에요.`,prevG:null,usedEvents:[],screen:'play',event:null,insight:null};
+  deal();render();
+}
+function deal(){const deck=shuffle(CARDS.filter(c=>c.id!=='rest')).slice(0,3);deck.push(CARDS.find(c=>c.id==='rest'));g.hand=shuffle(deck).map(c=>c.id);g.sel=[];}
+function selCost(){return g.sel.reduce((s,id)=>s+CARDS.find(c=>c.id===id).cost,0);}
+function maxPicks(){return g.burnoutNext?1:2;}
+
+function play(){
+  g.prevG={...g.gauges};
+  const cards=g.sel.map(id=>CARDS.find(c=>c.id===id));
+  let inflowBoost=0, welcome=g.welcome, insight=false;
+  g.energy-=selCost();
+  for(const c of cards){add(g,c.fx);if(c.inflow)inflowBoost+=c.inflow;if(c.welcome)welcome+=c.welcome;if(c.energy)g.energy+=c.energy;if(c.insight)insight=true;if(c.ten)g.tension[c.ten[0]]+=c.ten[1];}
+  const G=g.gauges;
+  // 지난 모임에 처음 온 사람이 다시 오는가
+  const pNR=clamp(.15+.55*G.conn/100+.2*G.rhythm/100-Math.max(0,G.belong-G.open)/250-Math.max(0,g.m.n-5)*.03+welcome,.05,.9);
+  const back=binom(g.m.n,pNR); const gone0=g.m.n-back;
+  // 다시 온 사람이 자리 잡는가
+  const pRS=clamp(.1+.4*G.belong/100+.15*G.rhythm/100,.03,.8);
+  const settle=binom(g.m.r,pRS); const restR=g.m.r-settle;
+  const pRC=clamp(.35-.25*G.conn/100-.1*G.rhythm/100,.05,.6);
+  const gone1=binom(restR,pRC);
+  // 자리 잡은 사람이 함께 이끄는가
+  const pSL=clamp(.03+.4*G.roles/100,.01,.5);
+  const lead=binom(g.m.s,pSL);
+  const pSC=clamp(.04+Math.max(0,G.open-70)/200+(g.energy<=2?.08:0)-.03*G.belong/100,.01,.4);
+  const gone2=binom(g.m.s-lead,pSC);
+  const gone3=binom(g.m.l,g.energy<=1?.15:.03);
+  // 새로 오는 사람
+  const inflow=Math.max(0,Math.round((1+G.open/30+inflowBoost+g.surge)*rnd(.8,1.2)));
+  g.surge=0;
+  g.newSum+=g.m.n; g.retSum+=back;
+  g.m={n:inflow,r:restR-gone1+back,s:g.m.s-lead-gone2+settle,l:g.m.l-gone3+lead};
+  g.total+=inflow; g.left+=gone0+gone1+gone2+gone3;
+  // 너무 커지면 친밀함이 옅어져요
+  const active=g.m.n+g.m.r+g.m.s+g.m.l;
+  let crowd='';
+  if(active>24){add(g,{belong:-(active-24)*.6,conn:-(active-24)*.5});crowd=' <span class="warn">사람이 많아져 서로의 이름을 모르는 사이가 늘었어요.</span>';}
+  // 가꾸지 않으면 식어요
+  add(g,{belong:-2,conn:-3,rhythm:-2,roles:-2});
+  add(g,{belong:g.m.l*1.5,roles:g.m.l*1});
+  // 에너지 회복
+  g.energy=clamp(g.energy+3+g.m.l,0,MAX_E);
+  g.burnoutNext=false;
+  let burn='';
+  if(g.energy<=1){g.burnouts++;g.burnoutNext=true;burn=' <span class="warn">운영자가 지쳤어요. 다음 모임에는 카드를 하나만 쓸 수 있어요.</span>';}
+  const act=TYPES[g.type].act;
+  let s=`${g.round}번째 ${act} 모임. 처음 온 사람 <em>${inflow}명</em>.`;
+  if(back+gone0>0)s+=` 지난번 처음 온 ${back+gone0}명 중 <em>${back}명</em>이 다시 왔어요.`;
+  if(settle)s+=` ${settle}명이 자리를 잡았어요.`;
+  if(lead)s+=` ${lead}명이 함께 이끌기 시작했어요.`;
+  const gone=gone1+gone2+gone3;
+  if(gone)s+=` <span class="warn">${gone}명이 조용히 떠났어요.</span>`;
+  s+=crowd+burn;
+  if(insight)s+=` <br>회고에서 들은 이야기: "${weakest(g)}이(가) 아쉬워요."`;
+  g.story=s;
+  // 사건
+  if(EVENT_ROUNDS.includes(g.round)){
+    const pool=shuffle(EVENTS.filter(e=>!g.usedEvents.includes(e.id)&&e.when(g)));
+    if(pool.length){g.event=pool[0];g.usedEvents.push(pool[0].id);}
+  }
+  g.round++;
+  if(!g.event&&g.round>MAX_ROUND){g.screen='report';}
+  deal();render();
+}
+function resolve(which){
+  const o=g.event[which]; g.prevG={...g.gauges};
+  const msg=o.run(g); if(o.ten)g.tension[o.ten[0]]+=o.ten[1];
+  g.story=`<b>${g.event.title}</b><br>→ ${o.t}. ${msg}`;
+  g.event=null;
+  if(g.round>MAX_ROUND)g.screen='report';
+  render();
+}
+
+function verdict(){
+  const G=g.gauges, rate=g.newSum?g.retSum/g.newSum:0, rooted=g.m.s+g.m.l;
+  if(g.m.l>=2&&rate>=.4&&g.burnouts===0) return {t:'스스로 굴러가는 모임',d:'운영자가 없어도 누군가 공지를 올리고, 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'이 모임이 계속 자라려면, 새로 이끄는 사람은 어디서 나올까요?'};
+  if(g.burnouts>=1&&g.m.l===0) return {t:'운영자가 지친 모임',d:'모임은 유지됐지만 모든 일이 한 사람에게 몰려 있어요. 커뮤니티는 출시하고 끝나는 게 아니라 계속 가꿔야 해서, 혼자서는 오래 버티기 어려워요.',q:'조금 더 하고 싶은 사람이 맡을 수 있는 자리가 있었나요?'};
+  if(g.total>=30&&rate<.3) return {t:'북적이지만 머무르지 않는 모임',d:'많은 사람이 왔지만 대부분 한 번 오고 다시 오지 않았어요. 앱이라면 유입을 늘리는 게 답일 수 있지만, 커뮤니티에서는 사람과 사람이 이어지지 않으면 남지 않아요.',q:'처음 온 사람이 다른 사람과 이어지는 순간은 언제였나요?'};
+  if(G.belong>=55&&G.open<40) return {t:'끈끈하지만 닫힌 모임',d:'자리 잡은 사람들은 깊이 연결됐지만, 새로 온 사람에게는 벽이 높아요. 소속감이 강해질수록 배타성도 함께 자라요.',q:'오래된 멤버의 편안함과 새 사람의 자리를 어떻게 함께 지킬 수 있을까요?'};
+  if(rooted<=3) return {t:'아직 뿌리내리지 못한 모임',d:'사람이 오고 갔지만 자리를 잡은 사람이 적어요. 다시 올 이유와 함께할 사람이 아직 부족해요.',q:'사람들이 다시 와야 할 이유는 무엇인가요?'};
+  return {t:'조용히 자라는 모임',d:'크지는 않지만 다시 오는 사람과 자리 잡는 사람이 꾸준히 생겼어요.',q:'이 모임이 건강한지는 가입자 수 말고 무엇으로 알 수 있을까요?'};
+}
+
+function esc(s){return String(s);}
+function fxChips(c){
+  const out=[];for(const k in c.fx){const v=c.fx[k];out.push(`<span class="${v>0?'up':'down'}">${GN[k]} ${v>0?'+':'−'}</span>`);}
+  if(c.inflow)out.push('<span class="up">새 사람 +</span>');
+  if(c.welcome)out.push('<span class="up">다시 올 확률 +</span>');
+  if(c.energy)out.push('<span class="up">에너지 +'+c.energy+'</span>');
+  if(c.insight)out.push('<span>약한 곳 알려줌</span>');
+  return out.join('');
+}
+function dots(n,cls){let h='';for(let i=0;i<n;i++)h+=`<i class="dot ${cls||''}"></i>`;return h||'<span class="note">아직 없어요</span>';}
+function gaugeHTML(){
+  return GAUGES.map(x=>{const v=Math.round(g.gauges[x.k]);const p=g.prevG?Math.round(g.prevG[x.k]):v;const d=v-p;
+    return `<div class="g" title="${x.hint}"><div class="row"><span>${x.name}</span><span class="mono">${v}${d?` <b class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</b>`:''}</span></div><div class="bar ${x.open?'open':''}"><i style="width:${v}%"></i></div></div>`;}).join('');
+}
+function pipHTML(){
+  const spend=selCost();let h='';
+  for(let i=0;i<MAX_E;i++){let c='pip';if(i<g.energy-spend)c+=' on';else if(i<g.energy)c+=' spend';h+=`<i class="${c}"></i>`;}
+  return h;
+}
+
+function render(){
+  resetIdle();
+  if(!g){renderIntro();return;}
+  if(g.screen==='report'){renderReport();return;}
+  const t=TYPES[g.type];
+  const round=Math.min(g.round,MAX_ROUND);
+  let main='';
+  if(g.event){
+    const e=g.event;
+    main=`<section class="event" aria-live="polite"><span class="tag">사건</span><h3>${e.title}</h3><div class="opts">
+      <button class="opt" id="ev-a"><b>${e.a.t}</b><span>${e.a.d}</span></button>
+      <button class="opt" id="ev-b"><b>${e.b.t}</b><span>${e.b.d}</span></button></div></section>`;
+  }else{
+    const picks=maxPicks();
+    main=`<section class="choose"><div class="choose-head"><h3>${round}번째 모임, 무엇을 해볼까요?</h3><span class="label">카드를 최대 ${picks}장 고르세요 · 숫자는 드는 에너지</span></div>
+      <div class="cards">${g.hand.map(id=>{const c=CARDS.find(x=>x.id===id);const on=g.sel.includes(id);
+        const dis=!on&&(g.sel.length>=picks||selCost()+c.cost>g.energy);
+        return `<button class="card ${on?'sel':''}" data-id="${id}" ${dis?'disabled':''} aria-pressed="${on}"><span class="cost">${c.cost}</span><span class="name">${c.name}</span><span class="flavor">${c.flavor}</span><span class="fx">${fxChips(c)}</span>${c.tl?`<span class="tension">긴장: ${c.tl}</span>`:''}</button>`;}).join('')}</div>
+      <button class="go" id="go">${g.sel.length?'이번 모임 열기':'아무것도 하지 않고 모임 열기'}</button></section>`;
+  }
+  app.innerHTML=`
+    <header class="top"><h2>${t.name}</h2><div class="status">
+      <span class="label">모임 <b class="mono">${round}/${MAX_ROUND}</b></span>
+      <span class="label" style="display:flex;gap:8px;align-items:center">운영자 에너지 <span class="pips">${pipHTML()}</span></span></div></header>
+    <section class="field" aria-label="모임 현장">
+      <div class="cols">
+        <div class="col c0"><h3>처음 온 사람 <span class="mono">${g.m.n}</span></h3><div class="dots">${dots(g.m.n,'new')}</div></div>
+        <div class="col c1"><h3>다시 온 사람 <span class="mono">${g.m.r}</span></h3><div class="dots">${dots(g.m.r)}</div></div>
+        <div class="col c2"><h3>자리 잡은 사람 <span class="mono">${g.m.s}</span></h3><div class="dots">${dots(g.m.s)}</div></div>
+        <div class="col c3"><h3>함께 이끄는 사람 <span class="mono">${g.m.l}</span></h3><div class="dots">${dots(g.m.l)}</div></div>
+      </div>
+      <p class="story" aria-live="polite">${g.story}</p>
+    </section>
+    <section class="gauges" aria-label="공동체 의식">${gaugeHTML()}</section>
+    ${main}
+    <p class="note">공동체 의식의 네 요소는 McMillan & Chavis(1986)에서 가져왔어요. 연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>`;
+  if(g.event){
+    document.getElementById('ev-a').onclick=()=>resolve('a');
+    document.getElementById('ev-b').onclick=()=>resolve('b');
+  }else{
+    app.querySelectorAll('.card').forEach(b=>b.onclick=()=>{const id=b.dataset.id;
+      g.sel=g.sel.includes(id)?g.sel.filter(x=>x!==id):g.sel.concat(id);render();});
+    document.getElementById('go').onclick=play;
+  }
+}
+
+function renderIntro(){
+  app.innerHTML=`<section class="intro">
+    <span class="label">졸업 전시 · 만드는 디자이너, 관계를 설계하다</span>
+    <h1>당신은 오늘부터<br><mark>모임 설계자</mark>예요</h1>
+    <p class="lead">앱을 만들 때처럼 문턱을 낮추고 유입을 늘리면 될까요? 여덟 번의 모임 동안 직접 선택하며 확인해 보세요. 화면과 사람 사이가 아니라, 사람과 사람 사이를 설계하는 게임이에요.</p>
+    <div class="types">${Object.entries(TYPES).map(([k,v])=>`<button class="type" data-t="${k}"><b>${v.name}</b><span>${v.desc}</span></button>`).join('')}</div>
+    <div class="how">
+      <div><b>매 모임마다 카드 고르기</b>운영자 에너지 안에서 최대 두 장</div>
+      <div><b>사람들의 변화 보기</b>처음 온 사람이 다시 오고, 자리 잡고, 함께 이끄는지</div>
+      <div><b>사건에 대응하기</b>실제 운영 사례에서 가져온 딜레마</div>
+      <div><b>마지막에 리포트 받기</b>가입자 수가 아닌 관계의 신호로 평가해요</div>
+    </div>
+    <p class="note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 한 판에 3~5분 걸려요.</p>
+  </section>`;
+  app.querySelectorAll('.type').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
+}
+
+function renderReport(){
+  const v=verdict(), rate=g.newSum?Math.round(g.retSum/g.newSum*100):0;
+  const ten=TENSIONS.map(x=>{const val=clamp(g.tension[x.k],-3,3);const pos=50+val/3*45;
+    return `<div class="ten"><span>${x.l}</span><div class="scale" role="img" aria-label="${x.l}와 ${x.r} 사이"><i style="left:${pos}%"></i></div><span>${x.r}</span></div>`;}).join('');
+  app.innerHTML=`<section class="report">
+    <span class="label">${TYPES[g.type].name} · 여덟 번의 모임 리포트</span>
+    <div class="verdict"><h2>${v.t}</h2><p>${v.d}</p><p class="q">${v.q}</p></div>
+    <div class="compare">
+      <div class="stat vanity"><span class="label">가입자 수로만 보면</span><span class="big">${g.total+2}명</span><span>다녀간 사람</span></div>
+      <div class="stat"><span class="label">다시 온 비율</span><span class="big">${rate}%</span><span>처음 온 사람 중 다음 모임에 다시 온 사람</span></div>
+      <div class="stat"><span class="label">자리 잡은 관계</span><span class="big">${g.m.s+g.m.l}명</span><span>자리 잡거나 함께 이끄는 사람</span></div>
+      <div class="stat"><span class="label">함께 이끄는 사람</span><span class="big">${g.m.l}명</span><span>운영자가 없어도 모임을 굴리는 사람</span></div>
+    </div>
+    <section class="gauges" aria-label="공동체 의식">${gaugeHTML()}</section>
+    <div class="tensions"><h3>당신이 기울었던 쪽</h3>${ten}</div>
+    <p class="message">앱은 마찰을 없앨수록 좋아지지만, 모임은 그렇지 않을 때가 있어요. 커뮤니티를 설계한다는 건 사용자와 화면 사이가 아니라 <b>사람과 사람 사이</b>를 설계하는 일이고, 출시한 뒤에도 계속 가꾸는 일이에요.</p>
+    <div class="actions"><button class="go" id="again">다른 선택으로 다시 해보기</button><button class="ghost" id="home">처음으로</button></div>
+    <p class="note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 이 화면은 잠시 후 처음으로 돌아가요.</p>
+  </section>`;
+  document.getElementById('again').onclick=()=>newGame(g.type);
+  document.getElementById('home').onclick=()=>{g=null;render();};
+}
+
+// 전시용: 오래 아무도 만지지 않으면 처음 화면으로
+function resetIdle(){clearTimeout(idleTimer);if(!g)return;idleTimer=setTimeout(()=>{g=null;render();},g.screen==='report'?90000:180000);}
+document.addEventListener('pointerdown',resetIdle);document.addEventListener('keydown',resetIdle);
+
+function start(data){if(data&&data.g){g=data.g;}render();}
+window.claude?.hot?.snapshot?.(()=>({g}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+})();
+</script>
