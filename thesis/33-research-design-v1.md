@@ -1,6 +1,7 @@
 # 33. 연구 설계서 v1 (구글 문서)
 
-- 문서: https://docs.google.com/document/d/1DQuMHxdiT4h37HhqHAsxYl_NrbtiFa_Kuna9EFZG8z4/edit
+- 최신 v2: https://docs.google.com/document/d/1oQ_FtkuGMWg4as6xtE20QRe9YnywOu8GpSB-vRTW6tY/edit (서론 흐름 확정안 반영, AI 축소, 부제 변경)
+- 이전 v1: https://docs.google.com/document/d/1DQuMHxdiT4h37HhqHAsxYl_NrbtiFa_Kuna9EFZG8z4/edit
 - 작성일: 2026-10-27. 11번 개요 v4, 13·21·27·30·31·32번 노트를 바탕으로 정리
 - 구성: 연구의 필요성 / 연구 질문 / 연구 목적 / 이론적 배경과 주요 개념 / 연구 방법 / 예상되는 연구의 의의와 적용 범위 (+ 한계)
 
@@ -12,7 +13,7 @@
 - P10(온·오프라인)은 원칙에서 빼고 접점 층으로 (32번)
 - 형식은 휴리스틱 (32번)
 
-## 서론 흐름 확정 (2026-10-27, 설계서 v2에 반영 예정)
+## 서론 흐름 확정 (2026-10-27, 설계서 v2에 반영함)
 - 연구자 결정: AI 맥락은 크게 드러내지 않음(부제에서 "AI 시대" 제외 제안, RQ1은 "무엇을 설계하고 만드는가" 중심). 운영자와 기존 프레임워크를 존중하는 관점("직관에 기대고 있다" 같은 표현 쓰지 않음)
 - 연구자의 출발 생각: 커뮤니티야말로 '사람'과 '맥락·상황'이 중요한 경험이라 UX가 원래 하는 일과 가장 가깝다
 
