@@ -1,6 +1,6 @@
 /**
  * 디자이너 대상 예비 설문 구글 폼 자동 생성 스크립트
- * (thesis/21-designer-pilot-survey.md 기준, v3.1: Q7 보기에 균형 잡힌 예시, 맨 끝에 Q13(도움이 될 디자인 방법) 추가)
+ * (thesis/21-designer-pilot-survey.md 기준, v3.2: 5점 리커트 척도, 예비 점검(연구자 해석) 반영)
  *
  * 사용 방법
  * 1. https://script.google.com 접속 → [새 프로젝트]
@@ -12,7 +12,7 @@
  * 7. 실행 로그의 "편집 링크"로 폼을 열어 확인
  *
  * 실행 후 폼 편집 화면에서 직접 해야 할 것 (스크립트로는 설정 불가)
- * - Q5, Q9, Q10, Q13의 [옵션 순서 섞기] 켜기
+ * - Q5, Q9, Q10, Q11의 [옵션 순서 섞기] 켜기
  * - Q6 격자 문항의 [행 순서 섞기] 켜기
  * - [설정] → 이메일 주소 수집: "수집하지 않음" 확인
  * - 안내문의 기간(~날짜) 고치기
@@ -25,7 +25,7 @@ function createPilotForm() {
     '사람들이 모이는 커뮤니티와 모임은 어떻게 만들어지고 유지될까요? 이 설문은 디자인을 전공·실무하는 사람과 모임을 운영하는 사람이 커뮤니티의 과제를 어떻게 바라보는지 알아보기 위한 졸업논문 예비 조사입니다.\n\n' +
     '📌 참여 안내\n' +
     '- 대상: 디자이너(UX/UI·프로덕트·리서처 등), 커뮤니티·모임을 운영하거나 기획하는 분. 운영 경험이 없어도 참여할 수 있어요.\n' +
-    '- 소요 시간: 약 5분 / 정답은 없어요.\n' +
+    '- 소요 시간: 약 7분 / 정답은 없어요.\n' +
     '- 기간: ~(날짜를 입력해 주세요)\n\n' +
     '💬 응답은 이렇게 쓰여요\n' +
     '① 커뮤니티 과제를 바라보는 관점 파악 ② 졸업논문의 커뮤니티 설계 프레임워크 근거 ③ 졸업 전시(커뮤니티 시뮬레이터) 내용 보완\n\n' +
@@ -53,12 +53,12 @@ function createPilotForm() {
 
   form.addMultipleChoiceItem()
     .setTitle('Q1. 지금 하는 일에 가장 가까운 것을 골라주세요.')
-    .setChoiceValues(['UX/UI·프로덕트 디자이너', 'UX 리서처', '그 외 디자인 직무', '디자인 직무는 아니지만 커뮤니티·모임을 운영하거나 기획한다'])
+    .setChoiceValues(['UX/UI·프로덕트 디자이너', 'UX 리서처', '그 외 디자인 직무', '디자인 전공 학생', '디자인 직무는 아니지만 커뮤니티·모임을 운영하거나 기획한다'])
     .showOtherOption(true)
     .setRequired(true);
 
   form.addMultipleChoiceItem()
-    .setTitle('Q2. 그 일을 한 기간은 어느 정도인가요?')
+    .setTitle('Q2. 그 일을 한 기간은 어느 정도인가요? (학생은 전공 기간)')
     .setChoiceValues(['1년 미만', '1~3년', '3~7년', '7년 이상'])
     .setRequired(true);
 
@@ -96,7 +96,8 @@ function createPilotForm() {
   form.addPageBreakItem().setTitle('3. 이런 일을 맡는다면');
 
   form.addGridItem()
-    .setTitle('Q6. 아래 일을 맡는다면 어느 정도 자신 있게 해낼 수 있을 것 같나요?')
+    .setTitle('Q6. 아래 일을 맡는다면, 나는 이 일을 잘 해낼 수 있다.')
+    .setHelpText('각 문장에 얼마나 동의하는지 골라주세요.')
     .setRows([
       '처음 온 사람이 어색하지 않도록 첫 모임 진행 방식 정하기',
       '다시 오지 않는 사람들의 이유 알아내기',
@@ -110,12 +111,12 @@ function createPilotForm() {
       '오래된 멤버와 새 멤버가 잘 섞이게 하기',
       '운영을 도와줄 사람을 찾고 일을 나누기'
     ])
-    .setColumns(['1 전혀 자신 없다', '2', '3', '4', '5 매우 자신 있다', '잘 모르겠다'])
+    .setColumns(['전혀 그렇지 않다', '그렇지 않다', '보통이다', '그렇다', '매우 그렇다', '잘 모르겠다'])
     .setRequired(true);
 
   form.addCheckboxItem()
-    .setTitle('Q7. 위에서 자신 있다고 답한 일은 주로 어떤 경험 덕분인가요? (해당하는 것을 모두 골라주세요)')
-    .setChoiceValues(['디자인 업무 경험 (예: 사용자 조사, 기획, 화면 설계)', '커뮤니티·모임 경험 (예: 동아리, 동호회, 온라인 커뮤니티 운영·참여)', '디자인이 아닌 다른 업무 경험 (예: 운영, 영업, 교육, 행사 진행)', '일상생활 경험 (예: 친구·가족 모임, 학교생활)', '자신 있다고 답한 일이 없음'])
+    .setTitle('Q7. Q6에서 "그렇다" 또는 "매우 그렇다"를 고른 일은 주로 어떤 경험 덕분인가요? (해당하는 것을 모두 골라주세요)')
+    .setChoiceValues(['디자인 업무 경험 (예: 사용자 조사, 기획, 화면 설계)', '커뮤니티·모임 경험 (예: 동아리, 동호회, 온라인 커뮤니티 운영·참여)', '디자인이 아닌 다른 업무 경험 (예: 운영, 영업, 교육, 행사 진행)', '일상생활 경험 (예: 친구·가족 모임, 학교생활)', '"그렇다"·"매우 그렇다"를 고른 일이 없음'])
     .showOtherOption(true)
     .setRequired(true);
 
@@ -158,6 +159,7 @@ function createPilotForm() {
       '규칙을 만들었다',
       '친목 자리를 늘렸다',
       '해결하지 못했다',
+      '풀어야 할 어려움이 없었음',
       '운영해 본 적 없음'
     ])
     .showOtherOption(true)
@@ -165,26 +167,11 @@ function createPilotForm() {
     .setRequired(true);
 
   // 5. 마지막으로 (앞 문항에 영향을 주지 않도록 맨 끝)
-  form.addPageBreakItem().setTitle('5. 마지막으로 (선택)');
+  form.addPageBreakItem().setTitle('5. 마지막으로');
 
-  form.addScaleItem()
-    .setTitle('Q11. 기회가 있다면 직접 커뮤니티나 모임을 만들어볼 생각이 있나요?')
-    .setBounds(1, 5)
-    .setLabels('전혀 없다', '매우 있다')
-    .setRequired(false);
-
-  form.addParagraphTextItem()
-    .setTitle('Q11-1. 망설여진다면 가장 큰 이유는 무엇인가요?')
-    .setRequired(false);
-
-  form.addParagraphTextItem()
-    .setTitle('Q12. 커뮤니티·모임과 관련해 기억에 남는 고민이나 사례가 있다면 자유롭게 들려주세요.')
-    .setHelpText('어려웠던 경험뿐 아니라 도움이 되었던 방법도 좋아요. 특정 단체나 개인을 알아볼 수 있는 정보는 빼주세요.')
-    .setRequired(false);
-
-  // "디자인 방법"이라는 말이 처음 나오는 문항이라 맨 끝에 둠
+  // "디자인 방법"이라는 말이 처음 나오는 문항이라 앞 섹션이 모두 끝난 뒤에 둠. 연구에 중요해서 필수(잘 모르겠음으로 빠져나갈 수 있음)
   form.addCheckboxItem()
-    .setTitle('Q13. 커뮤니티나 모임을 운영한다면, 디자인 업무에서 쓰는 방법 중 무엇이 도움이 될 것 같나요? (최대 3개)')
+    .setTitle('Q11. 커뮤니티나 모임을 운영한다면, 디자인 업무에서 쓰는 방법 중 무엇이 도움이 될 것 같나요? (최대 3개)')
     .setChoiceValues([
       '사용자 인터뷰·설문 같은 사용자 조사',
       '사용성 테스트·관찰',
@@ -201,6 +188,21 @@ function createPilotForm() {
       '디자인 업무 경험이 없음'
     ])
     .setValidation(atMost3)
+    .setRequired(true);
+
+  form.addGridItem()
+    .setTitle('Q12. 아래 문장에 얼마나 동의하나요? (선택)')
+    .setRows(['기회가 있다면 직접 커뮤니티나 모임을 만들어보고 싶다'])
+    .setColumns(['전혀 그렇지 않다', '그렇지 않다', '보통이다', '그렇다', '매우 그렇다'])
+    .setRequired(false);
+
+  form.addParagraphTextItem()
+    .setTitle('Q12-1. 망설여진다면 가장 큰 이유는 무엇인가요?')
+    .setRequired(false);
+
+  form.addParagraphTextItem()
+    .setTitle('Q13. 커뮤니티·모임과 관련해 기억에 남는 고민이나 사례가 있다면 자유롭게 들려주세요.')
+    .setHelpText('어려웠던 경험뿐 아니라 도움이 되었던 방법도 좋아요. 특정 단체나 개인을 알아볼 수 있는 정보는 빼주세요.')
     .setRequired(false);
 
   Logger.log('편집 링크: ' + form.getEditUrl());
