@@ -39,3 +39,25 @@
 | 13 비영리: 기사 | 이민영·노연희 (2024), 사회조사 원자료 |
 | 04 James Lang 강연 | 실무 자료로 유지, 학술은 Preece (2001), Kraut & Resnick (2012) |
 | 설문 척도 | Peterson 외 (2008) + 정진경 (1999). BSCS 한국어 번안 논문은 찾지 못함 → 번안 과정을 논문에 직접 기록 |
+
+## D. 프레임워크 도출용 추가 목록 (2026-10-27, 28·29번 노트 기준)
+> 연구자가 도서관·브라우저로 확보해 드라이브 폴더에 올림. 파일 이름: 저자_연도_짧은제목.pdf
+
+### 꼭 필요 (우선순위 순)
+- [ ] Kraut, R. E., & Resnick, P. (2012). *Building Successful Online Communities: Evidence-Based Social Design*. MIT Press. → 도서관 전자책. 신규 회원, 시작 문제(새 커뮤니티 만들기), 몰입, 기여, 행동 규칙을 다룬 장 (장 번호·제목 원문 확인). 우리 단계 구조와 가장 많이 겹치는 핵심 문헌
+- [ ] Ricken, S., Barkhuus, L., & Jones, Q. (2017). Going Online to Meet Offline: Organizational Practices of Social Activities Through Meetup. *Proc. C&T '17*, 139–148. doi:10.1145/3083671.3083705 → ACM DL (학교 계정)
+- [ ] Lu, Farzan & Lopez (2017). To Go or Not to Go! … *Proc. C&T '17* (전체 제목 원문 확인) → ACM DL에서 저자명으로 검색
+- [ ] Pethig, F., Hoehle, H., Hui, K. L., & Lanz, A. (2025). Behavior Toward Newcomers and Contributions to Online Communities. *MIS Quarterly*, 49(2), 731–758. doi:10.25300/MISQ/2024/17759 → 만하임대 저장소(madoc.bib.uni-mannheim.de/69440)에 CC BY 공개본이 있으나 봇 차단으로 Claude가 못 받음. 브라우저로 내려받기
+- [ ] Wiltshire, G., & Stevinson, C. (2018). Exploring the role of social capital in community-based physical activity: qualitative insights from parkrun. *Qualitative Research in Sport, Exercise and Health* (권호 원문 확인) → 러프버러대 저장소(dspace.lboro.ac.uk/2134/27222) 또는 도서관
+- [ ] 최현욱·이철원 (2010). 디지털 여가활동 동호회 참여 동기: DSLR카메라 동호회원을 중심으로. 『여가학연구』 8(1). → KCI (05번 S3)
+- [ ] 배구 동아리 탈퇴 사례연구 (2022, 서강대 석사학위논문, 제목 원문 확인) → RISS 또는 서강대 dCollection (05번 S4, 떠남 단계)
+- [ ] Omoto, A. M., & Snyder, M. (2002). Considerations of community: The context and process of volunteerism. *American Behavioral Scientist*, 45(5) (권호 원문 확인) → 도서관. 공동체 의식과 자원봉사 지속 (비영리 적용)
+- [ ] 국내 자원봉사·비영리 모임 지속 참여 연구 1편 (가능하면 질적 연구) → KCI 검색어: "자원봉사 지속 참여 경험 질적", "봉사 동아리 지속 근거이론", "청년 자원봉사 경험 현상학"
+- [ ] 국내 동호회·소모임 이탈 연구 1편 → KCI 검색어: "동호회 탈퇴 경험", "여가 참여 중단 질적", "소모임 이탈"
+
+### 이미 목록에 있는 것 중 이번에 함께 확보
+- [ ] Preece (2001) 사회성·사용성 (B 추천)
+- [ ] Lynn (1986) 내용 타당도 (B 추천) → 전문가 검토 CVI
+
+### Claude가 확보·노트 완료 (sources/notes/)
+- [x] Jabareen (2009), Thomas & Harden (2008), Dunne 외 (2024) parkrun, Pew Research Center (2026) 온라인 커뮤니티 이탈
