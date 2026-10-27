@@ -1,0 +1,608 @@
+<title>모임 설계자</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Black+Han+Sans&display=swap">
+<style>
+@font-face{font-family:"Pretendard";src:url(data:font/woff2;base64,__PRETENDARD__) format("woff2");font-weight:45 920;font-display:swap}
+/* 컨셉: 흰 바탕 + 검은 직선 + 원색 포인트 (포스터형). 제목은 굵은 그로테스크와 네모난 한글, 본문은 전부 Pretendard
+   레이아웃: 첫 화면 = 포스터처럼 위아래 큰 제목 사이에 데이터 / 설계 = 왼쪽 패널, 오른쪽 캔버스 / 결과 = 기록지 */
+:root{
+  color-scheme:light;
+  --paper:#ffffff; --ink:#111111; --mute:#6f6f6f; --rule:#111111; --hair:#d9d9d9;
+  --red:#e8372b; --blue:#2f6fe0; --yellow:#f6b72c; --green:#2a9a46; --violet:#6b5ce7; --orange:#f05a28;
+  --f-body:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-latin:"Archivo","Pretendard",sans-serif;
+  --f-kdisp:"Black Han Sans","Pretendard",sans-serif;
+}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto;padding-block:18px 32px}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.latin{font-family:var(--f-latin);font-weight:900;letter-spacing:-.02em}
+.kdisp{font-family:var(--f-kdisp);font-weight:400}
+.sq{display:inline-block;width:10px;height:10px;flex:none}
+
+/* ───────── 첫 화면 ───────── */
+.poster{position:relative}
+.p-top{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:end}
+.p-top .big{font-size:clamp(48px,10vw,128px);line-height:.86}
+.p-top .sub{font-family:var(--f-latin);font-weight:800;font-size:clamp(14px,1.8vw,22px);text-align:center;letter-spacing:.01em;padding-bottom:6px}
+@media (max-width:760px){.p-top{grid-template-columns:1fr}.p-top .sub{text-align:left}}
+.p-meta{display:flex;justify-content:space-between;gap:16px;margin-top:10px;font-weight:700;font-size:14px;line-height:1.35}
+.p-meta .r{text-align:right}
+.p-body{position:relative;margin-top:16px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px}
+@media (max-width:880px){.p-body{grid-template-columns:minmax(0,1fr)}}
+.decor{position:absolute;inset:0;pointer-events:none;z-index:0}
+.p-body>section,.p-body>aside{position:relative;z-index:1}
+.lab{font-weight:700;font-size:13px;display:flex;justify-content:space-between;gap:8px;border-top:2px solid var(--rule);padding-top:6px;margin-bottom:10px}
+.lab span:last-child{font-weight:500;color:var(--mute)}
+.field{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:2px}
+.glyph{aspect-ratio:1;display:block;max-width:100%}
+.glyph.ex{opacity:.35}
+.glyph.me{outline:3px solid var(--red);outline-offset:-3px}
+.side{display:grid;gap:22px;align-content:start}
+.band{display:block;width:100%;height:34px;margin-top:14px}
+.howto{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;align-items:center;font-size:13px;color:var(--mute)}
+.howto b{color:var(--ink);font-weight:700}
+.dist{display:flex;height:16px;gap:2px}
+.dist i{display:block;height:100%}
+.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;margin-top:10px;font-size:12.5px}
+.dlist span{display:flex;align-items:center;gap:6px}
+.dlist b{margin-left:auto;font-weight:700}
+.stats{display:flex;flex-wrap:wrap;gap:28px}
+.stat{display:grid}
+.stat b{font-family:var(--f-latin);font-weight:900;font-size:clamp(30px,4vw,44px);line-height:1}
+.stat span{font-size:12.5px;font-weight:600}
+.p-bottom{margin-top:22px;border-top:2px solid var(--rule);padding-top:14px;display:grid;gap:14px}
+.p-bottom .big{font-size:clamp(56px,13vw,170px);line-height:.9;letter-spacing:-.01em}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.type{background:var(--paper);border:2px solid var(--ink);padding:14px 16px;text-align:left;display:flex;align-items:center;gap:12px;font-weight:700;font-size:16px}
+.type:hover{background:var(--ink);color:var(--paper)}
+.type small{margin-left:auto;font-family:var(--f-latin);font-weight:800;font-size:12px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--mute)}
+
+/* ───────── 설계 화면 ───────── */
+.tool{display:grid;grid-template-columns:350px minmax(0,1fr);border:2px solid var(--ink)}
+@media (max-width:820px){.tool{grid-template-columns:minmax(0,1fr)}.canvas-wrap{order:-1;min-height:0;aspect-ratio:4/5}}
+.panel{padding:14px 16px 18px;display:grid;gap:14px;align-content:start;border-right:2px solid var(--ink)}
+@media (max-width:820px){.panel{border-right:0;border-top:2px solid var(--ink)}}
+.p-logo{display:flex;justify-content:space-between;align-items:baseline}
+.p-logo b{font-family:var(--f-kdisp);font-weight:400;font-size:30px;line-height:1}
+.p-logo small{font-family:var(--f-latin);font-weight:800;font-size:12px}
+.sec{display:grid;gap:9px}
+.sec-h{font-family:var(--f-latin);font-weight:900;font-size:14px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--ink);padding-top:6px}
+.sec-h em{font-style:normal;font-family:var(--f-body);font-weight:700;font-size:12px}
+.box{border:2px solid var(--ink);padding:1px 8px;font-weight:700;font-size:12.5px;min-width:64px;text-align:center}
+.pts{display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:var(--paper);padding:6px 6px 6px 14px}
+.pts span{font-weight:600;font-size:13px}
+.pts b{font-family:var(--f-latin);font-weight:900;font-size:30px;line-height:1}
+.sk{display:grid;gap:3px}
+.sk-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sk-name{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px}
+.sk-name small{font-family:var(--f-latin);font-weight:800;font-size:11px;color:var(--mute)}
+.sk-desc{font-size:12px;color:var(--mute)}
+.sk-desc .neg{color:var(--red);font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;margin:0;--c:var(--ink)}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--c) 0 var(--fill,0%),#cfcfcf var(--fill,0%))}
+input[type=range]::-moz-range-track{height:3px;background:#cfcfcf}
+input[type=range]::-moz-range-progress{height:3px;background:var(--c)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--c);border:2px solid var(--ink);margin-top:-6.5px;border-radius:0}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;background:var(--c);border:2px solid var(--ink);border-radius:0}
+input[type=range]:disabled{opacity:.6}
+.ebar{height:10px;border:2px solid var(--ink)}
+.ebar i{display:block;height:100%;background:var(--yellow);transition:width .5s}
+.ebar.low i{background:var(--red)}
+.log{font-size:12.5px;border:2px solid var(--ink);padding:8px 10px;min-height:92px;max-height:160px;overflow:auto;line-height:1.6;white-space:pre-wrap;font-variant-numeric:tabular-nums}
+.log .o{color:var(--red);font-weight:700}
+.btn{background:var(--ink);color:var(--paper);border:2px solid var(--ink);padding:13px 16px;font-weight:800;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:var(--paper);color:var(--ink)}
+.lvl{background:var(--yellow);border:2px solid var(--ink);padding:8px 12px;font-family:var(--f-latin);font-weight:900;display:flex;justify-content:space-between}
+.canvas-wrap{position:relative;background:var(--paper);min-height:440px}
+.canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.c-top{position:absolute;left:16px;right:16px;top:12px;display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:13px;pointer-events:none}
+.c-top .latin{font-size:15px}
+.c-cap{position:absolute;left:16px;right:16px;bottom:12px;display:grid;gap:6px;pointer-events:none}
+.c-cap #cap{font-size:14px;font-weight:600;background:var(--paper);border:2px solid var(--ink);padding:7px 10px}
+.c-cap #cap b{color:var(--blue)}
+.c-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;font-weight:600}
+.c-key span{display:flex;align-items:center;gap:6px}
+
+/* ───────── 결과: 기록지 ───────── */
+.case{position:relative;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr) minmax(0,.8fr);gap:26px;align-items:start}
+@media (max-width:980px){.case{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.sheet-col{grid-column:1/-1}}
+@media (max-width:620px){.case{grid-template-columns:minmax(0,1fr)}}
+.case>*{position:relative;z-index:1}
+.c-title{display:grid;gap:12px}
+.c-title .no{font-family:var(--f-latin);font-weight:900;font-size:15px;display:flex;align-items:center;gap:8px}
+.c-title h1{font-family:var(--f-kdisp);font-weight:400;font-size:clamp(40px,5vw,64px);line-height:1}
+.c-title p{font-size:16px;font-weight:500}
+.photo{border:2px solid var(--ink);background:var(--paper);position:relative;max-width:320px}
+.photo img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.photo .cap{border-top:2px solid var(--ink);padding:6px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between}
+.photo .tape{position:absolute;top:-10px;left:22px;width:80px;height:18px;background:var(--blue)}
+.sheet{border:2px solid var(--ink);background:var(--paper);position:relative}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--ink);color:var(--paper);padding:10px 16px}
+.sheet-h b{font-family:var(--f-latin);font-weight:900;font-size:22px}
+.sheet-h span{font-size:12.5px;font-weight:600}
+.verdict{display:flex;align-items:stretch;border-bottom:2px solid var(--ink)}
+.verdict i{width:16px;flex:none}
+.verdict b{font-family:var(--f-kdisp);font-weight:400;font-size:clamp(24px,3vw,32px);padding:12px 16px;line-height:1.15}
+dl{margin:0}
+.row{display:grid;grid-template-columns:132px minmax(0,1fr);gap:12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:14px}
+.row dt{font-weight:600;color:var(--mute)}
+.row dd{margin:0;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}
+.row dd small{font-weight:500;font-size:12px;color:var(--mute);margin-left:6px}
+.cells{display:inline-flex;gap:3px;vertical-align:middle;margin-left:8px}
+.cells i{width:12px;height:12px;border:2px solid var(--ink);display:inline-block}
+.design{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;font-size:12.5px;font-weight:700}
+.design div{display:grid;gap:4px}
+.design .bar{height:46px;border:2px solid var(--ink);display:flex;align-items:flex-end}
+.design .bar i{display:block;width:100%}
+.mm .row dd{display:flex;align-items:center}
+.hbar{flex:1;height:12px;border:2px solid var(--ink);max-width:240px}
+.hbar i{display:block;height:100%;background:var(--blue)}
+.sideR{display:grid;gap:18px;align-content:start}
+.note{background:var(--yellow);border:2px solid var(--ink);padding:14px 16px 16px;font-size:18px;font-weight:700;line-height:1.35}
+.note small{display:block;font-family:var(--f-latin);font-weight:900;font-size:12px;margin-bottom:6px}
+.strip{border:2px solid var(--ink);padding:10px 12px;font-size:13.5px;font-weight:600}
+.strip.blue{background:var(--blue);color:#fff}
+.r-actions{display:grid;gap:8px}
+.r-note{font-size:12px;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+const COL={red:'#e8372b',blue:'#2f6fe0',yellow:'#f6b72c',green:'#2a9a46',violet:'#6b5ce7',orange:'#f05a28',ink:'#111111',mute:'#9a9a9a',paper:'#ffffff'};
+const TYPES={
+  book:{name:'동네 독서모임',en:'Book Club',c:COL.blue},
+  run:{name:'저녁 러닝크루',en:'Running Crew',c:COL.red},
+  plog:{name:'플로깅 봉사 모임',en:'Plogging',c:COL.green}
+};
+const SKILLS=[
+  {k:'open',en:'Open',name:'열기',c:COL.yellow,sub:'새 사람이 쉽게 들어와요',down:'너무 높으면 한 명씩 챙기기 어려워요'},
+  {k:'welcome',en:'Welcome',name:'맞이',c:COL.red,sub:'처음 온 사람이 누군가와 이어져요',down:''},
+  {k:'rhythm',en:'Rhythm',name:'리듬',c:COL.blue,sub:'다시 올 이유와 때가 생겨요',down:'맞이 없이 높으면 부담이 돼요'},
+  {k:'conn',en:'Connect',name:'연결',c:COL.green,sub:'구성원끼리 관계가 쌓여요',down:'문이 닫히면 배타적이 돼요'},
+  {k:'roles',en:'Roles',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
+];
+const VERDICTS={
+  self:{t:'스스로 굴러가는 모임',c:COL.green,d:'운영자가 없어도 누군가 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'새로 이끄는 사람은 앞으로 어디서 나올까요?'},
+  quiet:{t:'조용히 자라는 모임',c:COL.blue,d:'크지 않지만 다시 오고 자리 잡는 사람이 꾸준히 생겼어요.',q:'가입자 수 말고 무엇으로 이 모임의 건강을 알 수 있을까요?'},
+  crowd:{t:'북적이지만 머무르지 않는 모임',c:COL.red,d:'많이 왔지만 대부분 아무와도 이어지지 못하고 떠났어요. 유입만 늘리는 앱의 방식으로는 사람이 남지 않아요.',q:'처음 온 사람이 다른 사람과 이어지는 순간은 언제였나요?'},
+  closed:{t:'끈끈하지만 닫힌 모임',c:COL.violet,d:'안쪽은 깊이 연결됐지만 바깥에서 들어오기 어려워요. 소속감이 커질수록 배타성도 함께 자라요.',q:'오래된 멤버의 편안함과 새 사람의 자리를 어떻게 함께 지킬까요?'},
+  burn:{t:'운영자가 지친 모임',c:COL.yellow,d:'모든 일이 한 사람에게 몰려 운영자가 먼저 지쳤어요. 커뮤니티는 출시 후에도 계속 가꿔야 해요.',q:'조금 더 하고 싶은 사람이 맡을 수 있는 자리가 있었나요?'},
+  root:{t:'아직 뿌리내리지 못한 모임',c:COL.mute,d:'사람이 오고 갔지만 자리 잡은 사람이 적어요.',q:'사람들이 다시 와야 할 이유는 무엇인가요?'}
+};
+const VORDER=['self','quiet','crowd','closed','burn','root'];
+const STAGE_NAMES=['처음 온 사람','다시 온 사람','자리 잡은 사람','함께 이끄는 사람'];
+const STAGE_C=[COL.paper,COL.blue,COL.green,COL.red];
+const RING=[.76,.57,.39,.22];
+const MAXLV=5, START_PTS=8, MEETINGS=8, HALF=4, TICK=1800;
+
+const app=document.getElementById('app');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pad=n=>String(n).padStart(2,'0');
+let st=null, timer=null, idle=null, canvas=null, ctx=null, raf=0, logLines=[];
+let plays=[], db=null, savedId=null, lastRec=null, examples=null;
+
+/* ───────── 시뮬레이션 ───────── */
+function freshState(type){
+  return {type,phase:'alloc',skills:{open:0,welcome:0,rhythm:0,conn:0,roles:0},lock:{open:0,welcome:0,rhythm:0,conn:0,roles:0},
+    points:START_PTS,meeting:0,E:100,people:[],links:[],nid:0,total:0,newSum:0,retSum:0,xp:0,gain:0,
+    stats:{lonelyLeft:0,left:0},tags:[],cap:'',burn:false,last:null};
+}
+function seed(){for(let i=0;i<2;i++)addPerson(2,1);st.links.push([st.people[0].id,st.people[1].id,0]);layout(true);}
+function newGame(type){
+  clearInterval(timer);savedId=null;logLines=[];
+  st=freshState(type);seed();
+  log(`${TYPES[type].name}을(를) 열었어요. 지금은 나와 친구 2명.`);
+  render();
+}
+function addPerson(stage,fromR){
+  const a=Math.random()*Math.PI*2;
+  const p={id:st.nid++,stage,a,x:0,y:0,tx:0,ty:0,alpha:0,leaving:false};
+  const r=fromR??1.15; p.x=Math.cos(a)*r; p.y=Math.sin(a)*r; st.people.push(p); return p;
+}
+const alive=()=>st.people.filter(p=>!p.leaving);
+function deg(p){let d=0;for(const l of st.links)if(l[0]===p.id||l[1]===p.id)d++;return d;}
+function link(a,b){if(a.id===b.id)return;if(st.links.some(l=>(l[0]===a.id&&l[1]===b.id)||(l[0]===b.id&&l[1]===a.id)))return;st.links.push([a.id,b.id,performance.now()]);
+  // 이어진 사람끼리 가까이 앉아요: 바깥쪽 사람이 안쪽 사람 곁으로
+  const [o,i]=a.stage<b.stage?[a,b]:[b,a];o.a=i.a+(Math.random()-.5)*.5;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function sum(){return Object.values(st.skills).reduce((a,b)=>a+b,0);}
+
+function layout(snap){
+  const TAU=Math.PI*2;
+  for(let s=0;s<4;s++){
+    const grp=alive().filter(p=>p.stage===s);
+    grp.forEach(p=>{p.a=((p.a%TAU)+TAU)%TAU;});
+    grp.sort((a,b)=>a.a-b.a);
+    const n=grp.length, ang=grp.map(p=>p.a), gap=Math.min(TAU/Math.max(n,1),[.3,.38,.5,.9][s]);
+    // 자기 자리 근처에 앉되 겹치지 않게 밀어내요
+    for(let it=0;it<30&&n>1;it++)for(let i=0;i<n;i++){const j=(i+1)%n;let df=ang[j]-ang[i];if(j===0)df+=TAU;
+      if(df<gap){const push=(gap-df)/2;ang[i]-=push;ang[j]+=push;}}
+    // 위쪽 쐐기는 구역 이름 자리로 비워 둬요
+    const W0=.7;
+    grp.forEach((p,i)=>{const r=RING[s]+(i%2?.02:-.02);const t=(((ang[i]%TAU)+TAU)%TAU)/TAU;const A=-Math.PI/2+W0/2+t*(TAU-W0);
+      p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
+  }
+}
+function tag(p,text,color){st.tags.push({p,text,color,life:1});}
+
+// 한 번의 모임
+function step(){
+  const k=st.skills, eff=st.E<25?.7:1;
+  let back=0,settle=0,lead=0,gone=0;
+  for(const p of alive()){
+    const d=deg(p);
+    if(p.stage===0){
+      st.newSum++;
+      const pb=(.1+(d>0?.45:0)+.03*k.rhythm-(k.rhythm>=4&&k.welcome<=1?.08:0))*eff;
+      if(Math.random()<pb){p.stage=1;back++;st.retSum++;st.xp+=1;tag(p,'다시 옴',COL.blue);}
+      else{p.leaving=true;gone++;st.stats.left++;if(d===0)st.stats.lonelyLeft++;tag(p,d===0?'못 이어져 떠남':'떠남',COL.red);}
+    }else if(p.stage===1){
+      if(Math.random()<(.08+.06*k.rhythm+.05*Math.min(d,3))*eff){p.stage=2;settle++;st.xp+=2;tag(p,'자리 잡음',COL.green);}
+      else if(Math.random()<clamp(.3-.1*Math.min(d,2)-.03*k.rhythm,.04,.5)){p.leaving=true;gone++;st.stats.left++;tag(p,'떠남',COL.red);}
+    }else if(p.stage===2){
+      if(Math.random()<(.02+.08*k.roles)*eff){p.stage=3;lead++;st.xp+=3;tag(p,'함께 이끎',COL.red);}
+      else if(Math.random()<.03+(k.open>=4?.05:0)+(st.E<15?.1:0)){p.leaving=true;gone++;st.stats.left++;}
+    }else if(p.stage===3){
+      if(Math.random()<(st.E<=0?.18:.02)){p.leaving=true;gone++;}
+    }
+  }
+  // 구성원끼리 관계가 생겨요
+  const mem=alive().filter(p=>p.stage>=1);
+  for(const p of mem){if(mem.length>1&&Math.random()<.05*k.conn*eff)link(p,pick(mem));}
+  // 새로 오는 사람: 자리 잡은 사람이 친구를 데려오기도 해요. 맞이할 수 있는 인원보다 많이 오면 한 명씩 챙기기 어려워요
+  const rootedNow=alive().filter(p=>p.stage>=2).length;
+  const n=Math.max(0,Math.round((1.5+k.open*1.1+rootedNow*.15)*rnd(.7,1.3)));
+  st.total+=n;
+  const cap=2+k.welcome*2;
+  const closed=k.conn>=4&&k.open<=1;
+  const pl=clamp((.1+.14*k.welcome+.03*k.conn-(closed?.15:0))*Math.min(1,cap/Math.max(1,n))*eff,0,.9);
+  for(let i=0;i<n;i++){const p=addPerson(0);if(mem.length&&Math.random()<pl)link(p,pick(mem));}
+  // 운영자 에너지: 스킬이 많을수록 바쁘고, 함께 이끄는 사람이 나눠 들어요
+  const leaders=alive().filter(p=>p.stage===3).length;
+  st.E=clamp(st.E-Math.max(.5,3+sum()*.55-leaders*2.5),0,100);
+  if(st.E<=0)st.burn=true;
+  st.links=st.links.filter(l=>{const a=st.people.find(p=>p.id===l[0]),b=st.people.find(p=>p.id===l[1]);return a&&b&&!a.leaving&&!b.leaving;});
+  st.meeting++;
+  st.last={n,back,settle,lead,gone};
+  const CAP=['','바깥에서 <b>처음 온 사람</b>이 들어와요. 누군가와 선이 이어지면 관계가 생긴 거예요.',
+    '선이 이어진 사람은 다시 와서 한 칸 안쪽으로 들어와요. 아무와도 이어지지 못한 사람은 떠나요.',
+    '관계가 쌓인 사람은 자리를 잡고, 그중 일부는 가운데에서 <b>함께 이끄는 사람</b>이 돼요.'];
+  st.cap=CAP[st.meeting]||'';
+  for(const p of st.people)if(p.leaving){p.tx=Math.cos(p.a)*1.3;p.ty=Math.sin(p.a)*1.3;}
+  layout(false);
+}
+function verdictKey(){
+  const L=alive(), lead=L.filter(p=>p.stage===3).length, rooted=L.filter(p=>p.stage>=2).length;
+  const rate=st.newSum?st.retSum/st.newSum:0;
+  if(st.burn&&lead<2)return 'burn';
+  if(lead>=2&&rate>=.4)return 'self';
+  if(st.total>=28&&rate<.3)return 'crowd';
+  if(st.skills.conn>=4&&st.skills.open<=1)return 'closed';
+  if(rooted<=3)return 'root';
+  return 'quiet';
+}
+function summary(){
+  const L=alive();
+  return {type:st.type,skills:{...st.skills},total:st.total+2,rooted:L.filter(p=>p.stage>=2).length,leaders:L.filter(p=>p.stage===3).length,
+    links:st.links.length,rate:st.newSum?Math.round(st.retSum/st.newSum*100):0,energy:Math.round(st.E),verdict:verdictKey(),t:Date.now()};
+}
+function diagnosis(){
+  const leaders=alive().filter(p=>p.stage===3).length;
+  if(st.E<35)return '운영자 에너지가 빠르게 줄고 있어요. 혼자서 너무 많은 일을 하고 있어요.';
+  if(st.stats.left&&st.stats.lonelyLeft/st.stats.left>.5)return '떠난 사람 대부분이 아무와도 이어지지 못한 채 떠났어요.';
+  if(st.skills.conn>=4&&st.skills.open<=1)return '오래된 멤버끼리는 끈끈하지만, 새 사람이 끼어들 틈이 없어요.';
+  if(leaders===0)return '아직 함께 이끄는 사람이 없어요. 모든 일이 운영자에게 몰려 있어요.';
+  if(st.total<6)return '새로 오는 사람이 적어요. 모임을 아는 사람이 거의 없어요.';
+  return '사람들이 조금씩 자리를 잡고 있어요. 어디를 더 키울까요?';
+}
+// 첫 화면에 쓸 예시: 실제 플레이 기록이 부족할 때만, 무작위 설계로 시뮬레이션을 돌려 만들어요
+function makeExamples(n){
+  const keep=st, out=[];
+  for(let i=0;i<n;i++){
+    st=freshState(pick(Object.keys(TYPES)));seed();
+    const give=pts=>{for(let j=0;j<pts;j++){const ks=SKILLS.map(s=>s.k).filter(k=>st.skills[k]<MAXLV);if(ks.length)st.skills[pick(ks)]++;}};
+    give(START_PTS);for(let m=0;m<HALF;m++)step();give(clamp(Math.floor(st.xp/3),2,6));for(let m=HALF;m<MEETINGS;m++)step();
+    const s=summary();s.example=true;out.push(s);
+  }
+  st=keep;return out;
+}
+
+/* ───────── 기록 저장 ───────── */
+function loadLocal(){try{return JSON.parse(localStorage.getItem('moim-plays')||'[]');}catch(e){return [];}}
+function saveLocal(rec){try{const a=loadLocal();a.unshift(rec);localStorage.setItem('moim-plays',JSON.stringify(a.slice(0,300)));}catch(e){}}
+plays=loadLocal();
+(async()=>{
+  try{
+    const c=window.claude;if(!c||!c.use)return;
+    db=await c.use('db');if(!db)return;
+    db.collection('plays').orderBy('t','desc').limit(300).onSnapshot(snap=>{
+      plays=snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(!st)renderIntro();
+    },()=>{});
+  }catch(e){}
+})();
+async function savePlay(rec){
+  if(savedId)return;savedId='pending';
+  if(db){try{const ref=await db.collection('plays').add(rec);savedId=ref.id;return;}catch(e){}}
+  saveLocal(rec);plays=[rec,...plays];savedId='local';
+}
+
+/* ───────── 화면 전환 ───────── */
+function render(){
+  resetIdle();cancelAnimationFrame(raf);
+  if(!st){renderIntro();return;}
+  if(st.phase==='report'){renderReport();return;}
+  renderTool();
+}
+
+/* ───────── 장식: 포스터 같은 띠 (원·네모·마름모·직선) ───────── */
+function bandSVG(){
+  const cs=[COL.red,COL.yellow,COL.blue,COL.green,COL.orange,COL.violet];let g='',x=0,i=0;
+  while(x<1240){const c=cs[i%cs.length],t=i%5;
+    if(t===0)g+=`<circle cx="${x+14}" cy="17" r="13" fill="${c}"/>`;
+    else if(t===1)g+=`<rect x="${x}" y="4" width="46" height="26" fill="${c}"/>`;
+    else if(t===2)g+=`<rect x="${x+5}" y="7" width="20" height="20" fill="${c}" transform="rotate(45 ${x+15} 17)"/>`;
+    else if(t===3)g+=`<line x1="${x}" y1="17" x2="${x+70}" y2="17" stroke="${c}" stroke-width="5"/><circle cx="${x+70}" cy="17" r="6" fill="${c}"/>`;
+    else g+=`<rect x="${x}" y="4" width="12" height="26" fill="none" stroke="${c}" stroke-width="3"/><rect x="${x+16}" y="4" width="12" height="26" fill="${c}"/>`;
+    x+=[30,52,32,82,34][t]+10;i++;}
+  return `<svg class="band" viewBox="0 0 1240 34" preserveAspectRatio="xMinYMid slice" aria-hidden="true">${g}</svg>`;
+}
+
+/* ───────── 첫 화면 ───────── */
+function glyphSVG(r,extra){
+  const V=VERDICTS[r.verdict]||VERDICTS.root;
+  let petals='';
+  SKILLS.forEach((s,i)=>{const a=-Math.PI/2+i*2*Math.PI/5,v=r.skills?.[s.k]||0;if(!v)return;const L=8+v*5.4;
+    petals+=`<line x1="${(Math.cos(a)*6).toFixed(1)}" y1="${(Math.sin(a)*6).toFixed(1)}" x2="${(Math.cos(a)*L).toFixed(1)}" y2="${(Math.sin(a)*L).toFixed(1)}" stroke="${s.c}" stroke-width="4.5"/>`;});
+  const core=3+Math.min(r.rooted||0,14)*.6;
+  return `<svg class="glyph ${extra||''}" viewBox="-40 -40 80 80" role="img" aria-label="${TYPES[r.type]?.name||''}: ${V.t}"><title>${TYPES[r.type]?.name||''} · ${V.t} · 남은 관계 ${r.rooted}명</title>
+    ${petals}<rect x="${-core}" y="${-core}" width="${core*2}" height="${core*2}" fill="${V.c}" stroke="#111" stroke-width="1.5"/></svg>`;
+}
+function scatterSVG(rows){
+  const W=360,H=230,P={l:30,r:10,t:16,b:30};
+  const mx=Math.max(20,...rows.map(r=>r.total)), my=Math.max(8,...rows.map(r=>r.rooted));
+  const nx=Math.ceil(mx/10)*10, ny=Math.ceil(my/4)*4;
+  const X=v=>P.l+v/nx*(W-P.l-P.r), Y=v=>H-P.b-v/ny*(H-P.t-P.b);
+  let g='';
+  for(let i=0;i<=4;i++){const v=ny/4*i;g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${i?'#e3e3e3':'#111'}" stroke-width="${i?1:2}"/><text x="${P.l-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;}
+  for(let i=0;i<=nx;i+=nx/5){g+=`<text x="${X(i)}" y="${H-P.b+15}" text-anchor="middle">${i}</text>`;}
+  const dots=rows.map(r=>`<rect x="${(X(r.total)-4).toFixed(1)}" y="${(Y(r.rooted)-4).toFixed(1)}" width="8" height="8" fill="${VERDICTS[r.verdict]?.c}" fill-opacity="${r.example?.45:1}"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="다녀간 사람과 남은 관계">
+    <g font-family="Pretendard,sans-serif" font-size="11" font-weight="600" fill="#6f6f6f">${g}
+    <text x="${W-P.r}" y="${H-3}" text-anchor="end" fill="#111">다녀간 사람 →</text><text x="${P.l}" y="${P.t-5}" fill="#111">남은 관계 ↑</text></g>${dots}</svg>`;
+}
+function renderIntro(){
+  const real=plays.filter(p=>p&&p.skills&&VERDICTS[p.verdict]);
+  if(!examples)examples=makeExamples(48);
+  const need=Math.max(0,48-real.length);
+  const rows=real.concat(examples.slice(0,need));
+  const sumL=real.reduce((a,r)=>a+(r.links||0),0), sumT=real.reduce((a,r)=>a+(r.total||0),0);
+  const counts={};VORDER.forEach(k=>counts[k]=0);rows.forEach(r=>counts[r.verdict]++);
+  const how=glyphSVG({type:'book',verdict:'self',rooted:8,skills:{open:2,welcome:4,rhythm:3,conn:3,roles:2}});
+  app.innerHTML=`<div class="poster">
+    <header>
+      <div class="p-top"><h1 class="big latin">Moim</h1><span class="sub">COMMUNITY DESIGN SIMULATOR</span><span class="big latin">Lab</span></div>
+      <div class="p-meta"><span>Skill<br>Meet<br>Report</span>
+        <div class="stats">
+          <div class="stat"><b>${real.length}</b><span>만들어진 모임</span></div>
+          <div class="stat"><b>${sumL}</b><span>이어진 관계</span></div>
+          <div class="stat"><b>${sumT}</b><span>다녀간 사람</span></div></div>
+        <span class="r">졸업 전시<br>만드는 디자이너,<br>관계를 설계하다</span></div>
+    </header>
+    ${bandSVG()}
+    <div class="p-body">
+      <section>
+        <div class="lab"><span>사람들이 설계한 모임</span><span>${need?`흐린 ${need}개는 예시예요`:'최근 순'}</span></div>
+        <div class="field">${rows.map(r=>glyphSVG(r,r.example?'ex':((r===lastRec||(r.id&&r.id===savedId))?'me':''))).join('')}</div>
+      </section>
+      <aside class="side">
+        <div><div class="lab"><span>읽는 법</span></div>
+          <div class="howto"><div style="width:110px">${how}</div>
+            <div><b>막대 다섯 개</b>는 스킬, 길수록 많이 쓴 것<br>${SKILLS.map(s=>`<span style="color:${s.c};font-weight:800">■</span> ${s.name}`).join(' ')}<br><b>가운데 네모</b>는 남은 관계(크기)와 결과(색)</div></div></div>
+        <div><div class="lab"><span>결과 유형</span><span>${rows.length}개 모임</span></div>
+          <div class="dist">${VORDER.filter(k=>counts[k]).map(k=>`<i style="flex:${counts[k]};background:${VERDICTS[k].c}" title="${VERDICTS[k].t} ${counts[k]}"></i>`).join('')}</div>
+          <div class="dlist">${VORDER.map(k=>`<span><i class="sq" style="background:${VERDICTS[k].c}"></i>${VERDICTS[k].t}<b>${counts[k]}</b></span>`).join('')}</div></div>
+        <div><div class="lab"><span>많이 오면 많이 남을까?</span></div>${scatterSVG(rows)}</div>
+      </aside>
+    </div>
+    <footer class="p-bottom">
+      <h2 class="big kdisp">모임 설계자</h2>
+      <div class="types">${Object.entries(TYPES).map(([k,v])=>`<button class="type" data-t="${k}"><i class="sq" style="background:${v.c};width:14px;height:14px"></i>${v.name}<small>${v.en} →</small></button>`).join('')}</div>
+      <div class="foot"><span>모임을 하나 골라 설계를 시작하세요 · 한 판에 1~2분</span><span>연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.${need?' 흐린 모임은 무작위 설계로 자동 생성한 예시예요.':''}</span></div>
+    </footer></div>`;
+  app.querySelectorAll('.type').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
+}
+
+/* ───────── 설계 화면 ───────── */
+function log(s){logLines.push(s);}
+function renderTool(){
+  app.innerHTML=`<div class="tool">
+    <div class="panel" id="panel"></div>
+    <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
+      <div class="c-top"><span><span class="latin">${TYPES[st.type].en}</span> · ${TYPES[st.type].name}</span><span id="mt"></span></div>
+      <div class="c-cap"><span id="cap"></span>
+        <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="sq" style="background:${STAGE_C[i]};border:2px solid #111"></i>${n}</span>`).join('')}<span><i style="width:18px;height:3px;background:${COL.yellow};display:inline-block"></i>관계</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>`;
+  canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
+  sizeCanvas();renderPanel();loop();
+}
+function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);}
+window.addEventListener('resize',sizeCanvas);
+function renderPanel(){
+  const P=document.getElementById('panel');if(!P)return;
+  const editable=st.phase==='alloc'||st.phase==='levelup', lv=st.phase==='levelup';
+  document.getElementById('mt').innerHTML=`<span class="latin">Meeting ${pad(st.meeting)}/${pad(MEETINGS)}</span>`;
+  document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
+  const e=Math.round(st.E);
+  P.innerHTML=`
+    <div class="p-logo"><b>모임 설계자</b><small>v0.5</small></div>
+    ${lv?`<div class="lvl"><span>LEVEL UP</span><span>+${st.gain}</span></div>`:''}
+    <div class="sec"><div class="sec-h">Points<em>${editable?'나누는 중':'진행 중'}</em></div>
+      <div class="pts"><span>남은 스킬 포인트</span><b>${pad(st.points)}</b></div></div>
+    <div class="sec"><div class="sec-h">Skills</div>
+      ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
+        <div class="sk-row"><label class="sk-name" for="r-${s.k}"><i class="sq" style="background:${s.c};width:14px;height:14px"></i>${s.name}<small>${s.en}</small></label><span class="box num">${v} / ${MAXLV}${v>lk&&lv?` +${v-lk}`:''}</span></div>
+        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}>
+        <span class="sk-desc">${s.sub}${s.down?` · <span class="neg">${s.down}</span>`:''}</span></div>`;}).join('')}</div>
+    <div class="sec"><div class="sec-h">Energy<span class="box num">${e}%</span></div>
+      <div class="ebar ${e<30?'low':''}"><i style="width:${e}%"></i></div>
+      <span class="sk-desc">스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.</span></div>
+    <div class="sec"><div class="sec-h">Log</div>
+      <div class="log" id="log">${logLines.map(l=>l.startsWith('!')?`<span class="o">${l.slice(1)}</span>`:l).join('\n')}</div></div>
+    ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>진행 중</span><span>…</span></button>`}
+    <button class="btn ghost" id="quit"><span>처음 화면으로</span><span>←</span></button>`;
+  const lg=document.getElementById('log');lg.scrollTop=lg.scrollHeight;
+  P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
+    const k=inp.dataset.k, old=st.skills[k];let v=+inp.value;
+    v=clamp(v,st.lock[k],old+st.points);st.points-=v-old;st.skills[k]=v;renderPanel();resetIdle();
+    const again=document.getElementById('r-'+k);if(again)again.focus();});
+  const go=document.getElementById('go');if(go)go.onclick=run;
+  document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;render();};
+}
+function run(){
+  st.phase='run';
+  log(`설계: ${SKILLS.map(s=>s.name+' '+st.skills[s.k]).join(' / ')}`);
+  const tick=()=>{step();const l=st.last;
+    log(`#${pad(st.meeting)}  새로 ${l.n} · 다시 ${l.back} · 자리 ${l.settle} · 이끎 ${l.lead} · 떠남 ${l.gone}`);};
+  tick();renderPanel();
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    tick();
+    if(st.meeting===HALF){clearInterval(timer);renderPanel();setTimeout(levelUp,900);}
+    else if(st.meeting>=MEETINGS){clearInterval(timer);renderPanel();setTimeout(finish,1300);}
+    else renderPanel();
+  },TICK);
+}
+function levelUp(){
+  if(!st)return;
+  st.gain=clamp(Math.floor(st.xp/3),2,6);st.points=st.gain;
+  st.lock={...st.skills};st.phase='levelup';
+  log(`!LEVEL UP · 경험치 ${st.xp} → 포인트 +${st.gain}`);
+  log(`!진단: ${diagnosis()}`);
+  renderPanel();
+}
+function finish(){
+  if(!st)return;
+  try{st.photo=canvas.toDataURL('image/png');}catch(e){st.photo='';}
+  st.result=summary();st.phase='report';
+  lastRec=st.result;savePlay(st.result);
+  render();
+}
+
+// 사람: 네모난 머리와 검은 몸 (포스터의 걷는 사람들처럼)
+function figure(x,y,r,head,hollow,a){
+  ctx.globalAlpha=a;
+  ctx.fillStyle=COL.ink;ctx.strokeStyle=COL.ink;
+  const d=window.devicePixelRatio||1;
+  // 몸통과 다리
+  ctx.fillRect(x-r*.38,y-r*.1,r*.76,r*.7);
+  ctx.lineWidth=Math.max(1.5,r*.16);ctx.beginPath();ctx.moveTo(x-r*.2,y+r*.6);ctx.lineTo(x-r*.32,y+r*1.05);ctx.moveTo(x+r*.2,y+r*.6);ctx.lineTo(x+r*.3,y+r*1.05);ctx.stroke();
+  // 머리
+  const h=r*.78;
+  ctx.fillStyle=head;ctx.fillRect(x-h/2,y-r*.25-h,h,h);
+  ctx.lineWidth=1.5*d;ctx.strokeRect(x-h/2,y-r*.25-h,h,h);
+  if(hollow){ctx.globalAlpha=a*.5;}
+}
+function loop(){
+  if(!st||!canvas||!document.body.contains(canvas))return;
+  const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.8,cx=W/2,cy=H/2;
+  ctx.fillStyle=COL.paper;ctx.fillRect(0,0,W,H);
+  // 구역: 검은 실선 동심원
+  const B=[.86,.665,.48,.305,.09];
+  ctx.strokeStyle=COL.ink;
+  B.slice(0,4).forEach((r,i)=>{ctx.lineWidth=(i===0?2:1)*d;ctx.setLineDash(i===0?[]:[2*d,4*d]);ctx.beginPath();ctx.arc(cx,cy,r*S,0,Math.PI*2);ctx.stroke();});
+  ctx.setLineDash([]);
+  ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=`700 ${12*d}px Pretendard,sans-serif`;
+  STAGE_NAMES.forEach((n,i)=>{const y=cy-((B[i]+B[i+1])/2)*S;const w=ctx.measureText(n).width;const x0=cx-(w+16*d)/2;
+    ctx.fillStyle=STAGE_C[i];ctx.fillRect(x0,y-5*d,10*d,10*d);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5*d;ctx.strokeRect(x0,y-5*d,10*d,10*d);
+    ctx.fillStyle=COL.ink;ctx.fillText(n,x0+16*d,y);});
+  ctx.textBaseline='alphabetic';
+  // 움직임
+  for(const p of st.people){p.x+=(p.tx-p.x)*.07;p.y+=(p.ty-p.y)*.07;
+    if(p.leaving)p.alpha=Math.max(0,p.alpha-.02);else p.alpha=Math.min(1,p.alpha+.05);}
+  st.people=st.people.filter(p=>!(p.leaving&&p.alpha<=0));
+  // 관계 선: 굵은 노란 직선, 새로 생기면 더 굵게
+  const byId=new Map(st.people.map(p=>[p.id,p])), now=performance.now();
+  for(const l of st.links){const a=byId.get(l[0]),b=byId.get(l[1]);if(!a||!b)continue;
+    const fresh=l[2]?Math.max(0,1-(now-l[2])/1500):0;
+    ctx.strokeStyle=fresh>0?COL.orange:COL.yellow;ctx.lineWidth=(3+fresh*4)*d;ctx.globalAlpha=Math.min(a.alpha,b.alpha);
+    ctx.beginPath();ctx.moveTo(cx+a.x*S,cy+a.y*S);ctx.lineTo(cx+b.x*S,cy+b.y*S);ctx.stroke();}
+  ctx.globalAlpha=1;
+  // 가운데: 나와 에너지
+  ctx.lineWidth=7*d;ctx.strokeStyle='#e6e6e6';ctx.beginPath();ctx.arc(cx,cy,24*d,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle=st.E<30?COL.red:COL.yellow;ctx.beginPath();ctx.arc(cx,cy,24*d,-Math.PI/2,-Math.PI/2+Math.PI*2*st.E/100);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,15*d,0,Math.PI*2);ctx.fillStyle=COL.ink;ctx.fill();
+  ctx.fillStyle=COL.paper;ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('나',cx,cy+.5*d);ctx.textBaseline='alphabetic';
+  // 사람
+  for(const p of st.people){const r=(p.stage===3?15:13)*d;
+    figure(cx+p.x*S,cy+p.y*S,r,p.leaving?'#ffffff':STAGE_C[p.stage],false,p.leaving?p.alpha*.5:p.alpha);}
+  ctx.globalAlpha=1;
+  // 사람마다 무슨 일이 있었는지
+  ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';
+  for(const t of st.tags){t.life-=.008;const p=t.p;const a=Math.max(0,Math.min(1,t.life*1.6));const x=cx+p.x*S,y=cy+p.y*S-30*d-(1-t.life)*10*d;
+    const w=ctx.measureText(t.text).width+10*d;ctx.globalAlpha=a;ctx.fillStyle=t.color;ctx.fillRect(x-w/2,y-12*d,w,17*d);
+    ctx.fillStyle=t.color===COL.yellow?COL.ink:COL.paper;ctx.fillText(t.text,x,y+1*d);}
+  st.tags=st.tags.filter(t=>t.life>0);ctx.globalAlpha=1;
+  raf=requestAnimationFrame(loop);
+}
+
+/* ───────── 결과: 기록지 ───────── */
+function renderReport(){
+  const r=st.result, V=VERDICTS[r.verdict], k=r.skills;
+  const real=plays.filter(p=>p&&p.skills&&!p.example);
+  const caseNo=String(Math.max(real.length,1)).padStart(4,'0');
+  const better=real.length>1?Math.round(real.filter(p=>p.rooted<r.rooted).length/real.length*100):null;
+  const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
+    '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
+  app.innerHTML=`<section class="case">
+    <div class="c-title">
+      <span class="no"><i class="sq" style="background:${V.c};width:14px;height:14px;border:2px solid #111"></i>CASE No. ${caseNo}</span>
+      <h1>${TYPES[r.type].name}</h1>
+      <p>${V.d}</p>
+      <div class="photo"><span class="tape"></span>${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
+    </div>
+    <div class="sheet-col"><div class="sheet">
+      <div class="sheet-h"><b>Report</b><span>설계 기록 · ${new Date(r.t).toLocaleDateString('ko-KR')}</span></div>
+      <div class="verdict"><i style="background:${V.c}"></i><b>${V.t}</b></div>
+      <dl>
+        <div class="row"><dt>다녀간 사람</dt><dd>${r.total}명<small>가입자 수로만 보면</small></dd></div>
+        <div class="row"><dt>남은 관계</dt><dd>${r.rooted}명<small>자리 잡거나 함께 이끄는 사람</small></dd></div>
+        <div class="row"><dt>다시 온 비율</dt><dd>${r.rate}%</dd></div>
+        <div class="row"><dt>관계의 선</dt><dd>${r.links}개</dd></div>
+        <div class="row"><dt>함께 이끄는 사람</dt><dd>${r.leaders}명</dd></div>
+        <div class="row"><dt>운영자 에너지</dt><dd>${r.energy}%${r.energy<30?'<small>지쳤어요</small>':''}</dd></div>
+        <div class="row" style="align-items:start"><dt>설계</dt><dd><div class="design">${SKILLS.map(s=>`<div><span class="bar"><i style="height:${k[s.k]/MAXLV*100}%;background:${s.c}"></i></span><span>${s.name} ${k[s.k]}</span></div>`).join('')}</div></dd></div>
+      </dl>
+      <div class="mm"><div class="row"><dt>공동체 의식</dt><dd><small style="margin:0">McMillan &amp; Chavis(1986)의 네 요소</small></dd></div>
+        ${Object.entries(g).map(([n,x])=>`<div class="row"><dt>${n}</dt><dd><span class="hbar"><i style="width:${x}%"></i></span></dd></div>`).join('')}</div>
+    </div></div>
+    <div class="sideR">
+      <div class="note"><small>NEXT QUESTION</small>${V.q}</div>
+      ${better!==null?`<div class="strip blue">지금까지 만들어진 모임 ${real.length}개 중, 남은 관계가 이 모임보다 적은 모임은 ${better}%예요.</div>`:''}
+      <div class="strip">앱은 마찰을 없앨수록 좋아지지만, 모임은 사람과 사람 사이에 선이 생겨야 남아요.</div>
+      <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
+      <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 이 화면은 잠시 후 처음으로 돌아가요.</p>
+    </div></section>`;
+  document.getElementById('again').onclick=()=>newGame(st.type);
+  document.getElementById('home').onclick=()=>{st=null;render();};
+}
+
+// 전시용: 아무도 만지지 않으면 처음 화면으로
+function resetIdle(){clearTimeout(idle);if(!st)return;idle=setTimeout(()=>{clearInterval(timer);st=null;render();},st.phase==='report'?60000:120000);}
+document.addEventListener('pointerdown',resetIdle);document.addEventListener('keydown',resetIdle);
+render();
+})();
+</script>
