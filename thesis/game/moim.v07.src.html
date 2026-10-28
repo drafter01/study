@@ -776,6 +776,15 @@ body{background:var(--page)}
 .stp{width:24px;height:24px;border-radius:50%;border:0;background:var(--cell);color:var(--ink);font-family:var(--f-head);font-weight:700;font-size:17px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
 .stp:hover:not(:disabled){background:var(--ink);color:#fff}
 .stp:disabled{opacity:.35;cursor:default}
+
+/* ───────── v2.18 4번째 모임 뒤 레벨업 안내 팝업 ───────── */
+.lvpop{width:min(560px,100%)}
+.lv-gain{display:flex;align-items:center;gap:16px;background:var(--pb);border-radius:24px;padding:18px 22px}
+.lv-gain b{font-family:var(--f-head);font-weight:500;font-size:64px;line-height:.9;color:var(--pd);letter-spacing:-.04em}
+.lv-gain p{font-size:16px;line-height:1.5;font-weight:600}
+.lv-diag{font-size:17px;line-height:1.55;border-top:1px solid #e3e2dc;padding-top:16px}
+.lv-diag small{display:block;font-family:var(--f-body);font-size:13px;font-weight:700;letter-spacing:0;color:var(--soft);margin-bottom:4px}
+.lv-next{font-size:16px;line-height:1.55;color:var(--soft)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -856,6 +865,21 @@ function helpPop(){
   ov.onclick=e=>{if(e.target===ov)close();};
   document.getElementById('help-ok').onclick=close;document.addEventListener('keydown',esc);
   document.getElementById('help-ok').focus();
+}
+function levelPop(){
+  const P=TPAL[st.type],ov=document.createElement('div');ov.className='helpov';
+  ov.innerHTML=`<div class="helpcard lvpop" role="dialog" aria-modal="true" aria-labelledby="lv-h" style="--pb:${P.bg};--pd:${P.dark}">
+    <small>LEVEL UP · ${HALF} / ${MEETINGS}</small><h2 id="lv-h">${HALF}번의 모임이 끝났어요</h2>
+    <div class="lv-gain"><b>+${st.gain}</b><p>운영하며 배운 만큼<br>포인트가 생겼어요</p></div>
+    <p class="lv-diag"><small>지금까지 지켜본 모임</small>${diagnosis()}</p>
+    <p class="lv-next">부족했던 스킬에 포인트를 더 나눠 주세요. 다 나누면 남은 모임 ${MEETINGS-HALF}번이 이어져요.</p>
+    <button class="btn" id="lv-ok"><span>포인트 나누러 가기</span><span>→</span></button></div>`;
+  document.body.appendChild(ov);
+  const close=()=>{ov.remove();document.removeEventListener('keydown',esc);};
+  const esc=e=>{if(e.key==='Escape'||e.key==='Enter')close();};
+  ov.onclick=e=>{if(e.target===ov)close();};
+  document.getElementById('lv-ok').onclick=close;document.addEventListener('keydown',esc);
+  document.getElementById('lv-ok').focus();
 }
 function newGame(type){
   clearInterval(timer);savedId=null;logLines=[];
@@ -1303,7 +1327,6 @@ function renderPanel(){
     <section class="pcard"><h3 class="eh">Goal</h3><p class="goal-t">여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많은 모임</p></section>
     <section class="pcard">
       <div class="ph sk-head"><h3>Skills${info('포인트는 운영자가 쓸 수 있는 시간과 힘이에요. 한정되어 있어서 모든 걸 다 높일 수는 없어요. 4번째 모임이 끝나면 운영하며 배운 만큼 포인트를 더 받아요.')}</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
-      ${lv?`<div class="lvl2"><small>LEVEL UP · 4번 운영하며 배운 만큼 포인트가 생겼어요</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
         <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <p class="sk-sub">${s.sub}</p>
@@ -1350,7 +1373,7 @@ function levelUp(){
   st.gain=clamp(Math.floor(st.xp/3),2,6);st.points=st.gain;
   st.lock={...st.skills};st.phase='levelup';
   log(`!LEVEL UP · 경험치 ${st.xp} → 포인트 +${st.gain}`);
-  renderPanel();
+  renderPanel();levelPop();
 }
 function finish(){
   if(!st)return;
