@@ -686,6 +686,18 @@ body{background:var(--page)}
 .mclock svg{width:clamp(84px,6.4vw,112px);height:auto;flex:none}
 .mclock .hero-n{font-size:clamp(40px,3.6vw,56px)}
 .ovbar{grid-template-columns:minmax(0,.9fr) minmax(0,1.15fr) minmax(0,1.15fr)}
+
+/* ───────── 모임 상자 자체가 시계: 12시부터 시계 방향으로 채워지고 바늘이 돌아요 ───────── */
+@property --p{syntax:'<percentage>';inherits:false;initial-value:0%}
+.ovbar .ov.ovclock,.ovclock{position:relative;overflow:hidden;--a:0deg;
+  background:repeating-conic-gradient(from -.5deg at 50% 58%,rgba(255,255,255,.9) 0 1deg,transparent 1deg 45deg),
+    conic-gradient(from 0deg at 50% 58%,#d9d8d1 0 var(--p),var(--cell) var(--p) 100%);
+  transition:--p .6s ease}
+.ovbar .ov.ovclock{top:auto;right:auto;left:auto;bottom:auto;width:auto;align-self:stretch;min-height:150px}
+.ovclock small{position:relative;z-index:2}
+.ovclock .hand{position:absolute;left:50%;top:58%;width:4px;height:34%;background:var(--ink);border-radius:2px;transform-origin:50% 0;transform:translateX(-50%) rotate(calc(var(--a) + 180deg));transition:transform .6s ease;z-index:1}
+.ovclock::after{content:"";position:absolute;left:50%;top:58%;width:14px;height:14px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);z-index:1}
+.ovclock .hero-n{position:absolute;right:16px;bottom:12px;z-index:2;font-size:clamp(40px,3.4vw,56px)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1083,7 +1095,7 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><div class="mclock" id="ovM"></div></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
       <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
@@ -1141,7 +1153,8 @@ function renderPanel(){
   document.getElementById('ovN').innerHTML=`${rooted}<em>명</em>`;
   document.getElementById('ovT').textContent=`다녀간 사람 ${st.total+2}명`;
   document.getElementById('ovMsg').textContent=relMsg(rooted);
-  document.getElementById('ovM').innerHTML=`${clockSVG(st.meeting)}<b class="hero-n">${st.meeting}<em>/${MEETINGS}</em></b>`;
+  {const oc=document.getElementById('ovR');oc.style.setProperty('--p',(st.meeting/MEETINGS*100)+'%');oc.style.setProperty('--a',(st.meeting*360/MEETINGS)+'deg');oc.setAttribute('aria-label',`모임 ${st.meeting}번째 / ${MEETINGS}번`);}
+  document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
   document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
