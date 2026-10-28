@@ -556,6 +556,13 @@ body{background:var(--page)}
 .ov{padding:16px 18px}
 .goal3,.legend div,.c2-m .cell,.e-cells .cell,.lvl2{border-radius:var(--r-sm)}
 .info .tip,.htip{border-radius:var(--r-sm)}
+
+/* ───────── v1.7 모임 → 머무는 사람 → 운영자 에너지, 셋 다 큰 숫자 ───────── */
+.ovbar{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) minmax(0,1.2fr)}
+.ovbar .ov-e .hero-n.low{color:var(--red)}
+.ovbar .ov-e .gauge{margin-top:6px}
+.ovbar .ov-e .info .tip{left:-8px;right:auto}
+@media (max-width:1100px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -900,7 +907,7 @@ function renderIntro(){
   mapRedraw=null;
   const tip=document.getElementById('htip'),map=app.querySelector('.map');
   const show=(gEl,cx,cy)=>{const r=rows[+gEl.dataset.i],V=VERDICTS[r.verdict],T=TYPES[r.type];
-    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b><i class="dot" style="background:${V.c}"></i>${V.t}</b><p>${V.d}</p><span>남은 관계 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
+    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b><i class="dot" style="background:${V.c}"></i>${V.t}</b><p>${V.d}</p><span>머무는 사람 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
     const mb=map.getBoundingClientRect(),w=260;let x=cx-mb.left+14,y=cy-mb.top+14;if(x+w>mb.width-8)x=cx-mb.left-w-14;if(y+150>mb.height)y=cy-mb.top-150;
     tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
   app.querySelectorAll('.cg').forEach(gEl=>{
@@ -952,8 +959,8 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ovbar" id="ovbar"><div class="ov ov-l"><small>지금 남아 있는 관계${info('파란 머리의 사람: 자리 잡았거나 함께 이끄는 사람이에요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
-      <div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b><span class="steps" id="ovS"></span></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b><span class="steps" id="ovS"></span></div>
+      <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
         <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
@@ -1003,7 +1010,7 @@ function renderPanel(){
   document.getElementById('ovMsg').textContent=relMsg(rooted);
   document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
   document.getElementById('ovS').innerHTML=Array.from({length:MEETINGS},(_,i)=>`<i class="${i<st.meeting?'on':''}${i===HALF-1?' half':''}"></i>`).join('');
-  document.getElementById('ovE').innerHTML=`<div class="ph"><small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="e-num ${e<30?'low':''}">${e}%</b></div>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
+  document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
   P.innerHTML=`
@@ -1124,7 +1131,7 @@ function renderReport(){
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
     </div>
     <div class="c2-m">
-      <div class="big2"><small>남은 관계</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데 자리 잡거나 함께 이끄는 사람</span></div>
+      <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데 자리 잡거나 함께 이끄는 사람</span></div>
       <div class="cgrid c2-cells">
         <div class="cell"><small>다시 온 비율</small><b>${r.rate}%</b></div>
         <div class="cell"><small>관계의 선</small><b>${r.links}개</b></div>
@@ -1136,7 +1143,7 @@ function renderReport(){
     </div>
     <div class="c2-r">
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
-      ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 남은 관계가 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
+      ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
       <div class="cell"><small>기억할 것</small><p>앱은 마찰을 없앨수록 좋아지지만, 모임은 사람과 사람 사이에 선이 생겨야 남아요.</p></div>
       <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
       <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 이 화면은 잠시 후 처음으로 돌아가요.</p>
