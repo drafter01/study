@@ -24,6 +24,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #grain.on{opacity:.28}
 .cap{position:fixed;left:28px;bottom:24px;z-index:4;font-size:12px;font-weight:700;color:rgba(241,236,227,.6);opacity:0;transition:opacity .8s;max-width:60vw}
 .cap.on{opacity:1}
+/* 연도: 장면이 바뀔 때마다 빠르게 굴러가며 바뀜 */
+.year{position:fixed;z-index:4;left:56px;top:40px;font-family:"Inter Tight",sans-serif;font-weight:600;font-size:clamp(64px,8vw,150px);line-height:.9;letter-spacing:-.05em;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s ease;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.year.on{opacity:.92}
+.year small{font-size:.38em;letter-spacing:0;margin-right:.18em;vertical-align:.9em}
+.paper .year{text-shadow:none}
 .line{position:fixed;z-index:4;left:50%;bottom:13vh;transform:translate(-50%,12px);width:min(1400px,92vw);text-align:center;font-weight:800;
   font-size:clamp(28px,3.1vw,56px);line-height:1.3;letter-spacing:-.035em;word-break:keep-all;white-space:pre-line;opacity:0;transition:opacity .9s ease,transform .9s ease;text-shadow:0 2px 24px rgba(0,0,0,.35)}
 .paper .line{text-shadow:none}
@@ -54,7 +59,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <img data-k="club" src="__IMG:club.jpg__" alt="">
 </div>
 <canvas id="grain" aria-hidden="true"></canvas>
-<p class="cap" id="cap"></p>
+<p class="cap" id="cap"></p><p class="year" id="year" aria-hidden="true"></p>
 <p class="line" id="line" aria-live="polite"></p><p class="sub" id="sub"></p><div class="kws" id="kws" aria-hidden="true"></div>
 <div class="title" id="title"><small>COMMUNITY DESIGN SIMULATOR</small><h1>How might we design a community filled with connection?</h1><button id="go"><span>모임 고르기</span><span>→</span></button></div>
 <button class="skip" id="skip">건너뛰기 →</button>
@@ -96,11 +101,18 @@ function drawCave(){
   g.globalAlpha=1;return c;}
 
 const dots=Array.from({length:N},()=>{const a=rnd(0,TAU),r=rnd(1.1,1.6);return {x:Math.cos(a)*r*1.6,y:Math.sin(a)*r,vx:0,vy:0,tx:0,ty:0,a:0,ta:0,c:[...WARM],tc:[...WARM],j:rnd(0,TAU)};});
+let yearV=null,yearRaf=0;
 let kwAll=false,mode=null,flowFrom=0,bubbles=[],tired=0;
 let fires=[],fireA=0,fireTA=0,bgT=0,bgTT=0,rings=0,ringsT=0,caveA=0,caveTA=0;
 const ring=(n,r,cx=0,cy=0,off=0)=>Array.from({length:n},(_,i)=>[cx+Math.cos(off+i/n*TAU)*r,cy+Math.sin(off+i/n*TAU)*r]);
 function place(list,start=0,col,alpha=1){list.forEach(([x,y],k)=>{const p=dots[start+k];if(!p)return;p.tx=x;p.ty=y;p.ta=alpha;if(col)p.tc=hex(col);});return start+list.length;}
 function hideFrom(n){for(let i=n;i<N;i++)dots[i].ta=0;}
+const yearEl=document.getElementById('year');
+const fmtY=v=>v<0?`<small>BC</small>${-v}`:`${Math.max(1,v)}`;
+function setYear(y,ms=900){cancelAnimationFrame(yearRaf);if(y==null){yearEl.classList.remove('on');yearV=null;return;}
+  const from=yearV==null?y-(y<0?600:120):yearV,t0=performance.now();yearEl.classList.add('on');
+  const step=now=>{const t=Math.min(1,(now-t0)/ms),e=1-Math.pow(1-t,3);let v=Math.round(from+(y-from)*e);if(v===0)v=y>0?1:-1;yearEl.innerHTML=fmtY(v);yearV=v;if(t<1)yearRaf=requestAnimationFrame(step);};
+  yearRaf=requestAnimationFrame(step);}
 function showFilm(k){film.classList.toggle('on',!!k);grain.classList.toggle('on',!!k||caveTA>0);
   film.querySelectorAll('img').forEach(im=>{const on=im.dataset.k===k;if(on&&!im.classList.contains('on')){im.classList.remove('on');void im.offsetWidth;}im.classList.toggle('on',on);});
   capEl.textContent=k?CAP[k]:'';capEl.classList.toggle('on',!!k);}
@@ -108,15 +120,15 @@ function showFilm(k){film.classList.toggle('on',!!k);grain.classList.toggle('on'
 const SCENES=[
   ['',1400,()=>{dots[0].tx=0;dots[0].ty=-.05;dots[0].ta=1;hideFrom(1);}],
   ['사람은 혼자서는 살 수 없었습니다.\n그래서 무리를 지었습니다.',5200,()=>{hideFrom(0);caveTA=1;grain.classList.add('on');}],
-  ['소크라테스는 광장에서 누구와도 대화를 나눴습니다.\n대화의 문은 모두에게 열려 있었습니다.',4000,()=>{caveTA=0;showFilm('athens');},'',['O','Open','문 열기']],
-  ['길드의 장인들은 일을 나눠 맡고,\n어려울 때 서로를 돌봤습니다.',3600,()=>{showFilm('guild');},'',['S','Share','역할 나누기']],
-  ['커피하우스에서는 처음 온 손님도\n옆자리 대화에 낄 수 있었습니다.',3600,()=>{showFilm('coffee');},'',['W','Welcome','반겨 주기']],
-  ['저녁이면 난롯가에 둘러앉아\n하루를 나누며 서로를 알아 갔습니다.',3600,()=>{showFilm('hearth');},'',['C','Connect','서로 알기']],
-  ['같은 것을 좋아하는 사람들은 클럽을 만들고,\n정해진 날 다시 만났습니다.',3600,()=>{showFilm('club');},'',['R','Rhythm','정기 모임']],
-  ['지금 우리는 좋아하는 일로 모입니다.',5600,()=>{showFilm(null);setTimeout(()=>{bgTT=1;},1100);mode=null;let k=0;
+  ['소크라테스는 광장에서 누구와도 대화를 나눴습니다.\n대화의 문은 모두에게 열려 있었습니다.',4000,()=>{caveTA=0;showFilm('athens');setYear(-400);},'',['O','Open','문 열기']],
+  ['길드의 장인들은 일을 나눠 맡고,\n어려울 때 서로를 돌봤습니다.',3600,()=>{showFilm('guild');setYear(1662);},'',['S','Share','역할 나누기']],
+  ['커피하우스에서는 처음 온 손님도\n옆자리 대화에 낄 수 있었습니다.',3600,()=>{showFilm('coffee');setYear(1750);},'',['W','Welcome','반겨 주기']],
+  ['저녁이면 난롯가에 둘러앉아\n하루를 나누며 서로를 알아 갔습니다.',3600,()=>{showFilm('hearth');setYear(1817);},'',['C','Connect','서로 알기']],
+  ['같은 것을 좋아하는 사람들은 클럽을 만들고,\n정해진 날 다시 만났습니다.',3600,()=>{showFilm('club');setYear(1890);},'',['R','Rhythm','정기 모임']],
+  ['지금 우리는 좋아하는 일로 모입니다.',5600,()=>{showFilm(null);setYear(2026,1500);setTimeout(()=>{bgTT=1;},1100);mode=null;let k=0;
     [['book',-.75],['run',0],['plog',.75]].forEach(([t,x])=>{const P=PAL[t];k=place(ring(5,.05,x,-.12,.3),k,P);k=place(ring(11,.13,x,-.12),k,P,.55);});hideFrom(k);},
     '책 앞에서, 한강에서, 동네 하천에서. 원할 때 들어오고, 원할 때 떠날 수 있는 작은 모임들이에요.'],
-  ['가볍게 들어올 수 있는 만큼, 가볍게 떠나기도 합니다.',5600,()=>{let k=0;k=place(ring(4,.04,0,-.12,.3),k,PAL.run);k=place(ring(8,.1,0,-.12),k,PAL.run,.8);
+  ['가볍게 들어올 수 있는 만큼, 가볍게 떠나기도 합니다.',5600,()=>{setYear(null);let k=0;k=place(ring(4,.04,0,-.12,.3),k,PAL.run);k=place(ring(8,.1,0,-.12),k,PAL.run,.8);
     flowFrom=k;for(let i=k;i<N;i++){const p=dots[i];p.tc=hex('#9e9d97');p.ft=performance.now()+rnd(0,2600);p.fin=false;}mode='flow';}],
   ['처음 온 사람은 누구와도 이어지지 못한 채 돌아가고,\n운영자는 혼자 지쳐 갑니다.',6400,()=>{mode=null;let k=0;
     dots[0].tx=0;dots[0].ty=-.12;dots[0].ta=1;dots[0].tc=hex('#173a86');k=1;k=place(ring(3,.07,0,-.12,.5),k,PAL.run,.9);
@@ -138,7 +150,7 @@ function go(i){si=i;const [txt,dur,fn,sub,kw]=SCENES[i];fn();lineEl.classList.re
   setTimeout(()=>{if(si!==i)return;lineEl.textContent=txt;if(txt)lineEl.classList.add('on');subEl.textContent=sub||'';if(sub)subEl.classList.add('on');const k=kwAll?KW:kw?[kw]:null;kwsEl.innerHTML=k?kwHTML(k):'';if(k)kwsEl.classList.add('on');},txt?(kw?350:650):0);
   if(dur){clearTimeout(timer);const gap=kw?300:550;timer=setTimeout(()=>{lineEl.classList.remove('on');subEl.classList.remove('on');kwsEl.classList.remove('on');setTimeout(()=>go(i+1),gap);},dur);}else finish();}
 function finish(){done=true;clearTimeout(timer);lineEl.classList.remove('on');subEl.classList.remove('on');kwsEl.classList.remove('on');titleEl.classList.add('on');document.getElementById('skip').style.display='none';}
-function skip(){if(done)return;mode=null;bubbles=[];tired=0;dots.forEach(p=>p.slow=false);showFilm(null);caveTA=0;grain.classList.remove('on');bgTT=1;fireTA=0;SCENES[LAST-1][2]();SCENES[LAST][2]();si=LAST;finish();}
+function skip(){if(done)return;setYear(null);mode=null;bubbles=[];tired=0;dots.forEach(p=>p.slow=false);showFilm(null);caveTA=0;grain.classList.remove('on');bgTT=1;fireTA=0;SCENES[LAST-1][2]();SCENES[LAST][2]();si=LAST;finish();}
 document.getElementById('skip').onclick=e=>{e.stopPropagation();skip();};
 document.body.addEventListener('click',e=>{if(!done&&e.target.id!=='go')skip();});
 document.getElementById('go').onclick=e=>{e.stopPropagation();location.reload();};
