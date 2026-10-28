@@ -26,7 +26,7 @@ await click('#help-ok');await W(900);
 for(const [k,v] of [['open',2],['welcome',3],['rhythm',1],['conn',1],['roles',1]])await drag(k,v);
 await W(600);await click('#go');
 await p.waitForSelector('.lvl2',{timeout:40000});await W(2200);
-await drag('conn',2);await drag('roles',2);await W(500);await click('#go');
+{const pts=+(await p.locator('.pts3 b').innerText());await drag('conn',1+Math.ceil(pts/2));await drag('roles',1+Math.floor(pts/2));}await W(500);await click('#go');
 await p.waitForSelector('.case3',{timeout:60000});console.log('verdict',await p.locator('h2.one').innerText());await W(1500);
 await moveTo('.q2',30);await W(2500);await moveTo('.big2',30);await W(1800);
 await click('#home');await W(1500);
