@@ -136,8 +136,7 @@ const SCENES=[
   ['같은 것을 좋아하는 사람들은 클럽을 만들고,\n정해진 날 다시 만났습니다.',2800,()=>{showFilm('club');setYear(1890);},'',['R','Rhythm','정기 모임']],
   ['지금 우리는 좋아하는 일로 모입니다.',6200,()=>{setYear(2026,1800);film.classList.add('wash');grain.classList.remove('on');capEl.classList.remove('on');bgTT=1;mode=null;
     setTimeout(()=>{showFilm(null);setTimeout(()=>film.classList.remove('wash'),1300);},1900);
-    setTimeout(()=>{let k=0;[['book',-.75],['run',0],['plog',.75]].forEach(([t,x])=>{const P=PAL[t];k=place(ring(5,.05,x,-.12,.3),k,P);k=place(ring(11,.13,x,-.12),k,P,.55);});hideFrom(k);},900);},
-    '책 앞에서, 한강에서, 동네 하천에서. 원할 때 들어오고, 원할 때 떠날 수 있는 작은 모임들이에요.'],
+    setTimeout(()=>{let k=0;[['book',-.75],['run',0],['plog',.75]].forEach(([t,x])=>{const P=PAL[t];k=place(ring(5,.05,x,-.12,.3),k,P);k=place(ring(11,.13,x,-.12),k,P,.55);});hideFrom(k);},900);}],
   ['가볍게 들어올 수 있는 만큼, 가볍게 떠나기도 합니다.',5600,()=>{setYear(null);let k=0;k=place(ring(4,.04,0,-.12,.3),k,PAL.run);k=place(ring(8,.1,0,-.12),k,PAL.run,.8);
     flowFrom=k;for(let i=k;i<N;i++){const p=dots[i];p.tc=hex('#9e9d97');p.ft=performance.now()+rnd(0,2600);p.fin=false;}mode='flow';}],
   ['처음 온 사람은 누구와도 이어지지 못한 채 돌아가고,\n운영자는 혼자 지쳐 갑니다.',6400,()=>{mode=null;let k=0;
