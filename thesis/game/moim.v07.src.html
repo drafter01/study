@@ -1074,7 +1074,7 @@ function renderSelect(){
 function log(s){logLines.push(s);}
 function renderTool(){
   const T=TYPES[st.type];
-  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><h1 class="bigt ptitle">${T.name}<sup>${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]}</sup></h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><h1 class="bigt ptitle">${T.name}</h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
