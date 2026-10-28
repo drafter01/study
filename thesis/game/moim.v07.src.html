@@ -585,6 +585,24 @@ body{background:var(--page)}
 .e-cells .cell{padding:12px 14px}
 .e-txt{padding:18px 26px 22px;gap:10px}
 .e-go{margin:0 18px 18px;padding:14px 18px}
+
+/* ───────── v2.1 볼드한 글자 대비: 큰 제목+위첨자, 두 톤 제목, 동그라미 글자 목록 ───────── */
+.bigt{font-weight:800;letter-spacing:-.03em;line-height:1;display:inline-flex;align-items:flex-start}
+.bigt sup{font-family:var(--f-head);font-weight:600;font-size:.26em;color:var(--soft);letter-spacing:0;margin-left:6px;line-height:1.4;vertical-align:top}
+.e-bar{padding:16px 24px;border-radius:var(--r-lg)}
+.e-bar .bigt{font-size:clamp(40px,4.4vw,64px)}
+.e-logo{gap:16px}
+.e-right{display:flex;align-items:center;gap:14px}
+.e-right small{font-family:var(--f-head);font-weight:600;font-size:13px;color:var(--soft)}
+.c2-l h1.bigt{font-size:clamp(40px,4.6vw,64px)}
+.two{font-weight:800;font-size:clamp(34px,3.6vw,52px);line-height:1.08;letter-spacing:-.03em;display:grid}
+.two span{color:#b9b8b2}
+.mm3{display:grid}
+.mm3 .h{font-size:12px;font-weight:700;color:var(--soft);display:flex;align-items:center;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.mm3 .r{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #e3e2dc}
+.mm3 .r i{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-weight:800;font-size:14px;display:grid;place-items:center;opacity:var(--o)}
+.mm3 .r b{font-weight:800;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
+.mm3 .r em{font-style:normal;font-family:var(--f-head);font-weight:500;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -622,6 +640,7 @@ const VERDICTS={
   burn:{t:'운영자가 지친 모임',c:COL.yellow,d:'모든 일이 한 사람에게 몰려 운영자가 먼저 지쳤어요. 커뮤니티는 출시 후에도 계속 가꿔야 해요.',q:'조금 더 하고 싶은 사람이 맡을 수 있는 자리가 있었나요?'},
   root:{t:'아직 뿌리내리지 못한 모임',c:COL.mute,d:'사람이 오고 갔지만 자리 잡은 사람이 적어요.',q:'사람들이 다시 와야 할 이유는 무엇인가요?'}
 };
+const VSPLIT={self:['스스로 굴러가는','모임'],quiet:['조용히 자라는','모임'],crowd:['북적이지만','머무르지 않는 모임'],closed:['끈끈하지만','닫힌 모임'],burn:['운영자가','지친 모임'],root:['아직 뿌리내리지','못한 모임']};
 const VORDER=['self','quiet','crowd','closed','burn','root'];
 const STAGE_NAMES=['처음 온 사람','다시 온 사람','자리 잡은 사람','함께 이끄는 사람'];
 const ACC='#2f6fe0';
@@ -962,7 +981,7 @@ function renderSelect(){
   screen='select';
   const now=new Date(),clock=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
   app.innerHTML=`<section class="entry">
-    <div class="e-bar"><span class="e-logo"><button class="back" id="back" aria-label="처음 화면으로">←</button>Community Entry</span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-clock num">${clock}</span></div>
+    <div class="e-bar"><span class="e-logo"><button class="back" id="back" aria-label="처음 화면으로">←</button><h1 class="bigt">모임 고르기<sup>${TKEYS.length}</sup></h1></span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-right"><small>Community Entry</small><span class="e-clock num">${clock}</span></span></div>
     <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c};--tbg:${TPAL[k].bg};--tink:${TPAL[k].ink}" aria-label="${v.name} 시작">
       <div class="e-img">${typeArt(k)}</div>
       <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
@@ -1145,9 +1164,9 @@ function renderReport(){
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
   app.innerHTML=`<section class="case2" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
     <div class="c2-l">
-      <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>CASE No. ${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span>
-      <h1>${T.name}</h1>
-      <span class="vchip">${V.t}</span>
+      <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${new Date(r.t).toLocaleDateString('ko-KR')}</span>
+      <h1 class="bigt">${T.name}<sup>No.${caseNo}</sup></h1>
+      <h2 class="two">${VSPLIT[r.verdict][0]}<span>${VSPLIT[r.verdict][1]}</span></h2>
       <p>${V.d}</p>
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
     </div>
@@ -1159,8 +1178,8 @@ function renderReport(){
         <div class="cell"><small>함께 이끄는 사람</small><b>${r.leaders}명</b></div>
         <div class="cell"><small>운영자 에너지</small><b style="${r.energy<30?'color:var(--red)':''}">${r.energy}%</b></div></div>
       <div class="cgrid c2-skill">${SKILLS.map(s=>`<div class="cell"><small>${s.name}</small><b>${k[s.k]}</b></div>`).join('')}</div>
-      <div class="mm2"><span class="h">공동체 의식 · McMillan &amp; Chavis(1986)의 네 요소 (은유적 추정)</span>
-        ${Object.entries(g).map(([n,x])=>`<div class="r"><span>${n}</span><span class="bar"><i style="width:${x}%"></i></span></div>`).join('')}</div>
+      <div class="mm3"><span class="h">공동체 의식${info('McMillan &amp; Chavis(1986)의 네 요소를 설계에서 은유적으로 추정한 값이에요. 진할수록 높아요.')}</span>
+        ${Object.entries(g).map(([n,x])=>`<div class="r" style="--o:${(.22+.78*x/100).toFixed(2)}"><i>${n[0]}</i><b>${n}</b><em>${Math.round(x)}</em></div>`).join('')}</div>
     </div>
     <div class="c2-r">
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
