@@ -702,6 +702,18 @@ body{background:var(--page)}
 .c3-l .q2{padding:22px 24px 26px;gap:12px}
 .c3-l .q2 b{font-size:clamp(24px,2.1vw,32px);font-weight:800;line-height:1.3;letter-spacing:-.02em;text-wrap:balance;word-break:keep-all}
 .c3-l .q2{background:var(--accent)}.c3-l .q2 small{color:#fff;opacity:.75}.c3-l .q2 b{color:#fff}
+
+/* ───────── v2.13 스킬 뜻을 이름 아래 한 줄로 바로 보여줌 ───────── */
+.sk-sub{font-size:13px;line-height:1.3;color:var(--soft);margin:-2px 0 2px 36px}
+.pcard .sk{padding:7px 0 5px;gap:3px}
+.sk-name label{font-size:21px}
+.sk-name .ini{width:24px;height:24px;font-size:12px}
+.ptitle{margin:22px 4px 16px}
+.lvl2 b{font-size:40px}
+.lvl2{padding:10px 12px;gap:4px}
+.goal-t{font-size:15px}
+.tool .panel .pcard{padding:16px 18px}.tool .panel{gap:8px}
+.ptitle{margin:14px 4px 14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1196,7 +1208,8 @@ function renderPanel(){
       <div class="ph sk-head"><h3>Skills</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
       ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <p class="sk-sub">${s.sub}</p>
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
