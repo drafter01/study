@@ -13,46 +13,96 @@
 html,body{height:100%;overflow:hidden}
 body{background:var(--night);color:#f1ece3;font-family:"Gothic A1",sans-serif;cursor:pointer}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-.line{position:fixed;left:50%;bottom:13vh;transform:translate(-50%,12px);width:min(1400px,92vw);text-align:center;font-weight:800;
-  font-size:clamp(28px,3.1vw,56px);line-height:1.3;letter-spacing:-.035em;word-break:keep-all;opacity:0;transition:opacity .9s ease,transform .9s ease}
+/* 옛 그림·사진: 흑백, 살짝 누런 톤, 천천히 다가가는 화면 */
+.film{position:fixed;inset:0;overflow:hidden;opacity:0;transition:opacity 1s ease}
+.film.on{opacity:1}
+.film img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) sepia(.32) contrast(1.12) brightness(.82);transform:scale(1.02);opacity:0;transition:opacity 1.4s ease}
+.film img.on{opacity:1;animation:kb 7s linear forwards}
+@keyframes kb{to{transform:scale(1.1)}}
+.film::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.65) 100%),linear-gradient(transparent 55%,rgba(0,0,0,.7))}
+#grain{z-index:2;pointer-events:none;mix-blend-mode:overlay;opacity:0;transition:opacity 1s}
+#grain.on{opacity:.28}
+.cap{position:fixed;left:28px;bottom:24px;z-index:4;font-size:12px;font-weight:700;color:rgba(241,236,227,.6);opacity:0;transition:opacity .8s;max-width:60vw}
+.cap.on{opacity:1}
+.line{position:fixed;z-index:4;left:50%;bottom:13vh;transform:translate(-50%,12px);width:min(1400px,92vw);text-align:center;font-weight:800;
+  font-size:clamp(28px,3.1vw,56px);line-height:1.3;letter-spacing:-.035em;word-break:keep-all;opacity:0;transition:opacity .9s ease,transform .9s ease;text-shadow:0 2px 24px rgba(0,0,0,.35)}
+.paper .line{text-shadow:none}
 .line.on{opacity:1;transform:translate(-50%,0)}
-.title{position:fixed;inset:0;display:grid;place-items:center;align-content:center;gap:28px;text-align:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+.title{position:fixed;z-index:4;inset:0;display:grid;place-items:center;align-content:center;gap:28px;text-align:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 .title.on{opacity:1;pointer-events:auto}
 .title small{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:15px;letter-spacing:.08em;color:#6f6e69}
 .title h1{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:clamp(44px,5.4vw,96px);line-height:.98;letter-spacing:-.05em;color:var(--ink);max-width:16ch}
 .title button{font:inherit;font-weight:800;font-size:18px;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:16px 30px;display:flex;gap:40px;cursor:pointer}
-.skip{position:fixed;right:28px;bottom:24px;font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.12);color:inherit;cursor:pointer;transition:background .6s,color .6s}
+.skip{position:fixed;z-index:5;right:28px;bottom:24px;font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.12);color:inherit;cursor:pointer;transition:background .6s,color .6s}
 .paper .skip{background:rgba(0,0,0,.06)}
-@media (prefers-reduced-motion:reduce){.line,.title{transition:none}}
+@media (prefers-reduced-motion:reduce){.line,.title,.film,.film img{transition:none;animation:none}}
 </style>
 <canvas id="cv" aria-hidden="true"></canvas>
+<div class="film" id="film" aria-hidden="true">
+  <img data-k="athens" src="__IMG:athens.jpg__" alt="">
+  <img data-k="guild" src="__IMG:guild.jpg__" alt="">
+  <img data-k="coffee" src="__IMG:coffee.jpg__" alt="">
+  <img data-k="club" src="__IMG:club.jpg__" alt="">
+</div>
+<canvas id="grain" aria-hidden="true"></canvas>
+<p class="cap" id="cap"></p>
 <p class="line" id="line" aria-live="polite"></p>
 <div class="title" id="title"><small>COMMUNITY DESIGN SIMULATOR</small><h1>How might we design a community filled with connection?</h1><button id="go"><span>모임 고르기</span><span>→</span></button></div>
 <button class="skip" id="skip">건너뛰기 →</button>
 <script>
-// 프롤로그: 사람은 오래전부터 무리 지어 살아왔다 → 지금의 작은 모임 → 직접 설계해 보기
+// 프롤로그: 동굴 벽화 → 불가의 무리 → 아테네 · 길드 · 커피하우스 · 클럽 (옛 판화와 사진) → 지금의 작은 모임 → 직접 설계해 보기
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lineEl=document.getElementById('line'),titleEl=document.getElementById('title');
+const film=document.getElementById('film'),capEl=document.getElementById('cap'),grain=document.getElementById('grain'),gx=grain.getContext('2d');
 const PAL={book:'#2f5bff',run:'#ff5a1f',plog:'#13a352'},WARM=[241,228,208],INK=[17,17,17];
+const CAP={athens:'Giovanni Volpato, 라파엘로 〈아테네 학당〉을 옮긴 판화, 1781년경 · The Met',
+  guild:'Léopold Flameng, 렘브란트 〈직물 길드의 이사들〉을 옮긴 판화, 1876 · The Met',
+  coffee:'Charles Grignion, 〈커피하우스에서 춤추는 사람들〉, 1793 · The Met',
+  club:'〈센트럴파크의 코칭 클럽 회원들〉, 1890–1900년경 · The Met'};
 const N=80,TAU=Math.PI*2;
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
-let W,H,S,d=1;
-function size(){d=window.devicePixelRatio||1;W=cv.width=innerWidth*d;H=cv.height=innerHeight*d;S=Math.min(W,H*1.25)/2;}
+let W,H,S,d=1,cave=null;
+function size(){d=window.devicePixelRatio||1;W=cv.width=innerWidth*d;H=cv.height=innerHeight*d;S=Math.min(W,H*1.25)/2;
+  grain.width=Math.ceil(innerWidth/2);grain.height=Math.ceil(innerHeight/2);cave=null;}
 addEventListener('resize',size);size();
 const rnd=(a,b)=>a+Math.random()*(b-a);
-const dots=Array.from({length:N},(_,i)=>{const a=rnd(0,TAU),r=rnd(1.1,1.6);return {x:Math.cos(a)*r*1.6,y:Math.sin(a)*r,vx:0,vy:0,tx:0,ty:0,a:0,ta:0,c:[...WARM],tc:[...WARM],j:rnd(0,TAU)};});
-let fires=[],fireA=0,fireTA=0,bgT=0,bgTT=0,rings=0,ringsT=0;
+
+// 동굴 벽화: 거친 바위 위에 붉은 흙빛으로 둘러서서 춤추는 사람들 (코드로 그린 그림)
+function drawCave(){
+  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  g.fillStyle='#3b2c20';g.fillRect(0,0,W,H);
+  for(let i=0;i<900;i++){const x=rnd(0,W),y=rnd(0,H),r=rnd(20,220)*d;g.fillStyle=`rgba(${rnd(80,140)|0},${rnd(60,100)|0},${rnd(40,70)|0},${rnd(.03,.09)})`;g.beginPath();g.ellipse(x,y,r,r*rnd(.4,1),rnd(0,TAU),0,TAU);g.fill();}
+  g.strokeStyle='rgba(20,14,10,.35)';for(let i=0;i<40;i++){g.lineWidth=rnd(.5,2.5)*d;g.beginPath();let x=rnd(0,W),y=rnd(0,H);g.moveTo(x,y);for(let k=0;k<6;k++){x+=rnd(-80,80)*d;y+=rnd(-30,60)*d;g.lineTo(x,y);}g.stroke();}
+  const ochre=['#b4502c','#9c4325','#c0623a'];const cx=W/2,cy=H*.42,R=Math.min(W,H)*.26;
+  const fig=(x,y,s,arm,leg,col,rot)=>{g.save();g.translate(x,y);g.rotate(rot);g.strokeStyle=col;g.fillStyle=col;g.lineCap='round';g.lineWidth=7*s;
+    g.beginPath();g.arc(0,-46*s,9*s,0,TAU);g.fill();
+    g.beginPath();g.moveTo(0,-36*s);g.quadraticCurveTo(4*s,-12*s,0,8*s);g.stroke();
+    g.beginPath();g.moveTo(-26*s,-34*s-arm*s);g.lineTo(0,-28*s);g.lineTo(26*s,-34*s-arm*s);g.stroke();
+    g.beginPath();g.moveTo(-14*s-leg*s,38*s);g.lineTo(0,8*s);g.lineTo(14*s+leg*s,38*s);g.stroke();g.restore();};
+  for(let i=0;i<13;i++){const a=-Math.PI*.95+i/12*Math.PI*.9,x=cx+Math.cos(a)*R*1.55,y=cy+Math.sin(a)*R*.55+R*.6;
+    fig(x,y,d*rnd(1.05,1.35),rnd(-6,22),rnd(-4,10),ochre[i%3],rnd(-.18,.18));}
+  for(let i=0;i<5;i++)fig(cx+rnd(-.9,.9)*R*1.8,cy-R*rnd(.55,.95),d*rnd(.7,.9),rnd(0,20),rnd(0,8),ochre[i%3],rnd(-.2,.2));
+  g.globalAlpha=.5;g.fillStyle='#b4502c';for(let i=0;i<3;i++){g.beginPath();g.moveTo(cx-20*d,cy+R*.6+i*12*d);g.lineTo(cx+20*d,cy+R*.6+i*12*d);g.lineTo(cx,cy+R*.6-30*d+i*12*d);g.fill();}
+  g.globalAlpha=1;return c;}
+
+const dots=Array.from({length:N},()=>{const a=rnd(0,TAU),r=rnd(1.1,1.6);return {x:Math.cos(a)*r*1.6,y:Math.sin(a)*r,vx:0,vy:0,tx:0,ty:0,a:0,ta:0,c:[...WARM],tc:[...WARM],j:rnd(0,TAU)};});
+let fires=[],fireA=0,fireTA=0,bgT=0,bgTT=0,rings=0,ringsT=0,caveA=0,caveTA=0;
 const ring=(n,r,cx=0,cy=0,off=0)=>Array.from({length:n},(_,i)=>[cx+Math.cos(off+i/n*TAU)*r,cy+Math.sin(off+i/n*TAU)*r]);
-function place(list,start=0,col,alpha=1){list.forEach(([x,y],k)=>{const p=dots[start+k];if(!p)return;p.tx=x;p.ty=y;p.ta=alpha;if(col)p.tc=hex(col).length?hex(col):col;});return start+list.length;}
-function hideFrom(n){for(let i=n;i<N;i++){dots[i].ta=0;}}
+function place(list,start=0,col,alpha=1){list.forEach(([x,y],k)=>{const p=dots[start+k];if(!p)return;p.tx=x;p.ty=y;p.ta=alpha;if(col)p.tc=hex(col);});return start+list.length;}
+function hideFrom(n){for(let i=n;i<N;i++)dots[i].ta=0;}
+function showFilm(k){film.classList.toggle('on',!!k);grain.classList.toggle('on',!!k||caveTA>0);
+  film.querySelectorAll('img').forEach(im=>{const on=im.dataset.k===k;if(on&&!im.classList.contains('on')){im.classList.remove('on');void im.offsetWidth;}im.classList.toggle('on',on);});
+  capEl.textContent=k?CAP[k]:'';capEl.classList.toggle('on',!!k);}
 // 장면: [문구, 시간(ms), 배치]
 const SCENES=[
-  ['',1600,()=>{dots[0].tx=0;dots[0].ty=-.05;dots[0].ta=1;hideFrom(1);}],
-  ['아주 오래전부터, 사람은 무리 지어 살아왔습니다.',4600,()=>{for(let i=0;i<14;i++){const a=rnd(0,TAU),r=rnd(.08,.42);dots[i].tx=Math.cos(a)*r*1.3;dots[i].ty=Math.sin(a)*r*.8-.08;dots[i].ta=1;dots[i].tc=[...WARM];}hideFrom(14);}],
-  ['불 곁에 둘러앉고, 함께 먹고, 서로의 이름을 불렀습니다.',4800,()=>{place(ring(14,.24,0,-.08,.2),0);dots.slice(0,14).forEach(p=>p.tc=[...WARM]);hideFrom(14);fires=[[0,-.08,.34]];fireTA=1;}],
-  ['무리는 마을이 되고, 두레가 되고, 계가 되었습니다.',4800,()=>{const C=[[0,-.1],[-.72,-.32],[.72,-.32],[-.48,.3],[.48,.3],[-1.2,.05],[1.2,.05]];let k=0;fires=[];
-    C.forEach(([x,y],i)=>{const n=i?10:12;k=place(ring(n,i?.11:.14,x,y,i),k);fires.push([x,y,i?.17:.22]);});dots.slice(0,k).forEach(p=>p.tc=[...WARM]);hideFrom(k);fireTA=.8;}],
-  ['그리고 지금, 우리는 책 앞에서, 한강에서, 동네 하천에서 다시 모입니다.',5200,()=>{fireTA=0;bgTT=1;let k=0;
+  ['',1400,()=>{dots[0].tx=0;dots[0].ty=-.05;dots[0].ta=1;hideFrom(1);}],
+  ['아주 오래전부터, 사람은 무리 지어 살아왔습니다.',5000,()=>{hideFrom(0);caveTA=1;grain.classList.add('on');}],
+  ['불 곁에 둘러앉고, 함께 먹고, 서로의 이름을 불렀습니다.',4800,()=>{caveTA=0;grain.classList.remove('on');place(ring(14,.24,0,-.08,.2),0);dots.slice(0,14).forEach(p=>{p.tc=[...WARM];});hideFrom(14);fires=[[0,-.08,.34]];fireTA=1;}],
+  ['고대 아테네의 사람들은 한자리에 모여 묻고, 토론했습니다.',5000,()=>{fireTA=0;hideFrom(0);showFilm('athens');}],
+  ['장인과 상인들은 길드로 모여 서로의 일과 삶을 지켰습니다.',5000,()=>{showFilm('guild');}],
+  ['18세기의 커피하우스는 누구나 앉아 이야기하는 자리였습니다.',5000,()=>{showFilm('coffee');}],
+  ['사람들은 좋아하는 일로 모이는 클럽을 만들었습니다.',5000,()=>{showFilm('club');}],
+  ['그리고 지금, 우리는 책 앞에서, 한강에서, 동네 하천에서 모입니다.',5600,()=>{showFilm(null);setTimeout(()=>{bgTT=1;},1100);let k=0;
     [['book',-.75],['run',0],['plog',.75]].forEach(([t,x])=>{const P=PAL[t];k=place(ring(5,.05,x,-.12,.3),k,P);k=place(ring(11,.13,x,-.12),k,P,.55);});hideFrom(k);}],
   ['어떤 모임은 오래 이어지고, 어떤 모임은 조용히 흩어집니다.',5200,()=>{let k=0;
     k=place(ring(6,.05,-.55,-.12,.3),k,PAL.run);k=place(ring(12,.12,-.55,-.12),k,PAL.run);k=place(ring(16,.19,-.55,-.12,.1),k,PAL.run,.7);
@@ -61,30 +111,43 @@ const SCENES=[
     k=place(ring(4,.05,0,-.14,.4),k,st[3]);k=place(ring(10,.15,0,-.14,.2),k,st[2]);k=place(ring(20,.29,0,-.14),k,st[1]);k=place(ring(30,.46,0,-.14,.1),k,st[0]);hideFrom(k);ringsT=1;}],
   ['',0,()=>{dots.forEach(p=>p.ta*=.18);ringsT=.6;}]
 ];
-let si=-1,t0=0,timer=null,done=false;
+const LAST=SCENES.length-1;
+let si=-1,timer=null,done=false;
 function go(i){si=i;const [txt,dur,fn]=SCENES[i];fn();lineEl.classList.remove('on');
   setTimeout(()=>{if(si!==i)return;lineEl.textContent=txt;if(txt)lineEl.classList.add('on');},txt?650:0);
   if(dur){clearTimeout(timer);timer=setTimeout(()=>{lineEl.classList.remove('on');setTimeout(()=>go(i+1),550);},dur);}else finish();}
 function finish(){done=true;clearTimeout(timer);lineEl.classList.remove('on');titleEl.classList.add('on');document.getElementById('skip').style.display='none';}
-function skip(){if(done)return;bgTT=1;fireTA=0;SCENES[6][2]();SCENES[7][2]();si=7;finish();}
+function skip(){if(done)return;showFilm(null);caveTA=0;grain.classList.remove('on');bgTT=1;fireTA=0;SCENES[LAST-1][2]();SCENES[LAST][2]();si=LAST;finish();}
 document.getElementById('skip').onclick=e=>{e.stopPropagation();skip();};
 document.body.addEventListener('click',e=>{if(!done&&e.target.id!=='go')skip();});
 document.getElementById('go').onclick=e=>{e.stopPropagation();location.reload();};
 
+let gt=0;
 function frame(now){
-  const ease=.045;bgT+=(bgTT-bgT)*.03;fireA+=(fireTA-fireA)*.04;rings+=(ringsT-rings)*.04;
+  bgT+=(bgTT-bgT)*.03;fireA+=(fireTA-fireA)*.04;rings+=(ringsT-rings)*.04;caveA+=(caveTA-caveA)*.04;
   const bg=mix(hex('#121210'),hex('#ecebe7'),bgT);document.body.style.background=`rgb(${bg.map(Math.round)})`;
   document.body.style.color=`rgb(${mix(hex('#f1ece3'),INK,bgT).map(Math.round)})`;document.body.classList.toggle('paper',bgT>.5);
   ctx.clearRect(0,0,W,H);const cx=W/2,cy=H/2;
+  // 동굴 벽: 횃불처럼 일렁이는 빛
+  if(caveA>.01){if(!cave)cave=drawCave();ctx.globalAlpha=caveA;ctx.drawImage(cave,0,0);
+    const fl=1+Math.sin(now/120)*.04+Math.sin(now/47)*.03,lx=cx+Math.sin(now/1300)*W*.06;
+    const g=ctx.createRadialGradient(lx,H*.5,0,lx,H*.5,Math.max(W,H)*.62*fl);g.addColorStop(0,'rgba(255,170,90,.10)');g.addColorStop(.55,'rgba(0,0,0,.25)');g.addColorStop(1,'rgba(0,0,0,.88)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
   if(rings>.01){ctx.lineWidth=1.5*d;ctx.strokeStyle=`rgba(17,17,17,${.08*rings})`;for(const r of [.54,.38,.22,.1]){ctx.beginPath();ctx.arc(cx,cy-.14*S,r*S,0,TAU);ctx.stroke();}}
   if(fireA>.01)for(const [fx,fy,fr] of fires){const fl=1+Math.sin(now/90+fx*7)*.05+Math.sin(now/37+fy*5)*.03;const g=ctx.createRadialGradient(cx+fx*S,cy+fy*S,0,cx+fx*S,cy+fy*S,fr*S*fl);
     g.addColorStop(0,`rgba(255,176,90,${.55*fireA})`);g.addColorStop(.35,`rgba(255,120,40,${.22*fireA})`);g.addColorStop(1,'rgba(255,100,30,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx+fx*S,cy+fy*S,fr*S*fl,0,TAU);ctx.fill();
     ctx.fillStyle=`rgba(255,210,150,${.9*fireA})`;ctx.beginPath();ctx.arc(cx+fx*S,cy+fy*S,4*d*fl,0,TAU);ctx.fill();}
   for(const p of dots){p.vx+=(p.tx-p.x)*.012;p.vy+=(p.ty-p.y)*.012;p.vx*=.86;p.vy*=.86;p.x+=p.vx;p.y+=p.vy;
-    p.a+=(p.ta-p.a)*ease;p.c=mix(p.c,p.tc,.05);if(p.a<.01)continue;
+    p.a+=(p.ta-p.a)*.045;p.c=mix(p.c,p.tc,.05);if(p.a<.01)continue;
     const wob=si<=1?.012:.003,x=cx+(p.x+Math.cos(now/900+p.j)*wob)*S,y=cy+(p.y+Math.sin(now/1100+p.j)*wob)*S;
     ctx.globalAlpha=p.a;ctx.fillStyle=`rgb(${p.c.map(Math.round)})`;ctx.beginPath();ctx.arc(x,y,8.5*d,0,TAU);ctx.fill();}
-  ctx.globalAlpha=1;requestAnimationFrame(frame);}
+  ctx.globalAlpha=1;
+  // 필름 입자와 긁힘 (두 프레임에 한 번)
+  if(grain.classList.contains('on')&&(gt++%2===0)){const w=grain.width,h=grain.height,img=gx.createImageData(w,h),a=img.data;
+    for(let i=0;i<a.length;i+=4){const v=Math.random()*255|0;a[i]=a[i+1]=a[i+2]=v;a[i+3]=255;}gx.putImageData(img,0,0);
+    if(Math.random()<.5){gx.fillStyle='rgba(255,255,255,.5)';gx.fillRect(Math.random()*w,0,1,h);}
+    if(Math.random()<.2){gx.fillStyle='rgba(0,0,0,.6)';gx.fillRect(Math.random()*w,0,1,h);}}
+  requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 setTimeout(()=>go(0),400);
 </script>

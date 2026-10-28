@@ -11,5 +11,8 @@ src = src_path.read_text(encoding="utf-8")
 for key, name in fonts.items():
     if key in src:
         src = src.replace(key, base64.b64encode((here / "fonts" / name).read_bytes()).decode())
+# 인트로 이미지: __IMG:파일이름__ → game/intro_img/파일이름 을 data URI로
+import re
+src = re.sub(r"__IMG:([\w.-]+)__", lambda m: "data:image/jpeg;base64," + base64.b64encode((here / "intro_img" / m.group(1)).read_bytes()).decode(), src)
 out_path.write_text(src, encoding="utf-8")
 print("built", out_path)
