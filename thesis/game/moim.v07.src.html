@@ -603,6 +603,38 @@ body{background:var(--page)}
 .mm3 .r i{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-weight:800;font-size:14px;display:grid;place-items:center;opacity:var(--o)}
 .mm3 .r b{font-weight:800;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
 .mm3 .r em{font-style:normal;font-family:var(--f-head);font-weight:500;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
+
+/* ───────── v2.2 결과 2열: 왼쪽 = 모임 그림과 다음 행동, 오른쪽 = 진단 ───────── */
+.case3{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:16px;align-items:start}
+@media (max-width:900px){.case3{grid-template-columns:minmax(0,1fr)}}
+.c3-l{display:grid;gap:14px}
+.c3-l .no{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-weight:700;font-size:13px;color:var(--soft)}
+.c3-l .back{background:var(--card)}
+.c3-l .photo2{max-width:none}
+.c3-l h1.bigt{font-size:clamp(36px,3.4vw,52px)}
+.c3-l .cell{background:var(--card);border-radius:var(--r-md);padding:12px 16px}
+.c3-l .cell p{font-size:13px;line-height:1.5;font-weight:700}
+.c3-r{background:var(--card);border-radius:var(--r-lg);padding:28px;display:grid;gap:16px}
+.diag{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:end;padding-bottom:6px}
+.diag .lbl{font-size:12px;font-weight:700;color:var(--soft)}
+.diag p{font-size:15px;line-height:1.55;margin-top:10px}
+.diag .big2{justify-items:end;text-align:right}
+.c3-r .big2 .hero-n{font-size:clamp(110px,11vw,190px)}
+.c3-r .two{font-size:clamp(40px,4vw,64px)}
+.goal-k{margin-left:auto;font-size:12px;font-weight:700;color:var(--soft);display:flex;align-items:center;gap:6px}
+.goal-k i{width:2px;height:12px;background:var(--ink);display:inline-block}
+.mm3 .r{grid-template-columns:40px minmax(0,1fr) 130px}
+.mm3 .r i{opacity:1;font-family:var(--f-head);font-size:15px}
+.mm3 .r .w{display:grid;gap:6px}
+.mm3 .r b,.mm3 .r em{color:var(--ink)}
+.mm3 .r em{text-align:right}
+.mm3 .r em small{font-size:.42em;color:var(--soft);margin-left:2px;letter-spacing:0}
+.mm3 .r.ok em,.mm3 .r.ok b{color:var(--accent)}
+.mm3 .r.ok i{background:var(--accent)}
+.track{position:relative;height:6px;border-radius:3px;background:#e6e5df;display:block}
+.track s{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--ink);text-decoration:none}
+.mm3 .r.ok .track s{background:var(--accent)}
+.track u{position:absolute;top:-4px;width:2px;height:14px;background:var(--ink);text-decoration:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1162,31 +1194,30 @@ function renderReport(){
   const better=real.length>1?Math.round(real.filter(p=>p.rooted<r.rooted).length/real.length*100):null;
   const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
-  app.innerHTML=`<section class="case2" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
-    <div class="c2-l">
+  const GOAL=60;
+  app.innerHTML=`<section class="case3" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
+    <div class="c3-l">
       <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${new Date(r.t).toLocaleDateString('ko-KR')}</span>
-      <h1 class="bigt">${T.name}<sup>No.${caseNo}</sup></h1>
-      <h2 class="two">${VSPLIT[r.verdict][0]}<span>${VSPLIT[r.verdict][1]}</span></h2>
-      <p>${V.d}</p>
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
+      <h1 class="bigt">${T.name}<sup>No.${caseNo}</sup></h1>
+      <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
+      ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
+      <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
+      <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>
     </div>
-    <div class="c2-m">
-      <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데 자리 잡거나 함께 이끄는 사람</span></div>
+    <div class="c3-r">
+      <div class="diag">
+        <div><small class="lbl">진단</small><h2 class="two">${VSPLIT[r.verdict][0]}<span>${VSPLIT[r.verdict][1]}</span></h2><p>${V.d}</p></div>
+        <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데</span></div>
+      </div>
       <div class="cgrid c2-cells">
         <div class="cell"><small>다시 온 비율</small><b>${r.rate}%</b></div>
         <div class="cell"><small>관계의 선</small><b>${r.links}개</b></div>
         <div class="cell"><small>함께 이끄는 사람</small><b>${r.leaders}명</b></div>
         <div class="cell"><small>운영자 에너지</small><b style="${r.energy<30?'color:var(--red)':''}">${r.energy}%</b></div></div>
       <div class="cgrid c2-skill">${SKILLS.map(s=>`<div class="cell"><small>${s.name}</small><b>${k[s.k]}</b></div>`).join('')}</div>
-      <div class="mm3"><span class="h">공동체 의식${info('McMillan &amp; Chavis(1986)의 네 요소를 설계에서 은유적으로 추정한 값이에요. 진할수록 높아요.')}</span>
-        ${Object.entries(g).map(([n,x])=>`<div class="r" style="--o:${(.22+.78*x/100).toFixed(2)}"><i>${n[0]}</i><b>${n}</b><em>${Math.round(x)}</em></div>`).join('')}</div>
-    </div>
-    <div class="c2-r">
-      <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
-      ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
-      <div class="cell"><small>기억할 것</small><p>앱은 마찰을 없앨수록 좋아지지만, 모임은 사람과 사람 사이에 선이 생겨야 남아요.</p></div>
-      <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
-      <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 이 화면은 잠시 후 처음으로 돌아가요.</p>
+      <div class="mm3"><span class="h">공동체 의식${info(`McMillan &amp; Chavis(1986)의 네 요소를 설계에서 은유적으로 추정한 값이에요. 만점은 100, 목표선 ${GOAL}은 이 게임에서 정한 기준이에요.`)}<span class="goal-k">만점 100 · 목표 <i></i>${GOAL}</span></span>
+        ${Object.entries(g).map(([n,x],i)=>{x=Math.round(x);const ok=x>=GOAL;return `<div class="r ${ok?'ok':''}"><i>${i+1}</i><div class="w"><b>${n}</b><span class="track"><s style="width:${x}%"></s><u style="left:${GOAL}%"></u></span></div><em>${x}<small>/100</small></em></div>`;}).join('')}</div>
     </div></section>`;
   document.getElementById('again').onclick=()=>newGame(st.type);
   document.getElementById('home').onclick=()=>{st=null;screen='intro';render();};
