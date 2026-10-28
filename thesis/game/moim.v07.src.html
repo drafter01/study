@@ -736,6 +736,15 @@ body{background:var(--page)}
 .hkey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;font-weight:700;color:var(--soft)}
 .hkey span{display:flex;align-items:center;gap:6px}.hkey em{width:12px;height:12px;border-radius:50%;display:inline-block}
 @keyframes hfade{from{opacity:0}}@keyframes hup{from{opacity:0;transform:translateY(16px)}}
+
+/* ───────── v2.15 레벨업 화면도 한 화면에: 진단 박스를 한 줄로, 스킬 설명은 잠시 숨김 ───────── */
+.lvl2{grid-template-columns:auto 1fr;align-items:center;column-gap:14px;row-gap:2px}
+.lvl2 small{grid-column:1/-1}
+.lvl2 .row2{gap:6px}
+.lvl2 b{font-size:36px;line-height:1}
+.lvl2 .row2 span{padding-bottom:3px}
+.lvl2 p{font-size:13.5px;line-height:1.4}
+.panel.is-lv .sk-sub{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1244,6 +1253,7 @@ function renderPanel(){
   document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
+  P.classList.toggle('is-lv',lv);
   P.innerHTML=`
     <section class="pcard">
       <div class="cat">${T.place} · ${T.when} ${T.time}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</div>
@@ -1260,10 +1270,16 @@ function renderPanel(){
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
 `;
-  P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
-    const k=inp.dataset.k, old=st.skills[k];let v=+inp.value;
-    v=clamp(v,st.lock[k],old+st.points);st.points-=v-old;st.skills[k]=v;renderPanel();resetIdle();
-    const again=document.getElementById('r-'+k);if(again)again.focus();});
+  // 끄는 동안에는 숫자만 바꾸고(패널을 다시 그리면 잡고 있던 막대가 사라져요), 손을 떼면 패널을 다시 그려요
+  P.querySelectorAll('input[type=range]').forEach(inp=>{
+    inp.oninput=()=>{
+      const k=inp.dataset.k, old=st.skills[k];let v=+inp.value;
+      v=clamp(v,st.lock[k],old+st.points);st.points-=v-old;st.skills[k]=v;inp.value=v;resetIdle();
+      inp.style.setProperty('--fill',v/MAXLV*100+'%');
+      const lk=st.lock[k],sv=inp.closest('.sk').querySelector('.sk-val');
+      if(sv)sv.innerHTML=`${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}`;
+      const pt=P.querySelector('.pts3');if(pt){pt.innerHTML=`남은 포인트 <b>${st.points}</b>`;pt.classList.toggle('zero',!st.points);}};
+    inp.onchange=()=>{const k=inp.dataset.k;renderPanel();const again=document.getElementById('r-'+k);if(again)again.focus();};});
   const go=document.getElementById('go');if(go)go.onclick=run;
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
