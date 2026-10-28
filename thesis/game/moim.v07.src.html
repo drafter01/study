@@ -635,6 +635,14 @@ body{background:var(--page)}
 .track s{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--ink);text-decoration:none}
 .mm3 .r.ok .track s{background:var(--accent)}
 .track u{position:absolute;top:-4px;width:2px;height:14px;background:var(--ink);text-decoration:none}
+
+/* ───────── v2.3 결과 다듬기 ───────── */
+.c3-l .photo2{position:relative;aspect-ratio:1}
+.c3-l .photo2 img{width:100%;height:100%;object-fit:contain}
+.c3-l .photo2 .back{position:absolute;left:16px;top:16px;z-index:1;background:var(--cell)}
+.c3-l h1.bigt sup{white-space:nowrap}
+.one{font-weight:800;font-size:clamp(34px,3.2vw,52px);line-height:1.12;letter-spacing:-.03em;margin-top:6px}
+.c3-r .mm3{margin-top:30px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1131,7 +1139,10 @@ function levelUp(){
 }
 function finish(){
   if(!st)return;
-  try{st.photo=canvas.toDataURL('image/png');}catch(e){st.photo='';}
+  try{const g=st.geo||{cx:canvas.width/2,cy:canvas.height/2,S:Math.min(canvas.width,canvas.height)/2};
+    const side=Math.round(Math.min(canvas.width,2*Math.min(g.cy,canvas.height-g.cy),2*Math.min(g.cx,canvas.width-g.cx))),c=document.createElement('canvas');c.width=c.height=side;
+    const sx=clamp(g.cx-side/2,0,canvas.width-side),sy=clamp(g.cy-side/2,0,canvas.height-side);
+    c.getContext('2d').drawImage(canvas,sx,sy,side,side,0,0,side,side);st.photo=c.toDataURL('image/png');}catch(e){st.photo='';}
   st.result=summary();st.phase='report';
   lastRec=st.result;savePlay(st.result);
   render();
@@ -1146,6 +1157,7 @@ function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
   sizeCanvas();
   const d=window.devicePixelRatio||1,W=canvas.width,H=canvas.height,ob=document.getElementById('ovbar'),top=ob?(ob.offsetTop+ob.offsetHeight)*d:0,AH=H-top,S=Math.min(W,AH)/2*.86,cx=W/2,cy=top+AH/2;
+  st.geo={cx,cy,S};
   ctx.clearRect(0,0,W,H);
   // 구역: 검은 실선 동심원
   const B=[.86,.665,.48,.305,.09];
@@ -1197,9 +1209,8 @@ function renderReport(){
   const GOAL=60;
   app.innerHTML=`<section class="case3" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
     <div class="c3-l">
-      <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${new Date(r.t).toLocaleDateString('ko-KR')}</span>
-      <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
-      <h1 class="bigt">${T.name}<sup>No.${caseNo}</sup></h1>
+      <div class="photo2"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
+      <h1 class="bigt">${T.name}<sup>No.${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</sup></h1>
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
       ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
       <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
@@ -1207,7 +1218,7 @@ function renderReport(){
     </div>
     <div class="c3-r">
       <div class="diag">
-        <div><small class="lbl">진단</small><h2 class="two">${VSPLIT[r.verdict][0]}<span>${VSPLIT[r.verdict][1]}</span></h2><p>${V.d}</p></div>
+        <div><small class="lbl">진단</small><h2 class="one">${V.t}</h2><p>${V.d}</p></div>
         <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데</span></div>
       </div>
       <div class="cgrid c2-cells">
