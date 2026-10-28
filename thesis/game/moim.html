@@ -745,6 +745,21 @@ body{background:var(--page)}
 .lvl2 .row2 span{padding-bottom:3px}
 .lvl2 p{font-size:13.5px;line-height:1.4}
 .panel.is-lv .sk-sub{display:none}
+
+/* ───────── v2.16 쉬운 스킬 이름, 포인트를 다 나눠야 시작, 결과는 다음 질문이 주인공 ───────── */
+.sk-name label{font-family:var(--f-body);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.sk-name label small{font-family:var(--f-head);font-weight:600;font-size:12px;letter-spacing:.02em;color:var(--soft)}
+.sk-sub{margin-left:0}
+.sk-head h3{display:flex;align-items:center;gap:6px}
+.panel.need-pts .pcard:has(.sk-head){box-shadow:0 0 0 3px var(--accent);animation:needp 1.6s ease-in-out infinite}
+@keyframes needp{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 35%,transparent)}}
+#go:disabled{background:var(--cell);color:var(--soft);cursor:not-allowed}
+.c3-r .big2 .hero-n{font-size:clamp(56px,4.6vw,76px);color:var(--ink)}
+.big2 .hero-n em{font-size:.36em}
+.c3-l .q2{padding:24px 28px 28px;gap:12px}
+.c3-l .q2 small{font-size:13px}
+.c3-l .q2 b{font-size:clamp(28px,2.3vw,36px);line-height:1.28}
+@media (prefers-reduced-motion:reduce){.panel.need-pts .pcard:has(.sk-head){animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -757,10 +772,10 @@ const COL={red:'#e8372b',blue:'#2f6fe0',yellow:'#f6b72c',green:'#2a9a46',violet:
 // roles 이끄는 사람 보정, linkM 관계 생기기 배수, drainM 운영자 에너지 소모 배수
 const TYPES={
   book:{name:'동네 독서모임',en:'Book Club',code:'BOOK',place:'동네 책방',when:'격주 목요일',time:'20:00',c:COL.blue,st:[2,4,2],
-    plus:'과제와 회비라는 문턱이 함께할 사람을 걸러 줘서, 온 사람이 오래 머물러요',minus:'문을 너무 활짝 열면(열기 4 이상) 그 효과가 사라져요',ev:'F003·F004·F034',
+    plus:'과제와 회비라는 문턱이 함께할 사람을 걸러 줘서, 온 사람이 오래 머물러요',minus:'문을 너무 활짝 열면(문 열기 4 이상) 그 효과가 사라져요',ev:'F003·F004·F034',
     inM:.7,ret0:k=>k.open>=4?0:.12,settle:.03,roles:0,linkM:1,clique:k=>0,drainM:.9},
   run:{name:'저녁 러닝크루',en:'Running Crew',code:'RUN',place:'한강 공원',when:'매주 화요일',time:'20:30',c:COL.red,st:[5,2,3],
-    plus:'친구가 친구를 데려오고, 함께 달리며 금방 가까워져요',minus:'맞이가 약하면(맞이 1 이하) 빠른 사람끼리만 뭉쳐 새 사람이 떠나요',ev:'F112·F015·F074',
+    plus:'친구가 친구를 데려오고, 함께 달리며 금방 가까워져요',minus:'반겨 주기가 약하면(1 이하) 빠른 사람끼리만 뭉쳐 새 사람이 떠나요',ev:'F112·F015·F074',
     inM:1.35,ret0:k=>0,settle:0,roles:0,linkM:1.3,clique:k=>k.welcome<=1?.1:0,drainM:1},
   plog:{name:'플로깅 봉사 모임',en:'Plogging',code:'PLOG',place:'동네 하천',when:'격주 토요일',time:'10:00',c:COL.green,st:[3,3,5],
     plus:'함께할 이유가 분명해서 자리 잡고 역할을 맡는 사람이 많아요',minus:'한 번 오고 마는 사람이 많고, 운영자가 빨리 지쳐요',ev:'F089·F047·F118',
@@ -768,11 +783,11 @@ const TYPES={
 };
 const TKEYS=Object.keys(TYPES);
 const SKILLS=[
-  {k:'open',en:'Open',name:'열기',c:COL.yellow,sub:'새 사람이 쉽게 들어와요',down:'너무 높으면 한 명씩 챙기기 어려워요'},
-  {k:'welcome',en:'Welcome',name:'맞이',c:COL.red,sub:'처음 온 사람이 누군가와 이어져요',down:''},
-  {k:'rhythm',en:'Rhythm',name:'리듬',c:COL.blue,sub:'다시 올 이유와 때가 생겨요',down:'맞이 없이 높으면 부담이 돼요'},
-  {k:'conn',en:'Connect',name:'연결',c:COL.green,sub:'구성원끼리 관계가 쌓여요',down:'문이 닫히면 배타적이 돼요'},
-  {k:'roles',en:'Share',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
+  {k:'open',en:'Open',name:'문 열기',c:COL.yellow,sub:'새 사람이 쉽게 찾아와요',down:'너무 높으면 한 명씩 챙기기 어려워요'},
+  {k:'welcome',en:'Welcome',name:'반겨 주기',c:COL.red,sub:'처음 온 사람을 누군가와 이어 줘요',down:''},
+  {k:'rhythm',en:'Rhythm',name:'정기 모임',c:COL.blue,sub:'다시 올 날과 이유가 생겨요',down:'반겨 주기 없이 높으면 부담이 돼요'},
+  {k:'conn',en:'Connect',name:'서로 알기',c:COL.green,sub:'구성원끼리 친해져요',down:'문이 닫히면 배타적이 돼요'},
+  {k:'roles',en:'Share',name:'역할 나누기',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
 ];
 const VERDICTS={
   self:{t:'스스로 굴러가는 모임',c:COL.green,d:'운영자가 없어도 누군가 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'새로 이끄는 사람은 앞으로 어디서 나올까요?'},
@@ -814,8 +829,8 @@ function helpPop(){
     <small>HOW TO PLAY</small><h2 id="help-h">이렇게 해 보세요</h2>
     <ol>
       <li><i>1</i><div><b>Goal</b><p>여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많을수록 좋아요.</p></div></li>
-      <li><i>2</i><div><b>Skills</b><p>포인트 ${START_PTS}개를 다섯 가지 스킬에 나눠 주세요. 막대를 옆으로 밀면 돼요.</p></div></li>
-      <li><i>3</i><div><b>Start</b><p>오른쪽에서 여덟 번의 모임이 열려요. 4번째 모임이 끝나면 포인트를 더 받아 다시 나눌 수 있어요.</p>
+      <li><i>2</i><div><b>Skills</b><p>먼저 포인트 ${START_PTS}개를 다섯 가지 스킬에 나눠 주세요. 막대를 옆으로 밀면 돼요. 포인트는 운영자의 시간과 힘이라, 모든 걸 다 높일 수는 없어요.</p></div></li>
+      <li><i>3</i><div><b>Start</b><p>오른쪽에서 여덟 번의 모임이 열려요. 4번째 모임이 끝나면 운영하며 배운 만큼 포인트를 더 받아, 부족했던 곳을 채울 수 있어요.</p>
         <div class="hkey"><span><em style="background:${STAGE_C[0]}"></em>처음 온 사람</span><span><em style="background:${STAGE_C[1]}"></em>다시 온 사람</span><span><em style="background:${P.dark}"></em>자리 잡은 사람</span><span><em style="background:${P.ink}"></em>함께 이끄는 사람</span></div></div></li>
     </ol>
     <button class="btn" id="help-ok"><span>알겠어요</span><span>→</span></button></div>`;
@@ -861,7 +876,8 @@ function layout(snap){
       p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
   }
 }
-function tag(){}
+// 사람에게 무슨 일이 생겼는지 말풍선으로 (한꺼번에 너무 많이 뜨지 않게)
+function tag(p,text,bye){if(!st||st.tags.length>=5||st.tags.some(t=>t.p===p)||Math.random()<.35)return;st.tags.push({p,text,bye,life:1});}
 
 // 한 번의 모임
 function step(){
@@ -873,16 +889,16 @@ function step(){
     if(p.stage===0){
       st.newSum++;
       const pb=(.1+T.ret0(k)+(d>0?.45:0)+.03*k.rhythm-(k.rhythm>=4&&k.welcome<=1?.08:0))*eff;
-      if(Math.random()<pb){p.stage=1;back++;st.retSum++;st.xp+=1;tag(p,'다시 옴',COL.blue);}
-      else{p.leaving=true;gone++;st.stats.left++;if(d===0)st.stats.lonelyLeft++;tag(p,d===0?'못 이어져 떠남':'떠남',COL.red);}
+      if(Math.random()<pb){p.stage=1;back++;st.retSum++;st.xp+=1;tag(p,'또 왔어요');}
+      else{p.leaving=true;gone++;st.stats.left++;if(d===0)st.stats.lonelyLeft++;tag(p,d===0?'아는 사람이 없네…':'이제 안 올래요',true);}
     }else if(p.stage===1){
-      if(Math.random()<(.08+T.settle+.06*k.rhythm+.05*Math.min(d,3))*eff){p.stage=2;settle++;st.xp+=2;tag(p,'자리 잡음',COL.green);}
-      else if(Math.random()<clamp(.3+T.clique(k)-.1*Math.min(d,2)-.03*k.rhythm,.04,.6)){p.leaving=true;gone++;st.stats.left++;tag(p,'떠남',COL.red);}
+      if(Math.random()<(.08+T.settle+.06*k.rhythm+.05*Math.min(d,3))*eff){p.stage=2;settle++;st.xp+=2;tag(p,'여기 편해요');}
+      else if(Math.random()<clamp(.3+T.clique(k)-.1*Math.min(d,2)-.03*k.rhythm,.04,.6)){p.leaving=true;gone++;st.stats.left++;tag(p,'다른 데 갈래요',true);}
     }else if(p.stage===2){
-      if(Math.random()<(.02+T.roles+.08*k.roles)*eff){p.stage=3;lead++;st.xp+=3;tag(p,'함께 이끎',COL.red);}
-      else if(Math.random()<.03+(k.open>=4?.05:0)+(st.E<15?.1:0)){p.leaving=true;gone++;st.stats.left++;}
+      if(Math.random()<(.02+T.roles+.08*k.roles)*eff){p.stage=3;lead++;st.xp+=3;tag(p,'제가 도울게요');}
+      else if(Math.random()<.03+(k.open>=4?.05:0)+(st.E<15?.1:0)){p.leaving=true;gone++;st.stats.left++;tag(p,'요즘 바빠서요',true);}
     }else if(p.stage===3){
-      if(Math.random()<(st.E<=0?.18:.02)){p.leaving=true;gone++;}
+      if(Math.random()<(st.E<=0?.18:.02)){p.leaving=true;gone++;tag(p,'너무 지쳤어요',true);}
     }
   }
   // 구성원끼리 관계가 생겨요
@@ -895,7 +911,7 @@ function step(){
   const cap=2+k.welcome*2;
   const closed=k.conn>=4&&k.open<=1;
   const pl=clamp((.1+.14*k.welcome+.03*k.conn-(closed?.15:0))*T.linkM*Math.min(1,cap/Math.max(1,n))*eff,0,.9);
-  for(let i=0;i<n;i++){const p=addPerson(0);if(mem.length&&Math.random()<pl)link(p,pick(mem));}
+  for(let i=0;i<n;i++){const p=addPerson(0);if(mem.length&&Math.random()<pl)link(p,pick(mem));if(i<2)tag(p,'처음 왔어요');}
   // 운영자 에너지: 스킬이 많을수록 바쁘고, 함께 이끄는 사람이 나눠 들어요
   const leaders=alive().filter(p=>p.stage===3).length;
   st.E=clamp(st.E-Math.max(.5,(3+sum()*.55)*T.drainM-leaders*2.5),0,100);
@@ -1253,7 +1269,7 @@ function renderPanel(){
   document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
-  P.classList.toggle('is-lv',lv);
+  P.classList.toggle('is-lv',lv);P.classList.toggle('need-pts',editable&&st.points>0);
   P.innerHTML=`
     <section class="pcard">
       <div class="cat">${T.place} · ${T.when} ${T.time}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</div>
@@ -1261,13 +1277,13 @@ function renderPanel(){
     </section>
     <section class="pcard"><h3 class="eh">Goal</h3><p class="goal-t">여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많은 모임</p></section>
     <section class="pcard">
-      <div class="ph sk-head"><h3>Skills</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
-      ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
+      <div class="ph sk-head"><h3>Skills${info('포인트는 운영자가 쓸 수 있는 시간과 힘이에요. 한정되어 있어서 모든 걸 다 높일 수는 없어요. 4번째 모임이 끝나면 운영하며 배운 만큼 포인트를 더 받아요.')}</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
+      ${lv?`<div class="lvl2"><small>LEVEL UP · 4번 운영하며 배운 만큼 포인트가 생겼어요</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <div class="sk-row"><span class="sk-name"><label for="r-${s.k}">${s.name}<small>${s.en}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <p class="sk-sub">${s.sub}</p>
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
-      ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
+      ${editable?(st.points?`<button class="btn" id="go" disabled><span>포인트 ${st.points}개를 더 나눠 주세요</span><span>▶</span></button>`:`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`):`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
 `;
   // 끄는 동안에는 숫자만 바꾸고(패널을 다시 그리면 잡고 있던 막대가 사라져요), 손을 떼면 패널을 다시 그려요
@@ -1278,7 +1294,9 @@ function renderPanel(){
       inp.style.setProperty('--fill',v/MAXLV*100+'%');
       const lk=st.lock[k],sv=inp.closest('.sk').querySelector('.sk-val');
       if(sv)sv.innerHTML=`${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}`;
-      const pt=P.querySelector('.pts3');if(pt){pt.innerHTML=`남은 포인트 <b>${st.points}</b>`;pt.classList.toggle('zero',!st.points);}};
+      const pt=P.querySelector('.pts3');if(pt){pt.innerHTML=`남은 포인트 <b>${st.points}</b>`;pt.classList.toggle('zero',!st.points);}
+      const go=document.getElementById('go');if(go){go.disabled=!!st.points;go.firstElementChild.textContent=st.points?`포인트 ${st.points}개를 더 나눠 주세요`:(lv?'남은 모임 4번 진행':'Start');}
+      P.classList.toggle('need-pts',st.points>0);};
     inp.onchange=()=>{const k=inp.dataset.k;renderPanel();const again=document.getElementById('r-'+k);if(again)again.focus();};});
   const go=document.getElementById('go');if(go)go.onclick=run;
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
@@ -1327,8 +1345,9 @@ function loop(){
   const d=window.devicePixelRatio||1,W=canvas.width,H=canvas.height,ob=document.getElementById('ovbar'),top=ob?(ob.offsetTop+ob.offsetHeight)*d:0,AH=H-top,S=Math.min(W,AH)/2*.86,cx=W/2,cy=top+AH/2;
   st.geo={cx,cy,S};
   ctx.clearRect(0,0,W,H);
-  // 구역: 검은 실선 동심원
-  const B=[.86,.665,.48,.305,.09];
+  // 구역: 아주 연한 동심원 (바깥부터 처음 온 사람 → 다시 온 사람 → 자리 잡은 사람 → 함께 이끄는 사람)
+  const B=[.92,.665,.305,.09];
+  ctx.lineWidth=1.5*d;ctx.strokeStyle='rgba(17,17,17,.08)';for(const b of B){ctx.beginPath();ctx.arc(cx,cy,b*S,0,Math.PI*2);ctx.stroke();}
   // 움직임
   {const P=st.people,rr=(9*d)/S*2.25,byIdM=new Map(P.map(q=>[q.id,q]));
     for(const p of P){p.vx=(p.vx||0)+(p.tx-p.x)*(p.leaving?.004:.0025);p.vy=(p.vy||0)+(p.ty-p.y)*(p.leaving?.004:.0025);
@@ -1358,10 +1377,14 @@ function loop(){
     figure(cx+p.x*S,cy+p.y*S,r,p.stage<2?STAGE_C[p.stage]:(p.stage===2?TPAL[st.type].dark:TPAL[st.type].ink),false,p.leaving?p.alpha*.6:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
-  ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';
-  for(const t of st.tags){t.life-=.008;const p=t.p;const a=Math.max(0,Math.min(1,t.life*1.6));const x=cx+p.x*S,y=cy+p.y*S-30*d-(1-t.life)*10*d;
-    const w=ctx.measureText(t.text).width+10*d;ctx.globalAlpha=a;ctx.fillStyle=t.color;ctx.fillRect(x-w/2,y-12*d,w,17*d);
-    ctx.fillStyle=t.color===COL.yellow?COL.ink:COL.paper;ctx.fillText(t.text,x,y+1*d);}
+  ctx.font=`700 ${14*d}px ${getComputedStyle(document.body).fontFamily}`;ctx.textAlign='center';ctx.textBaseline='middle';
+  for(const t of st.tags){t.life-=.0075;const p=t.p;const a=Math.max(0,Math.min(1,t.life*2.2,(1-t.life)*8));const x=cx+p.x*S,y=cy+p.y*S-34*d-(1-t.life)*8*d;
+    const w=ctx.measureText(t.text).width+22*d,h=30*d;ctx.globalAlpha=a;
+    ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=10*d;ctx.shadowOffsetY=2*d;ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,h/2);ctx.fill();
+    ctx.beginPath();ctx.moveTo(x-6*d,y+h/2-2*d);ctx.lineTo(x,y+h/2+7*d);ctx.lineTo(x+6*d,y+h/2-2*d);ctx.fill();
+    ctx.shadowColor='transparent';ctx.fillStyle=t.bye?'#8a8984':COL.ink;ctx.fillText(t.text,x,y+1*d);}
+  ctx.textBaseline='alphabetic';
   st.tags=st.tags.filter(t=>t.life>0);ctx.globalAlpha=1;
   raf=requestAnimationFrame(loop);
 }
