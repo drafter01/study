@@ -525,6 +525,14 @@ body{background:var(--page)}
 .pcard .cat{gap:10px}
 .c2-l .no{display:flex;align-items:center;gap:10px}
 .c2-l .back{background:var(--card)}
+
+/* ───────── v1.4 첫 화면: 모임마다 겹친 원 (단단하면 작고 진하게, 느슨하면 크고 옅게) ───────── */
+.map svg.comms{position:absolute;inset:0;width:100%;height:100%;display:block}
+.maplab2{position:absolute;left:14px;bottom:12px;font-size:11.5px;font-weight:700;color:var(--soft);background:rgba(255,255,255,.85);border-radius:999px;padding:3px 10px}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.legend div{background:var(--cell);border-radius:var(--r-sm);padding:8px;display:grid;justify-items:center;gap:4px;text-align:center}
+.legend svg{width:64px;height:64px;overflow:visible}
+.legend span{font-size:12px;font-weight:700;line-height:1.3}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -820,6 +828,26 @@ function drawMap(rows,centers){
     g.fillStyle=cl;g.globalAlpha=Math.min(1,.5+.15*v);g.beginPath();g.arc(i*cell+cell/2,j*cell+cell/2,rad,0,Math.PI*2);g.fill();}
   g.globalAlpha=1;
 }
+// 모임 하나 = 겹친 원. 바깥 옅은 원 = 다녀간 사람(클수록 많이 왔다 감), 가운데 진한 원 = 남은 관계,
+// 진하기 = 관계의 촘촘함, 가장 안쪽 점 = 함께 이끄는 사람. 단단하고 작은 모임은 진하고 작게, 느슨한 모임은 크고 옅게 퍼져요
+function commGlyph(r,x,y,u){
+  const tot=Math.max(3,r.total||3),ro=r.rooted||0,le=r.leaders||0,V=r.verdict;
+  const coh=clamp((r.links||0)/Math.max(1,ro)/1.4,0,1);
+  let halo=u*(.16+tot*.024),core=u*Math.min(.36,.07+ro*.026),mid=core*(1.25+.6*(1-coh));
+  let hc='#a9c6f7',ho=.07+.09*(1-coh),cc='#2f6fe0',co=.25+.72*coh,mc='#7fa6f2',mo=.12+.3*coh,out='';
+  if(V==='closed'){halo=core*1.25;cc='#173a86';co=.95;mc='#2f55b0';mo=.7;}
+  if(V==='crowd'){core=Math.max(u*.1,core*.7);mid=core*1.4;ho=.16;}
+  if(V==='root'){halo*=.6;co=.3;mo=.12;}
+  if(V==='burn'){hc='#c9c8c2';mc='#c9c8c2';}
+  out+=`<circle cx="${x}" cy="${y}" r="${halo.toFixed(1)}" fill="${hc}" fill-opacity="${ho.toFixed(2)}"/>`;
+  out+=`<circle cx="${x}" cy="${y}" r="${mid.toFixed(1)}" fill="${mc}" fill-opacity="${mo.toFixed(2)}"/>`;
+  if(V==='burn')out+=`<circle cx="${x}" cy="${y}" r="${core.toFixed(1)}" fill="none" stroke="#2f6fe0" stroke-opacity=".6" stroke-width="${(u*.05).toFixed(1)}" stroke-dasharray="${(u*.09).toFixed(1)} ${(u*.07).toFixed(1)}"/>`;
+  else out+=`<circle cx="${x}" cy="${y}" r="${core.toFixed(1)}" fill="${cc}" fill-opacity="${co.toFixed(2)}"/>`;
+  if(le)out+=`<circle cx="${x}" cy="${y}" r="${(u*(.04+Math.sqrt(le)*.035)).toFixed(1)}" fill="#0d2766"/>`;
+  return out;
+}
+const LEGEND={self:{total:30,rooted:10,leaders:3,links:14},quiet:{total:16,rooted:6,leaders:1,links:6},crowd:{total:42,rooted:3,leaders:0,links:2},
+  closed:{total:10,rooted:6,leaders:1,links:14},burn:{total:22,rooted:4,leaders:0,links:4},root:{total:8,rooted:1,leaders:0,links:0}};
 function renderIntro(){
   screen='intro';
   const real=plays.filter(p=>p&&p.skills&&VERDICTS[p.verdict]&&TYPES[p.type]);
@@ -827,45 +855,25 @@ function renderIntro(){
   const need=Math.max(0,48-real.length);
   const rows=real.slice(0,48).concat(examples.slice(0,need));
   const sumL=real.reduce((a,r)=>a+(r.links||0),0), sumT=real.reduce((a,r)=>a+(r.total||0),0);
-  const counts={};VORDER.forEach(k=>counts[k]=0);rows.forEach(r=>counts[r.verdict]++);
-  const centers=mapCenters(rows.length);
-  // 연결선으로 보여 줄 모임 세 개: 방금 만든 모임, 최근 모임, 결과가 서로 다른 모임 순
-  const feat=[];const mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));if(mine>=0)feat.push(mine);
-  for(let i=0;i<rows.length&&feat.length<3;i++){if(!feat.includes(i)&&!feat.some(f=>rows[f].verdict===rows[i].verdict))feat.push(i);}
-  const slots=[{x:6,y:7},{x:94,y:40},{x:9,y:72}];
-  // 연결선이 잘 보이도록 고른 모임을 카드에서 떨어진 자리로 옮겨요
-  [{x:.45,y:.3},{x:.6,y:.68},{x:.42,y:.62}].forEach((tg,si)=>{const ri=feat[si];if(ri===undefined)return;
-    let best=-1,bd=9;centers.forEach((c,j)=>{if(feat.includes(j)&&j!==ri)return;const dd=Math.hypot(c.x-tg.x,c.y-tg.y);if(dd<bd){bd=dd;best=j;}});
-    if(best>=0){const tmp=centers[ri];centers[ri]=centers[best];centers[best]=tmp;}});
-  const cards=feat.map((ri,si)=>{const r=rows[ri],V=VERDICTS[r.verdict],T=TYPES[r.type],s=slots[si];
-    return `<div class="ucard u${si}" style="${s.x>50?`right:${100-s.x}%;transform:translate(6px,-6px)`:`left:${s.x}%`};top:${s.y}%"><i class="av" style="background:${T.c}"></i>
-      <div><b>${T.code} · ${String(r.t%10000).padStart(4,'0')}${r.example?' (예시)':''}</b><span>${V.t}</span></div><span class="ck" style="color:${V.c}">●</span>
-      ${si===0?`<div class="pg"><span>다시 온 비율</span><em><s style="width:${r.rate}%"></s></em><span>${r.rate}%</span></div>`:''}</div>`;}).join('');
-  const wires=feat.map((ri,si)=>{const c=centers[ri],s=slots[si],x=c.x*100,y=c.y*100,mx=x,my=s.y;
-    return `<path class="u${si}" d="M${s.x} ${s.y} Q${mx} ${my} ${x} ${y}" fill="none" stroke="#6b6b67" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
-      <rect x="${x-.7}" y="${y-.9}" width="1.4" height="1.8" fill="#6b6b67"/>`;}).join('');
+  const COLS=6,ROWS=Math.ceil(rows.length/COLS),u=100,W=COLS*u,H=ROWS*u,J=rng(11);
+  const mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
+  const g=rows.map((r,i)=>{const x=(i%COLS+.5)*u+(J()-.5)*u*.3,y=(Math.floor(i/COLS)+.5)*u+(J()-.5)*u*.3;
+    return `<g opacity="${r.example?.75:1}"><title>${TYPES[r.type].name} · ${VERDICTS[r.verdict].t}${r.example?' (예시)':''}</title>${commGlyph(r,x.toFixed(1),y.toFixed(1),u)}${i===mine?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`;}).join('');
   app.innerHTML=`<div class="intro">
-    <div class="map"><canvas id="mapcv" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개를 점 무리로 그린 지도"></canvas>
-      <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${wires}</svg>${cards}
-      <div class="maplab"><span><i style="background:var(--dot-blue)"></i>다녀간 사람</span><span><i style="background:var(--dot-green)"></i>자리 잡은 사람</span><span><i style="background:var(--dot-orange)"></i>함께 이끄는 사람</span><span>${rows.length} communities${need?` · 흐린 ${need}개는 예시`:''}</span></div></div>
+    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임">${g}</svg>
+      ${need?`<span class="maplab2">흐린 ${need}개는 예시</span>`:''}</div>
     <div class="head">
-      <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span><span>MOIM LAB</span></div>
+      <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span></div>
         <h1>How might we design a community filled with connection?</h1></div>
       <div class="h-bot">
-        <p class="lead2">모임을 하나 골라 직접 설계하고, 여덟 번의 모임 동안 사람들이 어떻게 이어지고 떠나는지 지켜보세요. 결과는 가입자 수가 아니라 남은 관계로 평가해요.</p>
+        <p class="lead2">모임을 하나 골라 직접 설계하고, 여덟 번의 모임 동안 사람들이 어떻게 이어지고 떠나는지 지켜보세요.</p>
         <div class="istats"><div><b>${real.length}</b><span>만들어진 모임</span></div><div><b>${sumL}</b><span>이어진 관계</span></div><div><b>${sumT}</b><span>다녀간 사람</span></div></div>
-        <div><div class="lab"><span>결과 유형</span><span>${rows.length}개 모임</span></div>
-          <div class="dist">${VORDER.filter(k=>counts[k]).map(k=>`<i style="flex:${counts[k]};background:${VERDICTS[k].c}" title="${VERDICTS[k].t} ${counts[k]}"></i>`).join('')}</div>
-          <div class="dlist">${VORDER.map(k=>`<span><i class="sq" style="background:${VERDICTS[k].c}"></i>${VERDICTS[k].t}<b>${counts[k]}</b></span>`).join('')}</div></div>
-        <button class="btn" id="start"><span>모임 고르기 · 한 판 1~2분</span><span>→</span></button>
-        <div class="brand"><b><i class="sq" style="background:var(--ink)"></i>Moim Lab</b><span>졸업 전시 · 만드는 디자이너, 관계를 설계하다</span></div>
-        <p class="foot">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>
+        <div class="legend">${VORDER.map(k=>`<div><svg viewBox="-50 -50 100 100" aria-hidden="true">${commGlyph({...LEGEND[k],verdict:k},0,0,70)}</svg><span>${VERDICTS[k].t}</span></div>`).join('')}</div>
+        <button class="btn" id="start"><span>모임 고르기</span><span>→</span></button>
       </div></div></div>`;
-  drawMap(rows,centers);
-  mapRedraw=()=>drawMap(rows,centers);
+  mapRedraw=null;
   document.getElementById('start').onclick=()=>{screen='select';render();};
 }
-// 모임 카드 그림: 하프톤 점 바탕 + 모임의 길(검은 선)
 const TPAL={book:{bg:'#e4ecfb',mid:'#a9c1ef',dark:'#3a68c8',ink:'#1f438f'},
   run:{bg:'#fbe7e3',mid:'#f2b2a8',dark:'#d24a37',ink:'#8f2c1e'},
   plog:{bg:'#e3f3e6',mid:'#a3d6ad',dark:'#2f8e48',ink:'#1d5e2f'}};
