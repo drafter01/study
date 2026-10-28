@@ -647,6 +647,16 @@ body{background:var(--page)}
 .cname{display:flex;align-items:baseline;gap:10px;margin:0}
 .cname b{font-size:20px;font-weight:800;letter-spacing:-.01em}
 .cname span{font-family:var(--f-head);font-weight:600;font-size:13px;color:var(--soft)}
+
+/* ───────── v2.5 Skills: 영문 앞글자 동그라미 + 굵은 영문 이름 목록 ───────── */
+.sk-head{padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.sk-head h3{font-family:var(--f-head);font-weight:700;font-size:22px;letter-spacing:-.02em}
+.pcard .sk{padding:10px 0 8px;border-bottom:1px solid #e3e2dc;gap:6px}
+.sk-name{gap:10px}
+.sk-name .ini{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-family:var(--f-head);font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+.sk-name label{font-family:var(--f-head);font-weight:700;font-size:24px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px}
+.sk-name label small{font-family:var(--f-body);font-weight:700;font-size:13px;color:var(--soft);letter-spacing:0}
+.sk-val{font-size:22px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -674,7 +684,7 @@ const SKILLS=[
   {k:'welcome',en:'Welcome',name:'맞이',c:COL.red,sub:'처음 온 사람이 누군가와 이어져요',down:''},
   {k:'rhythm',en:'Rhythm',name:'리듬',c:COL.blue,sub:'다시 올 이유와 때가 생겨요',down:'맞이 없이 높으면 부담이 돼요'},
   {k:'conn',en:'Connect',name:'연결',c:COL.green,sub:'구성원끼리 관계가 쌓여요',down:'문이 닫히면 배타적이 돼요'},
-  {k:'roles',en:'Roles',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
+  {k:'roles',en:'Share',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
 ];
 const VERDICTS={
   self:{t:'스스로 굴러가는 모임',c:COL.green,d:'운영자가 없어도 누군가 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'새로 이끄는 사람은 앞으로 어디서 나올까요?'},
@@ -1105,10 +1115,10 @@ function renderPanel(){
       <div class="goal3"><small>목표</small><p>여덟 번째 모임이 끝났을 때, <mark>서로 이어져 남아 있는 사람</mark>이 많은 모임</p></div>
     </section>
     <section class="pcard">
-      <div class="ph"><h3>스킬 설계</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
+      <div class="ph sk-head"><h3>Skills</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
       ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><span class="sk-name"><label for="r-${s.k}">${s.name}</label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
