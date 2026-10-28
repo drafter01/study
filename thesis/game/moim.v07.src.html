@@ -675,6 +675,12 @@ body{background:var(--page)}
 
 .goal-t{font-weight:500}
 .e-bar{background:transparent!important;padding:0 4px!important;box-shadow:none}
+
+.ptitle{font-size:clamp(40px,4.4vw,64px);margin:34px 4px 22px}
+.topnav + .entry,.topnav + .case3{margin-top:28px}
+.ptitle sup{white-space:nowrap}
+.pcard .cat{font-size:13px;color:var(--ink);font-weight:700}
+@media (min-width:900px){.canvas-wrap{min-height:calc(100vh - 200px)!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1053,7 +1059,6 @@ function renderSelect(){
   screen='select';
   const now=new Date(),clock=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
   app.innerHTML=`<nav class="topnav"><button class="back" id="back" aria-label="처음 화면으로">←</button></nav><section class="entry">
-    <div class="e-bar"><span class="e-logo"><h1 class="bigt">모임 고르기<sup>${TKEYS.length}</sup></h1></span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-right"><small>Community Entry</small><span class="e-clock num">${clock}</span></span></div>
     <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c};--tbg:${TPAL[k].bg};--tink:${TPAL[k].ink}" aria-label="${v.name} 시작">
       <div class="e-img">${typeArt(k)}</div>
       <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
@@ -1069,7 +1074,7 @@ function renderSelect(){
 function log(s){logLines.push(s);}
 function renderTool(){
   const T=TYPES[st.type];
-  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><h1 class="bigt ptitle">${T.name}<sup>${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]}</sup></h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
@@ -1128,8 +1133,7 @@ function renderPanel(){
   const e=Math.round(st.E);
   P.innerHTML=`
     <section class="pcard">
-      <div class="cat">${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]} · ${T.place} · ${T.when} ${T.time}</div>
-      <h2 class="pname">${T.name}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</h2>
+      <div class="cat">${T.place} · ${T.when} ${T.time}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</div>
       <p class="trait"><b>특징</b>${T.plus}</p><p class="trait neg"><b>주의</b>${T.minus}</p>
     </section>
     <section class="pcard"><h3 class="eh">Goal</h3><p class="goal-t">여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많은 모임</p></section>
