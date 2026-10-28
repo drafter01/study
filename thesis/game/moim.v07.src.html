@@ -458,6 +458,23 @@ body{background:var(--page)}
 .e-num.low{color:var(--red)}
 .gauge{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
 .gauge i{height:22px;border-radius:7px;background:#e6e5df;transition:background .4s}
+
+/* ───────── v1.0 설명은 (i) 아이콘으로, 움직임으로 이미 보이는 것은 글로 다시 말하지 않음 ───────── */
+.info{position:relative;display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#e4e3dd;color:#6b6b67;font-family:var(--f-head);font-weight:700;font-size:11px;font-style:italic;cursor:help;vertical-align:middle;margin-left:6px;flex:none}
+.info:hover,.info:focus-visible,.info:focus{background:var(--ink);color:#fff;outline:none}
+.info .tip{position:absolute;left:-8px;top:calc(100% + 8px);width:240px;background:#fff;color:var(--ink);border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.16);padding:10px 12px;font-family:var(--f-body);font-style:normal;font-weight:700;font-size:13px;line-height:1.5;letter-spacing:0;text-align:left;text-transform:none;z-index:20;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s;pointer-events:none}
+.info:hover .tip,.info:focus-visible .tip,.info:focus .tip{opacity:1;visibility:visible;transform:none}
+.info .tip .neg{color:var(--red)}
+.info .tip small{color:var(--soft);font-size:11.5px}
+.pname{display:flex;align-items:center}
+.sk-name label{cursor:pointer}
+.sk{gap:2px}
+.c-top,.c-cap #cap,.c-key,.hints,.e-mid,.e-foot>span{display:none!important}
+.c-cap{pointer-events:auto;left:auto;right:14px;bottom:14px}
+.c-key2 .tip{left:auto;right:-8px;top:auto;bottom:calc(100% + 8px)}
+.e-head{position:relative}
+.e-head .ev{position:absolute;right:14px;top:16px}
+.e-head .ev .tip{left:auto;right:-8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -550,7 +567,7 @@ function layout(snap){
       p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
   }
 }
-function tag(p,text,color){st.tags.push({p,text,color,life:1});}
+function tag(){}
 
 // 한 번의 모임
 function step(){
@@ -816,9 +833,9 @@ function renderSelect(){
     <div class="e-bar"><span class="e-logo"><i></i>Community Entry</span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-clock num">${clock}</span></div>
     <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c}" aria-label="${v.name} 시작">
       <div class="e-img">${typeArt(k,v.c)}<div class="e-top"><span class="pill"><i class="dot" style="background:${v.c}"></i>TYPE ${'ABC'[i]}</span></div></div>
-      <div class="e-head"><span class="code">${v.code}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
+      <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
       <div class="cgrid e-cells">${[['유입',v.st[0]],['머무름',v.st[1]],['운영 부담',v.st[2]]].map(([n,x])=>`<div class="cell"><small>${n}</small><b>${x}<em>/5</em></b></div>`).join('')}</div>
-      <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p><small>근거 ${v.ev}</small></div>
+      <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p></div>
       <div class="e-go"><span>이 모임 운영하기</span><span>▶</span></div></button>`;}).join('')}</div>
     <div class="e-foot"><button class="btn ghost" id="back"><span>← 처음 화면</span></button><span>특징과 주의는 연구 근거 표의 발견(F 번호)에서 왔어요.</span></div></section>`;
   app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
@@ -833,7 +850,7 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="c-cap"><span id="cap"></span>
+      <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계, 가운데는 나(운영자)와 에너지예요.`)}</span>
         <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
     <div class="hints"><span class="dots">●●●●</span><span>NAVIGATION</span><span><kbd>×</kbd>슬라이더로 포인트 나누기</span><span><kbd>○</kbd>모임 시작</span><span><kbd>←</kbd>처음 화면</span><span class="r">${T.code} · ${T.name} · 은유적 모델이에요</span></div>`;
   canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
@@ -844,7 +861,7 @@ function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d
 window.addEventListener('resize',()=>{sizeCanvas();if(!st&&screen==='intro'&&mapRedraw)mapRedraw();});
 // 지금 상황을 한 문장으로: 남은 관계와 운영자 에너지가 바뀔 때마다 문구도 바뀌어요
 function relMsg(n){
-  if(st.meeting===0)return '시작을 누르면 첫 모임이 열려요. 지금은 나와 친구 2명이에요.';
+  if(st.meeting===0)return '시작을 누르면 첫 모임이 열려요.';
   if(n===0)return '아직 자리 잡은 사람이 없어요. 처음 온 사람이 누군가와 이어져야 다시 와요.';
   if(n<=2)return '첫 관계가 자리 잡기 시작했어요.';
   if(n<=5)return '다시 오는 사람이 늘며 모임의 중심이 생기고 있어요.';
@@ -857,6 +874,8 @@ function energyMsg(e,leaders){
   if(leaders&&!up)m+=` 함께 이끄는 사람 ${leaders}명이 일을 나눠 들고 있어요.`;
   return m;
 }
+// (i) 아이콘: 마우스를 올리거나 눌러서 포커스하면 설명이 보여요
+function info(text){return `<span class="info" tabindex="0" role="button" aria-label="설명: ${text.replace(/<[^>]+>/g,'')}">i<span class="tip" role="tooltip">${text}</span></span>`;}
 function gauge(e){
   const N=12,on=Math.ceil(e/100*N),c=e>=50?'var(--green)':e>=30?'var(--yellow)':'var(--red)';
   return `<div class="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${e}" aria-label="운영자 에너지">${Array.from({length:N},(_,i)=>`<i style="${i<on?`background:${c}`:''}"></i>`).join('')}</div>`;
@@ -871,29 +890,26 @@ function renderPanel(){
   P.innerHTML=`
     <section class="pcard">
       <div class="cat"><i class="dot" style="background:${T.c}"></i>${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]} · ${T.place} · ${T.when} ${T.time}</div>
-      <h2 class="pname">${T.name}</h2>
-      <div class="p-trait"><span>＋ ${T.plus}</span><span class="neg">－ ${T.minus}</span></div>
+      <h2 class="pname">${T.name}${info(`<b>특징</b> ${T.plus}<br><b class="neg">주의</b> ${T.minus}<br><small>근거 ${T.ev}</small>`)}</h2>
       <div class="goal3"><small>목표</small><p>여덟 번째 모임이 끝났을 때, <mark>서로 이어져 남아 있는 사람</mark>이 많은 모임</p></div>
       <div class="now">
-        <div class="now-n"><small>지금 남아 있는 관계</small><b class="hero-n">${rooted}<em>명</em></b><span>다녀간 사람 ${st.total+2}명</span></div>
+        <div class="now-n"><small>지금 남아 있는 관계${info('자리 잡은 사람과 함께 이끄는 사람의 수예요.')}</small><b class="hero-n">${rooted}<em>명</em></b><span>다녀간 사람 ${st.total+2}명</span></div>
         <div class="now-m"><small>모임</small><b class="hero-n">${st.meeting}<em>/${MEETINGS}</em></b><span class="steps">${Array.from({length:MEETINGS},(_,i)=>`<i class="${i<st.meeting?'on':''}${i===HALF-1?' half':''}"></i>`).join('')}</span></div>
       </div>
       <p class="msg">${relMsg(rooted)}</p>
     </section>
     <section class="pcard">
       <div class="ph"><h3>스킬 설계</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
-      ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트를 더 나눌 수 있어요</span></div><p>${diagnosis()}</p></div>`:''}
+      ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><label class="sk-name" for="r-${s.k}"><i class="dot" style="background:${s.c}"></i>${s.name}<small>${s.en}</small></label><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
-        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}>
-        <span class="sk-desc">${s.sub}${s.down?` · <span class="neg">${s.down}</span>`:''}</span></div>`;}).join('')}
+        <div class="sk-row"><span class="sk-name"><i class="dot" style="background:${s.c}"></i><label for="r-${s.k}">${s.name}</label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
     <section class="pcard">
-      <div class="ph"><h3>운영자 에너지</h3><b class="e-num ${e<30?'low':''}">${e}%</b></div>
+      <div class="ph"><h3>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</h3><b class="e-num ${e<30?'low':''}">${e}%</b></div>
       ${gauge(e)}
       <p class="msg">${energyMsg(e,leaders)}</p>
-      <span class="sk-desc">스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.</span>
     </section>
     <button class="btn ghost" id="quit"><span>처음 화면으로</span><span>←</span></button>`;
   P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
