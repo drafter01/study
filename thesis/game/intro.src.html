@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>모임 설계자 인트로</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&display=swap">
+<style>
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_R__) format("woff2");font-weight:400}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_B__) format("woff2");font-weight:700}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_EB__) format("woff2");font-weight:800}
+:root{--paper:#ecebe7;--night:#121210;--ink:#111}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--night);color:#f1ece3;font-family:"Gothic A1",sans-serif;cursor:pointer}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.line{position:fixed;left:50%;bottom:13vh;transform:translate(-50%,12px);width:min(1400px,92vw);text-align:center;font-weight:800;
+  font-size:clamp(28px,3.1vw,56px);line-height:1.3;letter-spacing:-.035em;word-break:keep-all;opacity:0;transition:opacity .9s ease,transform .9s ease}
+.line.on{opacity:1;transform:translate(-50%,0)}
+.title{position:fixed;inset:0;display:grid;place-items:center;align-content:center;gap:28px;text-align:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+.title.on{opacity:1;pointer-events:auto}
+.title small{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:15px;letter-spacing:.08em;color:#6f6e69}
+.title h1{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:clamp(44px,5.4vw,96px);line-height:.98;letter-spacing:-.05em;color:var(--ink);max-width:16ch}
+.title button{font:inherit;font-weight:800;font-size:18px;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:16px 30px;display:flex;gap:40px;cursor:pointer}
+.skip{position:fixed;right:28px;bottom:24px;font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.12);color:inherit;cursor:pointer;transition:background .6s,color .6s}
+.paper .skip{background:rgba(0,0,0,.06)}
+@media (prefers-reduced-motion:reduce){.line,.title{transition:none}}
+</style>
+<canvas id="cv" aria-hidden="true"></canvas>
+<p class="line" id="line" aria-live="polite"></p>
+<div class="title" id="title"><small>COMMUNITY DESIGN SIMULATOR</small><h1>How might we design a community filled with connection?</h1><button id="go"><span>모임 고르기</span><span>→</span></button></div>
+<button class="skip" id="skip">건너뛰기 →</button>
+<script>
+// 프롤로그: 사람은 오래전부터 무리 지어 살아왔다 → 지금의 작은 모임 → 직접 설계해 보기
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lineEl=document.getElementById('line'),titleEl=document.getElementById('title');
+const PAL={book:'#2f5bff',run:'#ff5a1f',plog:'#13a352'},WARM=[241,228,208],INK=[17,17,17];
+const N=80,TAU=Math.PI*2;
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+let W,H,S,d=1;
+function size(){d=window.devicePixelRatio||1;W=cv.width=innerWidth*d;H=cv.height=innerHeight*d;S=Math.min(W,H*1.25)/2;}
+addEventListener('resize',size);size();
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const dots=Array.from({length:N},(_,i)=>{const a=rnd(0,TAU),r=rnd(1.1,1.6);return {x:Math.cos(a)*r*1.6,y:Math.sin(a)*r,vx:0,vy:0,tx:0,ty:0,a:0,ta:0,c:[...WARM],tc:[...WARM],j:rnd(0,TAU)};});
+let fires=[],fireA=0,fireTA=0,bgT=0,bgTT=0,rings=0,ringsT=0;
+const ring=(n,r,cx=0,cy=0,off=0)=>Array.from({length:n},(_,i)=>[cx+Math.cos(off+i/n*TAU)*r,cy+Math.sin(off+i/n*TAU)*r]);
+function place(list,start=0,col,alpha=1){list.forEach(([x,y],k)=>{const p=dots[start+k];if(!p)return;p.tx=x;p.ty=y;p.ta=alpha;if(col)p.tc=hex(col).length?hex(col):col;});return start+list.length;}
+function hideFrom(n){for(let i=n;i<N;i++){dots[i].ta=0;}}
+// 장면: [문구, 시간(ms), 배치]
+const SCENES=[
+  ['',1600,()=>{dots[0].tx=0;dots[0].ty=-.05;dots[0].ta=1;hideFrom(1);}],
+  ['아주 오래전부터, 사람은 무리 지어 살아왔습니다.',4600,()=>{for(let i=0;i<14;i++){const a=rnd(0,TAU),r=rnd(.08,.42);dots[i].tx=Math.cos(a)*r*1.3;dots[i].ty=Math.sin(a)*r*.8-.08;dots[i].ta=1;dots[i].tc=[...WARM];}hideFrom(14);}],
+  ['불 곁에 둘러앉고, 함께 먹고, 서로의 이름을 불렀습니다.',4800,()=>{place(ring(14,.24,0,-.08,.2),0);dots.slice(0,14).forEach(p=>p.tc=[...WARM]);hideFrom(14);fires=[[0,-.08,.34]];fireTA=1;}],
+  ['무리는 마을이 되고, 두레가 되고, 계가 되었습니다.',4800,()=>{const C=[[0,-.1],[-.72,-.32],[.72,-.32],[-.48,.3],[.48,.3],[-1.2,.05],[1.2,.05]];let k=0;fires=[];
+    C.forEach(([x,y],i)=>{const n=i?10:12;k=place(ring(n,i?.11:.14,x,y,i),k);fires.push([x,y,i?.17:.22]);});dots.slice(0,k).forEach(p=>p.tc=[...WARM]);hideFrom(k);fireTA=.8;}],
+  ['그리고 지금, 우리는 책 앞에서, 한강에서, 동네 하천에서 다시 모입니다.',5200,()=>{fireTA=0;bgTT=1;let k=0;
+    [['book',-.75],['run',0],['plog',.75]].forEach(([t,x])=>{const P=PAL[t];k=place(ring(5,.05,x,-.12,.3),k,P);k=place(ring(11,.13,x,-.12),k,P,.55);});hideFrom(k);}],
+  ['어떤 모임은 오래 이어지고, 어떤 모임은 조용히 흩어집니다.',5200,()=>{let k=0;
+    k=place(ring(6,.05,-.55,-.12,.3),k,PAL.run);k=place(ring(12,.12,-.55,-.12),k,PAL.run);k=place(ring(16,.19,-.55,-.12,.1),k,PAL.run,.7);
+    for(let i=0;i<22;i++){const a=rnd(0,TAU),r=rnd(.22,.62);const p=dots[k++];p.tx=.6+Math.cos(a)*r;p.ty=-.12+Math.sin(a)*r*.75;p.ta=rnd(.12,.4);p.tc=hex('#9e9d97');}hideFrom(k);}],
+  ['그 차이를, 직접 설계해 보세요.',3800,()=>{let k=0;const st=['#d9d8d2','#9e9d97','#ff5a1f','#173a86'];
+    k=place(ring(4,.05,0,-.14,.4),k,st[3]);k=place(ring(10,.15,0,-.14,.2),k,st[2]);k=place(ring(20,.29,0,-.14),k,st[1]);k=place(ring(30,.46,0,-.14,.1),k,st[0]);hideFrom(k);ringsT=1;}],
+  ['',0,()=>{dots.forEach(p=>p.ta*=.18);ringsT=.6;}]
+];
+let si=-1,t0=0,timer=null,done=false;
+function go(i){si=i;const [txt,dur,fn]=SCENES[i];fn();lineEl.classList.remove('on');
+  setTimeout(()=>{if(si!==i)return;lineEl.textContent=txt;if(txt)lineEl.classList.add('on');},txt?650:0);
+  if(dur){clearTimeout(timer);timer=setTimeout(()=>{lineEl.classList.remove('on');setTimeout(()=>go(i+1),550);},dur);}else finish();}
+function finish(){done=true;clearTimeout(timer);lineEl.classList.remove('on');titleEl.classList.add('on');document.getElementById('skip').style.display='none';}
+function skip(){if(done)return;bgTT=1;fireTA=0;SCENES[6][2]();SCENES[7][2]();si=7;finish();}
+document.getElementById('skip').onclick=e=>{e.stopPropagation();skip();};
+document.body.addEventListener('click',e=>{if(!done&&e.target.id!=='go')skip();});
+document.getElementById('go').onclick=e=>{e.stopPropagation();location.reload();};
+
+function frame(now){
+  const ease=.045;bgT+=(bgTT-bgT)*.03;fireA+=(fireTA-fireA)*.04;rings+=(ringsT-rings)*.04;
+  const bg=mix(hex('#121210'),hex('#ecebe7'),bgT);document.body.style.background=`rgb(${bg.map(Math.round)})`;
+  document.body.style.color=`rgb(${mix(hex('#f1ece3'),INK,bgT).map(Math.round)})`;document.body.classList.toggle('paper',bgT>.5);
+  ctx.clearRect(0,0,W,H);const cx=W/2,cy=H/2;
+  if(rings>.01){ctx.lineWidth=1.5*d;ctx.strokeStyle=`rgba(17,17,17,${.08*rings})`;for(const r of [.54,.38,.22,.1]){ctx.beginPath();ctx.arc(cx,cy-.14*S,r*S,0,TAU);ctx.stroke();}}
+  if(fireA>.01)for(const [fx,fy,fr] of fires){const fl=1+Math.sin(now/90+fx*7)*.05+Math.sin(now/37+fy*5)*.03;const g=ctx.createRadialGradient(cx+fx*S,cy+fy*S,0,cx+fx*S,cy+fy*S,fr*S*fl);
+    g.addColorStop(0,`rgba(255,176,90,${.55*fireA})`);g.addColorStop(.35,`rgba(255,120,40,${.22*fireA})`);g.addColorStop(1,'rgba(255,100,30,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx+fx*S,cy+fy*S,fr*S*fl,0,TAU);ctx.fill();
+    ctx.fillStyle=`rgba(255,210,150,${.9*fireA})`;ctx.beginPath();ctx.arc(cx+fx*S,cy+fy*S,4*d*fl,0,TAU);ctx.fill();}
+  for(const p of dots){p.vx+=(p.tx-p.x)*.012;p.vy+=(p.ty-p.y)*.012;p.vx*=.86;p.vy*=.86;p.x+=p.vx;p.y+=p.vy;
+    p.a+=(p.ta-p.a)*ease;p.c=mix(p.c,p.tc,.05);if(p.a<.01)continue;
+    const wob=si<=1?.012:.003,x=cx+(p.x+Math.cos(now/900+p.j)*wob)*S,y=cy+(p.y+Math.sin(now/1100+p.j)*wob)*S;
+    ctx.globalAlpha=p.a;ctx.fillStyle=`rgb(${p.c.map(Math.round)})`;ctx.beginPath();ctx.arc(x,y,8.5*d,0,TAU);ctx.fill();}
+  ctx.globalAlpha=1;requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+setTimeout(()=>go(0),400);
+</script>
+</html>
