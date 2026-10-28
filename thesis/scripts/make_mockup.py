@@ -9,4 +9,4 @@ css='''*{box-sizing:border-box;margin:0}body{width:1080px;height:1350px;backgrou
 .neck{width:200px;height:150px;background:linear-gradient(#c9c8c2,#d9d8d3);clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
 .base{width:300px;height:14px;border-radius:0 0 10px 10px;background:#cfcec8}'''
 for i,f in enumerate(imgs,1):
-    open(f'{S}/mock/m{i}.html','w',encoding='utf-8').write(f'<!doctype html><meta charset="utf-8"><style>{css}</style><div class="m"><div class="mon"><div class="scr" style="background-image:url(\'file://{S}/insta/src/{f}\')"></div><div class="chin"></div></div><div class="neck"></div><div class="base"></div></div>')
+    open(f'{S}/mock/m{i}.html','w',encoding='utf-8').write(f'<!doctype html><meta charset="utf-8"><style>{css}</style><div class="m"><div class="mon"><div class="scr" style="background-image:url(\'file://{S}/insta/src2x/{f}\')"></div><div class="chin"></div></div><div class="neck"></div><div class="base"></div></div>')
