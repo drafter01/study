@@ -557,7 +557,7 @@ body{background:var(--page)}
 .info .tip,.htip{border-radius:var(--r-sm)}
 
 /* ───────── v1.7 모임 → 머무는 사람 → 운영자 에너지, 셋 다 큰 숫자 ───────── */
-.ovbar{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) minmax(0,1.2fr)}
+.ovbar{grid-template-columns:minmax(0,.6fr) minmax(0,1.2fr) minmax(0,1.2fr)}
 .ovbar .ov-e .hero-n.low{color:var(--red)}
 .ovbar .ov-e .gauge{margin-top:6px}
 .ovbar .ov-e .info .tip{left:-8px;right:auto}
@@ -566,6 +566,9 @@ body{background:var(--page)}
 .wrap{max-width:min(1720px,100%)}
 @media (max-width:720px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
 @media (min-width:1600px){.tool{grid-template-columns:400px minmax(0,1fr)}.canvas-wrap{min-height:min(82vh,900px)}}
+
+/* 화면 높이를 꽉 채움 (전시 모니터) */
+@media (min-width:900px){.intro{min-height:calc(100vh - 44px)}.canvas-wrap{min-height:calc(100vh - 44px)!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -606,7 +609,7 @@ const VERDICTS={
 const VORDER=['self','quiet','crowd','closed','burn','root'];
 const STAGE_NAMES=['처음 온 사람','다시 온 사람','자리 잡은 사람','함께 이끄는 사람'];
 const ACC='#2f6fe0';
-const STAGE_C=[COL.paper,'#a3a29c',ACC,ACC];
+const STAGE_C=['#d9d8d2','#9e9d97',ACC,'#173a86'];
 const RING=[.82,.5,.14,.04];
 const MAXLV=5, START_PTS=8, MEETINGS=8, HALF=4, TICK=1800;
 
@@ -962,7 +965,7 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b><span class="steps" id="ovS"></span></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b></div>
       <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
@@ -1012,7 +1015,6 @@ function renderPanel(){
   document.getElementById('ovT').textContent=`다녀간 사람 ${st.total+2}명`;
   document.getElementById('ovMsg').textContent=relMsg(rooted);
   document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
-  document.getElementById('ovS').innerHTML=Array.from({length:MEETINGS},(_,i)=>`<i class="${i<st.meeting?'on':''}${i===HALF-1?' half':''}"></i>`).join('');
   document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
@@ -1071,7 +1073,6 @@ function finish(){
 function figure(x,y,r,head,hollow,a){
   const d=window.devicePixelRatio||1;
   ctx.globalAlpha=a;ctx.beginPath();ctx.arc(x,y,r*.68,0,Math.PI*2);ctx.fillStyle=head;ctx.fill();
-  if(head==='#ffffff'||head===COL.paper){ctx.lineWidth=1.5*d;ctx.strokeStyle='#8a8a86';ctx.stroke();}
 }
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
@@ -1095,7 +1096,7 @@ function loop(){
   const byId=new Map(st.people.map(p=>[p.id,p])), now=performance.now();
   // 끝난 뒤: 첫 화면과 같은 원 그림이 점들 뒤에서 자라나요
   if(st.glyph){const t=Math.min(1,(now-st.glyph.t0)/1400),e=1-Math.pow(1-t,3);
-    for(const c of glyphParts(st.glyph.r,S)){ctx.globalAlpha=c.a*e;ctx.beginPath();ctx.arc(cx,cy,c.r*(.55+.45*e),0,Math.PI*2);
+    for(const c of glyphParts(st.glyph.r,S)){ctx.globalAlpha=c.a*e*.5;ctx.beginPath();ctx.arc(cx,cy,c.r*(.55+.45*e),0,Math.PI*2);
       if(c.fill){ctx.fillStyle=c.fill;ctx.fill();}else{ctx.strokeStyle=c.stroke;ctx.lineWidth=c.w;ctx.setLineDash(c.dash);ctx.stroke();ctx.setLineDash([]);}}
     ctx.globalAlpha=1;}
   for(const l of st.links){const a=byId.get(l[0]),b=byId.get(l[1]);if(!a||!b)continue;
@@ -1106,7 +1107,7 @@ function loop(){
   ctx.globalAlpha=1;
   // 사람
   for(const p of st.people){const r=(p.stage===3?14:13)*d;
-    figure(cx+p.x*S,cy+p.y*S,r,p.leaving?'#ffffff':STAGE_C[p.stage],false,p.leaving?p.alpha*.5:p.alpha);}
+    figure(cx+p.x*S,cy+p.y*S,r,STAGE_C[p.stage],false,p.leaving?p.alpha*.6:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
   ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';
