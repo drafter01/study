@@ -4,6 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Black+Han+Sans&family=Inter+Tight:wght@500;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap">
 <style>
+@font-face{font-family:"Pretendard";src:url(data:font/woff2;base64,__PRETENDARD__) format("woff2-variations");font-weight:100 900;font-display:swap}
 @font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_R__) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_B__) format("woff2");font-weight:700;font-display:swap}
 @font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_EB__) format("woff2");font-weight:800;font-display:swap}
@@ -13,7 +14,7 @@
   color-scheme:light;
   --paper:#ffffff; --ink:#111111; --mute:#6f6f6f; --rule:#111111; --hair:#d9d9d9;
   --red:#e8372b; --blue:#2f6fe0; --yellow:#f6b72c; --green:#2a9a46; --violet:#6b5ce7; --orange:#f05a28;
-  --f-body:"Gothic A1",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"Pretendard","Gothic A1",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --f-latin:"Archivo","Pretendard",sans-serif;
   --f-kdisp:"Black Han Sans","Pretendard",sans-serif;
   --f-head:"Inter Tight","Pretendard",sans-serif;
@@ -1405,7 +1406,7 @@ function loop(){
     figure(cx+p.x*S,cy+p.y*S,r,p.stage<2?STAGE_C[p.stage]:(p.stage===2?TPAL[st.type].dark:TPAL[st.type].ink),false,p.leaving?p.alpha*.6:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
-  ctx.font=`700 ${14*d}px ${getComputedStyle(document.body).fontFamily}`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font=`600 ${14*d}px ${getComputedStyle(document.body).fontFamily}`;ctx.textAlign='center';ctx.textBaseline='middle';
   for(const t of st.tags){t.life-=.0075;const p=t.p;const a=Math.max(0,Math.min(1,t.life*2.2,(1-t.life)*8));const x=cx+p.x*S,y=cy+p.y*S-34*d-(1-t.life)*8*d;
     const w=ctx.measureText(t.text).width+22*d,h=30*d;ctx.globalAlpha=a;
     ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=10*d;ctx.shadowOffsetY=2*d;ctx.fillStyle='#fff';
