@@ -569,6 +569,22 @@ body{background:var(--page)}
 
 /* 화면 높이를 꽉 채움 (전시 모니터) */
 @media (min-width:900px){.intro{min-height:calc(100vh - 44px)}.canvas-wrap{min-height:calc(100vh - 44px)!important}}
+
+/* ───────── v2.0 모임별 키 컬러(채도 높게) + 모임 고르기 여백 ───────── */
+.vchip{background:var(--ink)}
+.lvl2{background:var(--accent-bg)}
+.lvl2 small,.lvl2 b{color:var(--accent)}
+.tool .sk-val ins{color:var(--accent)}
+.e-cards{gap:20px}
+.entry{gap:20px}
+.e-bar{padding:12px 20px}
+.e-img{height:180px}
+.e-head{padding:24px 26px 8px;gap:6px}
+.e-head .ev{right:22px;top:26px}
+.e-cells{padding:12px 18px 0;gap:8px}
+.e-cells .cell{padding:12px 14px}
+.e-txt{padding:18px 26px 22px;gap:10px}
+.e-go{margin:0 18px 18px;padding:14px 18px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -870,14 +886,15 @@ function glyphParts(r,u){
   const tot=Math.max(3,r.total||3),ro=r.rooted||0,le=r.leaders||0,V=r.verdict;
   const coh=clamp((r.links||0)/Math.max(1,ro)/1.4,0,1);
   let halo=u*(.16+tot*.024),core=u*Math.min(.36,.07+ro*.026),mid=core*(1.25+.6*(1-coh));
-  let hc='#a9c6f7',ho=.07+.09*(1-coh),cc='#2f6fe0',co=.25+.72*coh,mc='#7fa6f2',mo=.12+.3*coh;
-  if(V==='closed'){halo=core*1.25;cc='#173a86';co=.95;mc='#2f55b0';mo=.7;}
+  const K=TPAL[r.type]||TPAL.book;
+  let hc=K.mid,ho=.14+.14*(1-coh),cc=K.dark,co=.4+.6*coh,mc=K.dark,mo=.14+.22*coh;
+  if(V==='closed'){halo=core*1.25;cc=K.ink;co=.95;mc=K.dark;mo=.7;}
   if(V==='crowd'){core=Math.max(u*.1,core*.7);mid=core*1.4;ho=.16;}
   if(V==='root'){halo*=.6;co=.3;mo=.12;}
   if(V==='burn'){hc='#c9c8c2';mc='#c9c8c2';}
   const out=[{r:halo,fill:hc,a:ho},{r:mid,fill:mc,a:mo}];
-  if(V==='burn')out.push({r:core,stroke:'#2f6fe0',a:.6,w:u*.05,dash:[u*.09,u*.07]});else out.push({r:core,fill:cc,a:co});
-  if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:'#0d2766',a:1});
+  if(V==='burn')out.push({r:core,stroke:K.dark,a:.7,w:u*.05,dash:[u*.09,u*.07]});else out.push({r:core,fill:cc,a:co});
+  if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:K.ink,a:1});
   return out;
 }
 function commGlyph(r,x,y,u){
@@ -913,7 +930,7 @@ function renderIntro(){
   mapRedraw=null;
   const tip=document.getElementById('htip'),map=app.querySelector('.map');
   const show=(gEl,cx,cy)=>{const r=rows[+gEl.dataset.i],V=VERDICTS[r.verdict],T=TYPES[r.type];
-    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b><i class="dot" style="background:${V.c}"></i>${V.t}</b><p>${V.d}</p><span>머무는 사람 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
+    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b>${V.t}</b><p>${V.d}</p><span>머무는 사람 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
     const mb=map.getBoundingClientRect(),w=260;let x=cx-mb.left+14,y=cy-mb.top+14;if(x+w>mb.width-8)x=cx-mb.left-w-14;if(y+150>mb.height)y=cy-mb.top-150;
     tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
   app.querySelectorAll('.cg').forEach(gEl=>{
@@ -923,9 +940,9 @@ function renderIntro(){
     gEl.addEventListener('blur',()=>tip.classList.remove('on'));});
   document.getElementById('start').onclick=()=>{screen='select';render();};
 }
-const TPAL={book:{bg:'#e4ecfb',mid:'#a9c1ef',dark:'#3a68c8',ink:'#1f438f'},
-  run:{bg:'#fbe7e3',mid:'#f2b2a8',dark:'#d24a37',ink:'#8f2c1e'},
-  plog:{bg:'#e3f3e6',mid:'#a3d6ad',dark:'#2f8e48',ink:'#1d5e2f'}};
+const TPAL={book:{bg:'#e3e9ff',mid:'#b3c3ff',dark:'#2f5bff',ink:'#1a2f99'},
+  run:{bg:'#ffe8dd',mid:'#ffbfa3',dark:'#ff5a1f',ink:'#a8320c'},
+  plog:{bg:'#ddf5e6',mid:'#a6e3bd',dark:'#13a352',ink:'#0b6534'}};
 function typeArt(k){
   const P=TPAL[k],W=400,H=190;
   const shape={
@@ -951,7 +968,7 @@ function renderSelect(){
       <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
       <div class="cgrid e-cells">${[['유입',v.st[0]],['머무름',v.st[1]],['운영 부담',v.st[2]]].map(([n,x])=>`<div class="cell"><small>${n}</small><b>${x}<em>/5</em></b></div>`).join('')}</div>
       <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p></div>
-      <div class="e-go"><span>이 모임 운영하기</span><span>▶</span></div></button>`;}).join('')}</div>
+      <div class="e-go"><span>시작하기</span><span>▶</span></div></button>`;}).join('')}</div>
     </section>`;
   app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
   document.getElementById('back').onclick=()=>{screen='intro';render();};
@@ -961,7 +978,7 @@ function renderSelect(){
 function log(s){logLines.push(s);}
 function renderTool(){
   const T=TYPES[st.type];
-  app.innerHTML=`<div class="tool">
+  app.innerHTML=`<div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
@@ -1107,7 +1124,7 @@ function loop(){
   ctx.globalAlpha=1;
   // 사람
   for(const p of st.people){const r=(p.stage===3?14:13)*d;
-    figure(cx+p.x*S,cy+p.y*S,r,STAGE_C[p.stage],false,p.leaving?p.alpha*.6:p.alpha);}
+    figure(cx+p.x*S,cy+p.y*S,r,p.stage<2?STAGE_C[p.stage]:(p.stage===2?TPAL[st.type].dark:TPAL[st.type].ink),false,p.leaving?p.alpha*.6:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
   ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';
@@ -1126,11 +1143,11 @@ function renderReport(){
   const better=real.length>1?Math.round(real.filter(p=>p.rooted<r.rooted).length/real.length*100):null;
   const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
-  app.innerHTML=`<section class="case2">
+  app.innerHTML=`<section class="case2" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
     <div class="c2-l">
       <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>CASE No. ${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span>
       <h1>${T.name}</h1>
-      <span class="vchip" style="background:${V.c}">${V.t}</span>
+      <span class="vchip">${V.t}</span>
       <p>${V.d}</p>
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
     </div>
