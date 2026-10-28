@@ -714,6 +714,28 @@ body{background:var(--page)}
 .goal-t{font-size:15px}
 .tool .panel .pcard{padding:16px 18px}.tool .panel{gap:8px}
 .ptitle{margin:14px 4px 14px}
+
+/* ───────── v2.14 단계 표시 + 설계 화면 사용법 팝업 ───────── */
+.topnav{position:relative}
+.stepbar{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.stepbar .st{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px 0 6px;border-radius:999px;background:var(--card);color:#9e9d97;font-weight:700;font-size:15px}
+.stepbar .st i{width:28px;height:28px;border-radius:50%;background:var(--page,#ecebe7);color:#9e9d97;display:grid;place-items:center;font-style:normal;font-family:var(--f-head);font-size:13px}
+.stepbar .st.on{background:var(--ink);color:#fff}.stepbar .st.on i{background:#fff;color:var(--ink)}
+.stepbar .st.done{color:var(--ink)}.stepbar .st.done i{background:var(--ink);color:#fff}
+.stepbar .ln{width:28px;height:2px;background:#d9d8d2}
+@media (max-width:1100px){.stepbar{display:none}}
+.helpov{position:fixed;inset:0;z-index:100;background:rgba(20,20,18,.42);display:grid;place-items:center;padding:24px;animation:hfade .25s ease}
+.helpcard{width:min(620px,100%);background:var(--card);border-radius:36px;padding:36px 36px 28px;display:grid;gap:18px;box-shadow:0 30px 80px rgba(0,0,0,.25);animation:hup .3s ease}
+.helpcard small{font-family:var(--f-head);font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--soft)}
+.helpcard h2{font-weight:800;font-size:34px;letter-spacing:-.03em;margin-top:-10px}
+.helpcard ol{list-style:none;padding:0;margin:0;display:grid;gap:4px}
+.helpcard li{display:grid;grid-template-columns:36px 1fr;gap:14px;padding:14px 0;border-top:1px solid #e3e2dc}
+.helpcard li>i{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-family:var(--f-head);font-weight:700;display:grid;place-items:center}
+.helpcard li b{font-family:var(--f-head);font-weight:700;font-size:21px;letter-spacing:-.02em}
+.helpcard li p{font-size:16px;line-height:1.5;margin-top:2px;word-break:keep-all}
+.hkey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;font-weight:700;color:var(--soft)}
+.hkey span{display:flex;align-items:center;gap:6px}.hkey em{width:12px;height:12px;border-radius:50%;display:inline-block}
+@keyframes hfade{from{opacity:0}}@keyframes hup{from{opacity:0;transform:translateY(16px)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -773,6 +795,28 @@ function freshState(type){
     stats:{lonelyLeft:0,left:0},tags:[],cap:'',burn:false,last:null};
 }
 function seed(){for(let i=0;i<2;i++)addPerson(2,1);st.links.push([st.people[0].id,st.people[1].id,0]);layout(true);}
+const STEPS=['모임 고르기','스킬 나누기','8번의 모임 지켜보기','결과 보기'];
+function stepBar(n){return `<div class="stepbar" id="steps" aria-label="${STEPS.length}단계 중 ${n}단계: ${STEPS[n-1]}">${STEPS.map((t,i)=>`${i?'<span class="ln" aria-hidden="true"></span>':''}<span class="st ${i+1===n?'on':i+1<n?'done':''}"><i>${i+1<n?'✓':i+1}</i>${t}</span>`).join('')}</div>`;}
+let showHelp=false;
+function helpPop(){
+  const P=TPAL[st.type];
+  const ov=document.createElement('div');ov.className='helpov';
+  ov.innerHTML=`<div class="helpcard" role="dialog" aria-modal="true" aria-labelledby="help-h">
+    <small>HOW TO PLAY</small><h2 id="help-h">이렇게 해 보세요</h2>
+    <ol>
+      <li><i>1</i><div><b>Goal</b><p>여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많을수록 좋아요.</p></div></li>
+      <li><i>2</i><div><b>Skills</b><p>포인트 ${START_PTS}개를 다섯 가지 스킬에 나눠 주세요. 막대를 옆으로 밀면 돼요.</p></div></li>
+      <li><i>3</i><div><b>Start</b><p>오른쪽에서 여덟 번의 모임이 열려요. 4번째 모임이 끝나면 포인트를 더 받아 다시 나눌 수 있어요.</p>
+        <div class="hkey"><span><em style="background:${STAGE_C[0]}"></em>처음 온 사람</span><span><em style="background:${STAGE_C[1]}"></em>다시 온 사람</span><span><em style="background:${P.dark}"></em>자리 잡은 사람</span><span><em style="background:${P.ink}"></em>함께 이끄는 사람</span></div></div></li>
+    </ol>
+    <button class="btn" id="help-ok"><span>알겠어요</span><span>→</span></button></div>`;
+  document.body.appendChild(ov);
+  const close=()=>{ov.remove();document.removeEventListener('keydown',esc);};
+  const esc=e=>{if(e.key==='Escape'||e.key==='Enter')close();};
+  ov.onclick=e=>{if(e.target===ov)close();};
+  document.getElementById('help-ok').onclick=close;document.addEventListener('keydown',esc);
+  document.getElementById('help-ok').focus();
+}
 function newGame(type){
   clearInterval(timer);savedId=null;logLines=[];
   st=freshState(type);seed();st.t0=Date.now();
@@ -1115,7 +1159,7 @@ function typeArt(k){
 function renderSelect(){
   screen='select';
   const now=new Date(),clock=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  app.innerHTML=`<nav class="topnav"><button class="back" id="back" aria-label="처음 화면으로">←</button></nav><section class="entry">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="back" aria-label="처음 화면으로">←</button>${stepBar(1)}</nav><section class="entry">
     <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c};--tbg:${TPAL[k].bg};--tink:${TPAL[k].ink}" aria-label="${v.name} 시작">
       <div class="e-img">${typeArt(k)}</div>
       <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
@@ -1123,7 +1167,7 @@ function renderSelect(){
       <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p></div>
       <div class="e-go"><span>시작하기</span><span>▶</span></div></button>`;}).join('')}</div>
     </section>`;
-  app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
+  app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>{showHelp=true;newGame(b.dataset.t);});
   document.getElementById('back').onclick=()=>{screen='intro';render();};
 }
 
@@ -1131,7 +1175,7 @@ function renderSelect(){
 function log(s){logLines.push(s);}
 function renderTool(){
   const T=TYPES[st.type];
-  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><h1 class="bigt ptitle">${T.name}</h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button>${stepBar(st.phase==='alloc'?2:3)}</nav><h1 class="bigt ptitle">${T.name}</h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
@@ -1144,6 +1188,7 @@ function renderTool(){
   canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
   if(window.ResizeObserver){new ResizeObserver(()=>sizeCanvas()).observe(canvas.parentElement);}
   sizeCanvas();renderPanel();loop();
+  if(showHelp){showHelp=false;helpPop();}
 }
 function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.round(r.width*d),h=Math.round(r.height*d);if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
 window.addEventListener('resize',()=>{sizeCanvas();if(!st&&screen==='intro'&&mapRedraw)mapRedraw();});
@@ -1187,6 +1232,7 @@ function gauge(e){
 function renderPanel(){
   const P=document.getElementById('panel');if(!P)return;
   const editable=st.phase==='alloc'||st.phase==='levelup', lv=st.phase==='levelup', T=TYPES[st.type];
+  {const sb=document.getElementById('steps');if(sb)sb.outerHTML=stepBar(st.phase==='alloc'?2:3);}
   const L=alive(), rooted=L.filter(p=>p.stage>=2).length, leaders=L.filter(p=>p.stage===3).length;
   document.getElementById('mt').innerHTML=`모임 ${st.meeting}/${MEETINGS}`;
   {const e=Math.round(st.E);
@@ -1313,7 +1359,7 @@ function renderReport(){
   const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
   const GOAL=60;
-  app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button></nav><section class="case3" style="--accent:${TPAL[r.type].dark};--accent-ink:${TPAL[r.type].ink};--accent-bg:${TPAL[r.type].bg}">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${stepBar(4)}</nav><section class="case3" style="--accent:${TPAL[r.type].dark};--accent-ink:${TPAL[r.type].ink};--accent-bg:${TPAL[r.type].bg}">
     <div class="c3-l">
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
