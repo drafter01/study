@@ -759,6 +759,18 @@ body{background:var(--page)}
 .c3-l .q2 small{font-size:13px}
 .c3-l .q2 b{font-size:clamp(28px,2.3vw,36px);line-height:1.28}
 @media (prefers-reduced-motion:reduce){.panel.need-pts .pcard:has(.sk-head){animation:none}}
+
+/* ───────── v2.17 시뮬레이션 영역 가운데 큰 Start, 패널 버튼은 키 컬러 ───────── */
+.cstart{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:3;display:none}
+.cstart.on{display:block}
+.cstart.low{top:auto;bottom:40px;transform:translateX(-50%)}
+.cs-hint{display:inline-block;background:var(--card);border-radius:999px;padding:14px 26px;font-weight:700;font-size:18px;color:var(--soft);box-shadow:0 6px 20px rgba(0,0,0,.08);white-space:nowrap}
+.cs-go{display:flex;align-items:center;gap:28px;border:0;border-radius:999px;background:var(--accent);color:#fff;padding:22px 34px 22px 40px;font-family:var(--f-head);font-weight:700;font-size:30px;letter-spacing:-.02em;cursor:pointer;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 40%,transparent);animation:csp 1.8s ease-in-out infinite;white-space:nowrap}
+.cs-go:hover{filter:brightness(1.06)}
+.cs-go span:last-child{font-size:.7em}
+@keyframes csp{50%{transform:scale(1.04)}}
+.panel #go:not(:disabled){background:var(--accent)}
+@media (prefers-reduced-motion:reduce){.cs-go{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1203,7 +1215,7 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
+      <div class="cstart" id="cstart"></div><div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
       <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
@@ -1253,6 +1265,15 @@ function gauge(e){
   const N=12,on=Math.ceil(e/100*N),c=e>=30?'var(--ink)':'var(--red)';
   return `<div class="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${e}" aria-label="운영자 에너지">${Array.from({length:N},(_,i)=>`<i style="${i<on?`background:${c}`:''}"></i>`).join('')}</div>`;
 }
+function syncStart(){
+  const c=document.getElementById('cstart');if(!c||!st)return;
+  const editable=st.phase==='alloc'||st.phase==='levelup',lv=st.phase==='levelup';
+  c.className='cstart'+(editable?' on':'')+(lv?' low':'')+(editable&&!st.points?' ready':'');
+  if(!editable){c.innerHTML='';return;}
+  c.innerHTML=st.points?`<span class="cs-hint">← 포인트 ${st.points}개를 더 나눠 주세요</span>`
+    :`<button class="cs-go" id="cs-go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`;
+  const b=document.getElementById('cs-go');if(b)b.onclick=run;
+}
 function renderPanel(){
   const P=document.getElementById('panel');if(!P)return;
   const editable=st.phase==='alloc'||st.phase==='levelup', lv=st.phase==='levelup', T=TYPES[st.type];
@@ -1295,9 +1316,10 @@ function renderPanel(){
       if(sv)sv.innerHTML=`${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}`;
       const pt=P.querySelector('.pts3');if(pt){pt.innerHTML=`남은 포인트 <b>${st.points}</b>`;pt.classList.toggle('zero',!st.points);}
       const go=document.getElementById('go');if(go){go.disabled=!!st.points;go.firstElementChild.textContent=st.points?`포인트 ${st.points}개를 더 나눠 주세요`:(lv?'남은 모임 4번 진행':'Start');}
-      P.classList.toggle('need-pts',st.points>0);};
+      P.classList.toggle('need-pts',st.points>0);syncStart();};
     inp.onchange=()=>{const k=inp.dataset.k;renderPanel();const again=document.getElementById('r-'+k);if(again)again.focus();};});
   const go=document.getElementById('go');if(go)go.onclick=run;
+  syncStart();
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
 function run(){
