@@ -478,7 +478,7 @@ body{background:var(--page)}
 
 /* ───────── v1.1 결과는 동심원 쪽, 강조색은 하나, 스킬은 아이콘 ───────── */
 :root{--accent:#2f6fe0}
-.goal3 mark{box-shadow:none;color:var(--accent)}
+.goal3 mark{box-shadow:none;color:inherit;background:none}
 .sic{width:18px;height:18px;flex:none}
 .sk-name{gap:6px}
 .c2-skill .cell b .sic{width:16px;height:16px}
@@ -499,6 +499,17 @@ body{background:var(--page)}
 .ov .info .tip{z-index:30}
 .ov-e .info .tip{top:auto;bottom:calc(100% + 8px)}
 .lvl2{background:#eef3ff}
+
+/* ───────── v1.2 결과 세 개는 동심원 위에 한 줄로 묶음 ───────── */
+.ovbar{position:absolute;left:14px;right:14px;top:14px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);gap:8px;z-index:2}
+@media (max-width:1100px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
+.ovbar .ov{position:static;width:auto;align-content:start}
+.ovbar .ov-e{gap:6px}
+.ovbar .hero-n{font-size:clamp(44px,4.6vw,64px)}
+.ovbar .ov-r .hero-n{color:var(--ink)}
+.ovbar .info .tip{top:calc(100% + 8px);bottom:auto}
+.ovbar .ov-e .info .tip{left:auto;right:-8px}
+.ovbar .ov-e .gauge{margin-top:auto}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -876,9 +887,9 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ov ov-l"><small>지금 남아 있는 관계${info('파란 머리의 사람: 자리 잡았거나 함께 이끄는 사람이에요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-l"><small>지금 남아 있는 관계${info('파란 머리의 사람: 자리 잡았거나 함께 이끄는 사람이에요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b><span class="steps" id="ovS"></span></div>
-      <div class="ov ov-e" id="ovE"></div>
+      <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
         <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
     <div class="hints"><span class="dots">●●●●</span><span>NAVIGATION</span><span><kbd>×</kbd>슬라이더로 포인트 나누기</span><span><kbd>○</kbd>모임 시작</span><span><kbd>←</kbd>처음 화면</span><span class="r">${T.code} · ${T.name} · 은유적 모델이에요</span></div>`;
@@ -940,7 +951,7 @@ function renderPanel(){
       <div class="ph"><h3>스킬 설계</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
       ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><span class="sk-name">${sicon(s.k)}<label for="r-${s.k}">${s.name}</label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <div class="sk-row"><span class="sk-name"><label for="r-${s.k}">${s.name}</label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
@@ -998,7 +1009,7 @@ function figure(x,y,r,head,hollow,a){
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
   sizeCanvas();
-  const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.74,cx=W/2,cy=H/2+Math.min(W,H)*.02;
+  const d=window.devicePixelRatio||1,W=canvas.width,H=canvas.height,ob=document.getElementById('ovbar'),top=ob?(ob.offsetTop+ob.offsetHeight)*d:0,AH=H-top,S=Math.min(W,AH)/2*.86,cx=W/2,cy=top+AH/2;
   ctx.clearRect(0,0,W,H);
   // 구역: 검은 실선 동심원
   const B=[.86,.665,.48,.305,.09];
@@ -1014,7 +1025,7 @@ function loop(){
     const ax=cx+a.x*S,ay=cy+a.y*S,bx=cx+b.x*S,by=cy+b.y*S,qx=cx+(a.x+b.x)/2*S*.72,qy=cy+(a.y+b.y)/2*S*.72;
     ctx.lineCap='round';ctx.globalAlpha=Math.min(a.alpha,b.alpha);
     ctx.strokeStyle='rgba(17,17,17,.26)';ctx.lineWidth=1.4*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();
-    if(fresh>0){ctx.strokeStyle=ACC;ctx.globalAlpha=Math.min(a.alpha,b.alpha)*fresh;ctx.lineWidth=2.6*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();}}
+    if(fresh>0){ctx.strokeStyle='rgba(17,17,17,.75)';ctx.globalAlpha=Math.min(a.alpha,b.alpha)*fresh;ctx.lineWidth=2.6*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();}}
   ctx.globalAlpha=1;
   // 가운데: 모임이 함께하는 활동 (모임 고르기 카드의 그림과 같은 선)
   ctx.beginPath();ctx.arc(cx,cy,30*d,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();
@@ -1056,7 +1067,7 @@ function renderReport(){
         <div class="cell"><small>관계의 선</small><b>${r.links}개</b></div>
         <div class="cell"><small>함께 이끄는 사람</small><b>${r.leaders}명</b></div>
         <div class="cell"><small>운영자 에너지</small><b style="${r.energy<30?'color:var(--red)':''}">${r.energy}%</b></div></div>
-      <div class="cgrid c2-skill">${SKILLS.map(s=>`<div class="cell"><small>${s.name}</small><b>${sicon(s.k)}${k[s.k]}</b></div>`).join('')}</div>
+      <div class="cgrid c2-skill">${SKILLS.map(s=>`<div class="cell"><small>${s.name}</small><b>${k[s.k]}</b></div>`).join('')}</div>
       <div class="mm2"><span class="h">공동체 의식 · McMillan &amp; Chavis(1986)의 네 요소 (은유적 추정)</span>
         ${Object.entries(g).map(([n,x])=>`<div class="r"><span>${n}</span><span class="bar"><i style="width:${x}%"></i></span></div>`).join('')}</div>
     </div>
