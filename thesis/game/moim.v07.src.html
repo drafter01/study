@@ -502,7 +502,6 @@ body{background:var(--page)}
 
 /* ───────── v1.2 결과 세 개는 동심원 위에 한 줄로 묶음 ───────── */
 .ovbar{position:absolute;left:14px;right:14px;top:14px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);gap:8px;z-index:2}
-@media (max-width:1100px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
 .ovbar .ov{position:static;width:auto;align-content:start}
 .ovbar .ov-e{gap:6px}
 .ovbar .hero-n{font-size:clamp(44px,4.6vw,64px)}
@@ -562,7 +561,11 @@ body{background:var(--page)}
 .ovbar .ov-e .hero-n.low{color:var(--red)}
 .ovbar .ov-e .gauge{margin-top:6px}
 .ovbar .ov-e .info .tip{left:-8px;right:auto}
-@media (max-width:1100px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
+
+/* ───────── v1.8 결과 세 칸은 항상 한 줄 (아주 좁은 화면만 쌓음), 아이맥처럼 넓은 화면은 더 넓게 ───────── */
+.wrap{max-width:min(1720px,100%)}
+@media (max-width:720px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
+@media (min-width:1600px){.tool{grid-template-columns:400px minmax(0,1fr)}.canvas-wrap{min-height:min(82vh,900px)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
