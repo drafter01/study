@@ -698,6 +698,10 @@ body{background:var(--page)}
 .ovclock .hand{position:absolute;left:50%;top:58%;width:4px;height:34%;background:var(--ink);border-radius:2px;transform-origin:50% 0;transform:translateX(-50%) rotate(calc(var(--a) + 180deg));transition:transform .6s ease;z-index:1}
 .ovclock::after{content:"";position:absolute;left:50%;top:58%;width:14px;height:14px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);z-index:1}
 .ovclock .hero-n{position:absolute;right:16px;bottom:12px;z-index:2;font-size:clamp(40px,3.4vw,56px)}
+
+.c3-l .q2{padding:22px 24px 26px;gap:12px}
+.c3-l .q2 b{font-size:clamp(24px,2.1vw,32px);font-weight:800;line-height:1.3;letter-spacing:-.02em;text-wrap:balance;word-break:keep-all}
+.c3-l .q2{background:var(--accent)}.c3-l .q2 small{color:#fff;opacity:.75}.c3-l .q2 b{color:#fff}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1296,7 +1300,7 @@ function renderReport(){
   const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
   const GOAL=60;
-  app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button></nav><section class="case3" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button></nav><section class="case3" style="--accent:${TPAL[r.type].dark};--accent-ink:${TPAL[r.type].ink};--accent-bg:${TPAL[r.type].bg}">
     <div class="c3-l">
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
