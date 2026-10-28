@@ -643,6 +643,10 @@ body{background:var(--page)}
 .c3-l h1.bigt sup{white-space:nowrap}
 .one{font-weight:800;font-size:clamp(34px,3.2vw,52px);line-height:1.12;letter-spacing:-.03em;margin-top:6px}
 .c3-r .mm3{margin-top:30px}
+
+.cname{display:flex;align-items:baseline;gap:10px;margin:0}
+.cname b{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.cname span{font-family:var(--f-head);font-weight:600;font-size:13px;color:var(--soft)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1210,7 +1214,6 @@ function renderReport(){
   app.innerHTML=`<section class="case3" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
     <div class="c3-l">
       <div class="photo2"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
-      <h1 class="bigt">${T.name}<sup>No.${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</sup></h1>
       <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
       ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
       <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
@@ -1218,7 +1221,7 @@ function renderReport(){
     </div>
     <div class="c3-r">
       <div class="diag">
-        <div><small class="lbl">진단</small><h2 class="one">${V.t}</h2><p>${V.d}</p></div>
+        <div><p class="cname"><b>${T.name}</b><span>No.${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span></p><h2 class="one">${V.t}</h2><p>${V.d}</p></div>
         <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데</span></div>
       </div>
       <div class="cgrid c2-cells">
