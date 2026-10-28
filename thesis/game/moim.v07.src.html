@@ -1143,7 +1143,7 @@ function renderPanel(){
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
         <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
-      ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
+      ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
 `;
   P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
