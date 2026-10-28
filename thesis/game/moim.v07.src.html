@@ -672,6 +672,9 @@ body{background:var(--page)}
 .trait.neg b{color:var(--red)}
 .eh{font-family:var(--f-head);font-weight:700;font-size:22px;letter-spacing:-.02em}
 .goal-t{font-size:18px;font-weight:800;line-height:1.45}
+
+.goal-t{font-weight:500}
+.e-bar{background:transparent!important;padding:0 4px!important;box-shadow:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1125,9 +1128,8 @@ function renderPanel(){
   const e=Math.round(st.E);
   P.innerHTML=`
     <section class="pcard">
-      <div class="cat">${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]}</div>
+      <div class="cat">${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]} · ${T.place} · ${T.when} ${T.time}</div>
       <h2 class="pname">${T.name}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</h2>
-      <div class="cgrid tfacts"><div class="cell"><small>장소</small><b>${T.place}</b></div><div class="cell"><small>모임</small><b>${T.when} ${T.time}</b></div></div>
       <p class="trait"><b>특징</b>${T.plus}</p><p class="trait neg"><b>주의</b>${T.minus}</p>
     </section>
     <section class="pcard"><h3 class="eh">Goal</h3><p class="goal-t">여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많은 모임</p></section>
