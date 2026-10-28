@@ -771,6 +771,13 @@ body{background:var(--page)}
 @keyframes csp{50%{transform:scale(1.04)}}
 .panel #go:not(:disabled){background:var(--accent)}
 @media (prefers-reduced-motion:reduce){.cs-go{animation:none}}
+
+/* ───────── v2.17 스킬 막대 양옆 − / + 버튼 ───────── */
+.sk-ctl{display:grid;grid-template-columns:24px minmax(0,1fr) 24px;align-items:center;gap:10px;margin-top:-2px}
+.pcard .sk{padding:4px 0 3px;gap:2px}
+.stp{width:24px;height:24px;border-radius:50%;border:0;background:var(--cell);color:var(--ink);font-family:var(--f-head);font-weight:700;font-size:17px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.stp:hover:not(:disabled){background:var(--ink);color:#fff}
+.stp:disabled{opacity:.35;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1302,7 +1309,7 @@ function renderPanel(){
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
         <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <p class="sk-sub">${s.sub}</p>
-        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
+        <div class="sk-ctl"><button class="stp" data-k="${s.k}" data-d="-1" aria-label="${s.en} 1 내리기" ${editable&&v>lk?'':'disabled'}>−</button><input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}><button class="stp" data-k="${s.k}" data-d="1" aria-label="${s.en} 1 올리기" ${editable&&v<MAXLV&&st.points>0?'':'disabled'}>+</button></div></div>`;}).join('')}
       ${editable?(st.points?`<button class="btn" id="go" disabled><span>포인트 ${st.points}개를 더 나눠 주세요</span><span>▶</span></button>`:`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`):`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
 `;
@@ -1318,6 +1325,9 @@ function renderPanel(){
       const go=document.getElementById('go');if(go){go.disabled=!!st.points;go.firstElementChild.textContent=st.points?`포인트 ${st.points}개를 더 나눠 주세요`:(lv?'남은 모임 4번 진행':'Start');}
       P.classList.toggle('need-pts',st.points>0);syncStart();};
     inp.onchange=()=>{const k=inp.dataset.k;renderPanel();const again=document.getElementById('r-'+k);if(again)again.focus();};});
+  // − / + 버튼: 막대와 같은 규칙으로 한 칸씩
+  P.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d,inp=document.getElementById('r-'+k);
+    inp.value=+inp.value+d;inp.oninput();renderPanel();const again=P.querySelector(`.stp[data-k="${k}"][data-d="${d}"]`);if(again&&!again.disabled)again.focus();});
   const go=document.getElementById('go');if(go)go.onclick=run;
   syncStart();
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
