@@ -4,14 +4,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Black+Han+Sans&family=Inter+Tight:wght@500;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap">
 <style>
-@font-face{font-family:"Pretendard";src:url(data:font/woff2;base64,__PRETENDARD__) format("woff2");font-weight:45 920;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_R__) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_B__) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_EB__) format("woff2");font-weight:800;font-display:swap}
 /* 컨셉: 흰 바탕 + 검은 직선 + 원색 포인트 (포스터형). 제목은 굵은 그로테스크와 네모난 한글, 본문은 전부 Pretendard
    레이아웃: 첫 화면 = 포스터처럼 위아래 큰 제목 사이에 데이터 / 설계 = 왼쪽 패널, 오른쪽 캔버스 / 결과 = 기록지 */
 :root{
   color-scheme:light;
   --paper:#ffffff; --ink:#111111; --mute:#6f6f6f; --rule:#111111; --hair:#d9d9d9;
   --red:#e8372b; --blue:#2f6fe0; --yellow:#f6b72c; --green:#2a9a46; --violet:#6b5ce7; --orange:#f05a28;
-  --f-body:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"Gothic A1",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --f-latin:"Archivo","Pretendard",sans-serif;
   --f-kdisp:"Black Han Sans","Pretendard",sans-serif;
   --f-head:"Inter Tight","Pretendard",sans-serif;
@@ -264,6 +266,438 @@ dl{margin:0}
 .strip.blue{background:var(--blue);color:#fff}
 .r-actions{display:grid;gap:8px}
 .r-note{font-size:12px;color:var(--mute)}
+
+/* ───────── v0.7 강조 원칙 ─────────
+   1) 화면마다 주인공은 한두 개: 큰 숫자나 큰 글자로만 강조
+   2) 포인트 색은 의미가 있을 때만: 모임 종류(작은 점), 결과 유형, 경고(빨강)
+   3) 나머지 정보는 회색 칸(라벨 + 값)으로 낮춤. 선은 1px */
+:root{--cell:#f2f2ef;--line:#111;--soft:#8a8a86}
+.latin{font-family:var(--f-head);font-weight:600;letter-spacing:-.02em}
+.kdisp{font-family:var(--f-body);font-weight:800}
+.hero-n{font-family:var(--f-head);font-weight:500;letter-spacing:-.05em;line-height:.88;font-variant-numeric:tabular-nums}
+.cgrid{display:grid;gap:6px}
+.cell{background:var(--cell);border-radius:10px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.cell small{font-size:11.5px;color:var(--soft);font-weight:700}
+.cell b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+/* 첫 화면 */
+.intro{border-width:1px}
+.ucard{border-radius:10px}
+.ucard i.av{width:10px;height:10px;border-radius:50%;border:0}
+.ucard{grid-template-columns:10px minmax(0,1fr) auto}
+.istats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.istats div{background:var(--cell);border-radius:10px;padding:8px 10px}
+.istats b{font-size:26px}
+.dlist{color:var(--soft)}
+.dlist b{color:var(--ink)}
+.dist{height:8px;border-radius:4px;overflow:hidden}
+/* 모임 고르기 */
+.entry{border-width:1px}
+.ecard{border-radius:16px;overflow:hidden;border:1px solid #d6d6d2}
+.ecard:hover,.ecard:focus-visible{box-shadow:0 0 0 1px var(--ink),0 10px 24px rgba(0,0,0,.10)}
+.e-img{border-bottom:0;margin:8px 8px 0;border-radius:10px;background:#fafaf8}
+.e-top{position:absolute;left:10px;top:10px;display:flex;gap:6px}
+.pill{background:#fff;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.e-head{padding:12px 14px 4px;display:grid;gap:4px}
+.e-head .code{font-family:var(--f-cond);font-weight:700;font-size:clamp(52px,6vw,76px);line-height:.85;letter-spacing:-.01em}
+.e-head .sub{font-size:13px;color:var(--soft);font-weight:700}
+.e-cells{grid-template-columns:repeat(3,minmax(0,1fr));padding:8px 8px 0}
+.e-cells .cell b{font-family:var(--f-head);font-weight:600;font-size:24px;letter-spacing:-.02em}
+.e-cells .cell b em{font-style:normal;font-size:13px;color:var(--soft);font-weight:600;margin-left:2px}
+.e-txt{padding:10px 14px 12px}
+.e-txt .neg b{color:var(--red)}
+.e-go{background:var(--ink)!important;margin:0 8px 8px;border-radius:10px}
+/* 설계 화면 */
+.tool{border-width:1px}
+.panel{border-right-width:1px;gap:12px}
+.sec-h{border-top-width:1px;font-family:var(--f-head);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft)}
+.p-type{background:transparent;color:var(--ink);padding:0;font-style:normal}
+.p-type b{font-family:var(--f-cond);font-weight:700;font-size:44px;line-height:.9}
+.p-name{border:0;background:var(--cell);border-radius:10px}
+.goal{background:var(--cell);border-radius:10px;padding:8px 10px;font-size:13.5px;font-weight:700;line-height:1.45}
+.goal mark{background:none;color:inherit;box-shadow:inset 0 -6px 0 #ffe08a}
+.pts2{display:flex;justify-content:space-between;align-items:end;background:var(--cell);border-radius:10px;padding:8px 12px}
+.pts2 span{font-size:13px;font-weight:700;color:var(--soft)}
+.pts2 b{font-size:54px}
+.pts2.zero b{color:#c4c4c0}
+.sk-name{font-size:14.5px}
+.sk-name .dot{width:9px;height:9px}
+.sk-val{font-family:var(--f-head);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums}
+.sk-val em{font-style:normal;font-size:12px;color:var(--soft)}
+.sk-val ins{text-decoration:none;color:var(--blue);font-size:13px;margin-left:4px}
+input[type=range]{--c:var(--ink)!important}
+input[type=range]::-webkit-slider-thumb{border-radius:50%;width:16px;height:16px;border:0;background:var(--ink)}
+input[type=range]::-moz-range-thumb{border-radius:50%;border:0;background:var(--ink)}
+.ebar{border:0;background:#e4e4e0;height:6px;border-radius:3px;overflow:hidden}
+.ebar i{background:var(--ink)}
+.e-row{display:flex;justify-content:space-between;align-items:baseline}
+.e-row b{font-family:var(--f-head);font-weight:600;font-size:22px}
+.e-row.low b{color:var(--red)}
+.log .o{color:var(--ink)}
+.log{border:0;background:var(--cell);border-radius:10px;font-size:12px;color:#555}
+.btn{border-width:1px;border-radius:10px}
+.lvl2{background:var(--cell);border-radius:12px;padding:10px 12px;display:grid;gap:6px;border-left:4px solid var(--blue)}
+.lvl2 small{font-family:var(--f-head);font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--blue)}
+.lvl2 .row2{display:flex;align-items:end;gap:10px}
+.lvl2 b{font-size:56px;color:var(--blue)}
+.lvl2 span{font-size:13px;font-weight:700;padding-bottom:6px}
+.lvl2 p{font-size:14px;font-weight:700;line-height:1.45}
+.c-hero{position:absolute;right:18px;top:12px;text-align:right;display:grid;justify-items:end;gap:2px;pointer-events:none}
+.c-hero small{font-size:12px;font-weight:700;color:var(--soft)}
+.c-hero b{font-size:clamp(56px,7vw,96px)}
+.c-hero span{font-size:12.5px;font-weight:700}
+.c-top{right:auto}
+.c-cap #cap{border-width:1px;border-radius:10px}
+.canvas-wrap::before{display:none}
+/* 결과 */
+.case2{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) minmax(0,.85fr);gap:22px;align-items:start}
+@media (max-width:980px){.case2{grid-template-columns:minmax(0,1fr)}}
+.c2-l{display:grid;gap:12px}
+.c2-l .no{font-family:var(--f-head);font-weight:700;font-size:13px;color:var(--soft);letter-spacing:.04em}
+.c2-l h1{font-weight:800;font-size:clamp(34px,4vw,48px);line-height:1.05}
+.vchip{justify-self:start;border-radius:999px;padding:5px 14px;font-weight:800;font-size:15px;color:#fff}
+.c2-l p{font-size:15px;line-height:1.55}
+.photo2{border:1px solid #d6d6d2;border-radius:14px;overflow:hidden;background:#fff;max-width:340px}
+.photo2 img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.photo2 .cap{border-top:1px solid #e3e3df;padding:6px 10px;font-size:12px;font-weight:700;display:flex;justify-content:space-between;color:var(--soft)}
+.c2-m{border:1px solid #d6d6d2;border-radius:16px;padding:16px;display:grid;gap:12px}
+.big2{display:grid;gap:2px}
+.big2 small{font-size:13px;font-weight:700;color:var(--soft)}
+.big2 .hero-n{font-size:clamp(110px,14vw,180px)}
+.big2 .hero-n em{font-style:normal;font-size:.28em;letter-spacing:0;margin-left:6px;font-family:var(--f-body);font-weight:800}
+.big2 span{font-size:14px;font-weight:700}
+.c2-cells{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:620px){.c2-cells{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.c2-skill{grid-template-columns:repeat(5,minmax(0,1fr))}
+.c2-skill .cell b{display:flex;align-items:center;gap:6px}
+.mm2{display:grid;gap:7px}
+.mm2 .h{font-size:12px;font-weight:700;color:var(--soft)}
+.mm2 .r{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;align-items:center;font-size:13.5px;font-weight:700}
+.mm2 .bar{height:6px;background:#e4e4e0;border-radius:3px;overflow:hidden}
+.mm2 .bar i{display:block;height:100%;background:var(--ink)}
+.c2-r{display:grid;gap:12px}
+.q2{border:1px solid var(--ink);border-radius:16px;padding:14px 16px;display:grid;gap:6px}
+.q2 small{font-family:var(--f-head);font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--soft)}
+.q2 b{font-size:20px;font-weight:800;line-height:1.4}
+.c2-r .cell p{font-size:13px;line-height:1.5;font-weight:700}
+
+/* ───────── v0.8 부드러운 상자: 검은 선 없이, 큰 radius의 흰 상자를 따뜻한 회색 바탕 위에 ───────── */
+:root{--page:#ecebe7;--card:#ffffff;--cell:#f2f1ed;--r-lg:24px;--r-md:16px;--r-sm:12px}
+body{background:var(--page)}
+.wrap{padding-block:16px 28px}
+.btn{border:0;border-radius:var(--r-sm)}
+.btn.ghost{background:var(--card)}
+.btn:disabled{background:#cfcec9;color:#fff;opacity:1}
+.lab{border-top:0;padding-top:0}
+/* 첫 화면 */
+.intro{border:0;gap:10px;min-height:min(88vh,780px)}
+.map{border:0!important;background:var(--card);border-radius:var(--r-lg)}
+.head{background:var(--card);border-radius:var(--r-lg);overflow:hidden}
+.h-bot{border-top:0;padding-top:4px}
+.ucard{border:0;border-radius:var(--r-sm);box-shadow:0 6px 20px rgba(0,0,0,.10)}
+.maplab{border-radius:var(--r-sm);padding:6px 8px}
+.istats div{border-radius:var(--r-sm)}
+/* 모임 고르기 */
+.entry{border:0;display:grid;gap:10px}
+.e-bar{border:0;background:var(--card);border-radius:999px;padding:10px 18px}
+.e-cards{padding:0}
+.ecard{border:0;border-radius:var(--r-lg)}
+.ecard:hover,.ecard:focus-visible{box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.e-img{border-radius:var(--r-md);margin:10px 10px 0}
+.e-cells{padding:8px 10px 0}
+.e-cells .cell{border-radius:var(--r-sm)}
+.e-go{margin:0 10px 10px;border-radius:var(--r-sm)}
+.e-foot{padding:0}
+/* 설계 화면 */
+.tool{border:0;gap:10px;grid-template-columns:350px minmax(0,1fr)}
+@media (max-width:820px){.tool{grid-template-columns:minmax(0,1fr)}}
+.panel{border:0!important;background:var(--card);border-radius:var(--r-lg)}
+.canvas-wrap{border-radius:var(--r-lg);overflow:hidden;background-color:var(--card);background-image:radial-gradient(#e6e5e0 1px,transparent 1px);background-size:20px 20px}
+.canvas-wrap::after{display:none}
+.sec-h{border-top:0;padding-top:2px}
+.p-name,.goal,.pts2,.log,.lvl2{border-radius:var(--r-sm)}
+.lvl2{border-left:0;background:#eef3ff}
+.c-cap #cap{border:0;border-radius:var(--r-sm);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.hints{border:0;background:var(--card);border-radius:999px;margin-top:10px;padding:8px 18px}
+.hints kbd{border-color:#9a9a96}
+/* 결과 */
+.c2-l h1{margin-top:2px}
+.photo2{border:0;border-radius:var(--r-lg)}
+.photo2 .cap{border-top:0;background:var(--cell)}
+.c2-m{border:0;background:var(--card);border-radius:var(--r-lg);padding:18px}
+.c2-m .cell{border-radius:var(--r-sm)}
+.q2{border:0;background:var(--card);border-radius:var(--r-lg)}
+.c2-r .cell{background:var(--card);border-radius:var(--r-md);padding:12px 14px}
+
+/* ───────── v0.9 왼쪽 패널을 상자 3개로: 지금 상황 / 스킬 설계 / 운영자 에너지 ───────── */
+.panel{background:transparent!important;padding:0;gap:10px;border-radius:0}
+.pcard{background:var(--card);border-radius:var(--r-lg);padding:16px;display:grid;gap:10px;align-content:start}
+.cat{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--soft)}
+.pname{font-size:22px;font-weight:800;line-height:1.2}
+.goal3{background:var(--cell);border-radius:var(--r-sm);padding:10px 12px;display:grid;gap:2px}
+.goal3 small{font-size:11.5px;font-weight:700;color:var(--soft)}
+.goal3 p{font-size:15.5px;font-weight:800;line-height:1.4}
+.goal3 mark{background:none;color:inherit;box-shadow:inset 0 -7px 0 #ffe08a}
+.now{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:6px}
+.now>div{background:var(--cell);border-radius:var(--r-sm);padding:10px 12px;display:grid;gap:2px;align-content:start}
+.now small{font-size:11.5px;font-weight:700;color:var(--soft)}
+.now .hero-n{font-size:60px}
+.now .hero-n em{font-style:normal;font-size:.3em;letter-spacing:0;margin-left:3px;font-family:var(--f-body);font-weight:800;color:var(--soft)}
+.now span{font-size:12px;font-weight:700;color:var(--soft)}
+.steps{display:flex;gap:3px;margin-top:4px}
+.steps i{flex:1;height:6px;border-radius:3px;background:#dcdbd5}
+.steps i.on{background:var(--ink)}
+.steps i.half{margin-right:4px}
+.msg{font-size:14px;font-weight:700;line-height:1.45}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ph h3{font-size:16px;font-weight:800}
+.pts3{background:var(--ink);color:#fff;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700}
+.pts3 b{font-family:var(--f-head);font-weight:600;font-size:16px;margin-left:4px}
+.pts3.zero{background:var(--cell);color:var(--soft)}
+.e-num{font-family:var(--f-head);font-weight:600;font-size:24px;letter-spacing:-.02em}
+.e-num.low{color:var(--red)}
+.gauge{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
+.gauge i{height:22px;border-radius:7px;background:#e6e5df;transition:background .4s}
+
+/* ───────── v1.0 설명은 (i) 아이콘으로, 움직임으로 이미 보이는 것은 글로 다시 말하지 않음 ───────── */
+.info{position:relative;display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#e4e3dd;color:#6b6b67;font-family:var(--f-head);font-weight:700;font-size:11px;font-style:italic;cursor:help;vertical-align:middle;margin-left:6px;flex:none}
+.info:hover,.info:focus-visible,.info:focus{background:var(--ink);color:#fff;outline:none}
+.info .tip{position:absolute;left:-8px;top:calc(100% + 8px);width:240px;background:#fff;color:var(--ink);border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.16);padding:10px 12px;font-family:var(--f-body);font-style:normal;font-weight:700;font-size:13px;line-height:1.5;letter-spacing:0;text-align:left;text-transform:none;z-index:20;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s;pointer-events:none}
+.info:hover .tip,.info:focus-visible .tip,.info:focus .tip{opacity:1;visibility:visible;transform:none}
+.info .tip .neg{color:var(--red)}
+.info .tip small{color:var(--soft);font-size:11.5px}
+.pname{display:flex;align-items:center}
+.sk-name label{cursor:pointer}
+.sk{gap:2px}
+.c-top,.c-cap #cap,.c-key,.hints,.e-mid,.e-foot>span{display:none!important}
+.c-cap{pointer-events:auto;left:auto;right:14px;bottom:14px}
+.c-key2 .tip{left:auto;right:-8px;top:auto;bottom:calc(100% + 8px)}
+.e-head{position:relative}
+.e-head .ev{position:absolute;right:14px;top:16px}
+.e-head .ev .tip{left:auto;right:-8px}
+
+/* ───────── v1.1 결과는 동심원 쪽, 강조색은 하나, 스킬은 아이콘 ───────── */
+:root{--accent:#2f6fe0}
+.goal3 mark{box-shadow:none;color:inherit;background:none}
+.sic{width:18px;height:18px;flex:none}
+.sk-name{gap:6px}
+.c2-skill .cell b .sic{width:16px;height:16px}
+.ov{position:absolute;background:var(--cell);border-radius:var(--r-md);padding:12px 14px;display:grid;gap:2px;align-content:start;z-index:2}
+.ov-l{left:14px;top:14px;width:min(270px,42%)}
+.ov-r{right:14px;top:14px;width:min(190px,30%)}
+.ov-e{left:14px;bottom:14px;width:min(300px,46%);gap:8px}
+.ov small{font-size:12px;font-weight:700;color:var(--soft);display:flex;align-items:center}
+.ov .hero-n{font-size:clamp(52px,6vw,76px)}
+.ov-l .hero-n,.big2 .hero-n{color:var(--accent)}
+.ov .hero-n em{font-style:normal;font-size:.3em;letter-spacing:0;margin-left:3px;font-family:var(--f-body);font-weight:800;color:var(--soft)}
+.ov span{font-size:12px;font-weight:700;color:var(--soft)}
+.ov .msg{margin-top:4px;font-size:13.5px}
+.ov .steps{display:flex;gap:3px;margin-top:6px}
+.canvas-wrap{min-height:min(80vh,740px)}
+.ov-e .gauge i{height:16px;border-radius:5px;background:#dcdbd5}
+.ov-e .e-num{font-size:20px}
+.ov .info .tip{z-index:30}
+.ov-e .info .tip{top:auto;bottom:calc(100% + 8px)}
+.lvl2{background:#eef3ff}
+
+/* ───────── v1.2 결과 세 개는 동심원 위에 한 줄로 묶음 ───────── */
+.ovbar{position:absolute;left:14px;right:14px;top:14px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);gap:8px;z-index:2}
+.ovbar .ov{position:static;width:auto;align-content:start}
+.ovbar .ov-e{gap:6px}
+.ovbar .hero-n{font-size:clamp(44px,4.6vw,64px)}
+.ovbar .ov-r .hero-n{color:var(--ink)}
+.ovbar .info .tip{top:calc(100% + 8px);bottom:auto}
+.ovbar .ov-e .info .tip{left:auto;right:-8px}
+.ovbar .ov-e .gauge{margin-top:auto}
+
+/* ───────── v1.3 추상 세로줄 그래픽, 왼쪽 위 뒤로 버튼, 동그라미 사람 ───────── */
+.ecard{background:var(--tbg)}
+.e-img{margin:0;border-radius:0;aspect-ratio:auto;height:150px;background:transparent}
+.e-head .code{color:var(--tink)}
+.e-head .sub{color:color-mix(in srgb,var(--tink) 70%,#fff)}
+.e-cells .cell{background:rgba(255,255,255,.6)}
+.e-txt{color:#222}
+.back{width:34px;height:34px;border-radius:50%;border:0;background:var(--cell);font-size:17px;font-weight:700;display:inline-grid;place-items:center;flex:none;line-height:1}
+.back:hover{background:var(--ink);color:#fff}
+.e-logo{gap:10px}
+.e-logo .back{background:var(--page)}
+.pcard .cat{gap:10px}
+.c2-l .no{display:flex;align-items:center;gap:10px}
+.c2-l .back{background:var(--card)}
+
+/* ───────── v1.4 첫 화면: 모임마다 겹친 원 (단단하면 작고 진하게, 느슨하면 크고 옅게) ───────── */
+.map svg.comms{position:absolute;inset:0;width:100%;height:100%;display:block}
+.maplab2{position:absolute;left:14px;bottom:12px;font-size:11.5px;font-weight:700;color:var(--soft);background:rgba(255,255,255,.85);border-radius:999px;padding:3px 10px}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.legend div{background:var(--cell);border-radius:var(--r-sm);padding:8px;display:grid;justify-items:center;gap:4px;text-align:center}
+.legend svg{width:64px;height:64px;overflow:visible}
+.legend span{font-size:12px;font-weight:700;line-height:1.3}
+
+/* ───────── v1.5 첫 화면은 그림과 질문만, 원 위에 마우스를 올리면 설명 ───────── */
+.comms .cg{cursor:pointer;transition:opacity .2s;outline:none}
+.comms .cg.ex{opacity:.75}
+.comms:hover .cg{opacity:.35}
+.comms .cg:hover,.comms .cg:focus{opacity:1}
+.htip{position:absolute;z-index:5;width:260px;background:#fff;border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.16);padding:10px 12px;display:grid;gap:3px;pointer-events:none;opacity:0;transition:opacity .12s}
+.htip.on{opacity:1}
+.htip small{font-size:11.5px;font-weight:700;color:var(--soft)}
+.htip b{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.htip p{font-size:13px;line-height:1.5}
+.htip span{font-size:11.5px;font-weight:700;color:var(--soft)}
+.maplab2{display:flex;align-items:center;gap:6px;flex-direction:row-reverse}
+.maplab2 .info{margin-left:0}
+.maplab2 .info .tip{top:auto;bottom:calc(100% + 8px)}
+
+/* ───────── v1.6 radius 더 크게 ───────── */
+:root{--r-lg:36px;--r-md:26px;--r-sm:18px}
+.pcard,.panel .pcard{padding:20px}
+.btn{border-radius:999px;padding-inline:20px}
+.ov{padding:16px 18px}
+.goal3,.legend div,.c2-m .cell,.e-cells .cell,.lvl2{border-radius:var(--r-sm)}
+.info .tip,.htip{border-radius:var(--r-sm)}
+
+/* ───────── v1.7 모임 → 머무는 사람 → 운영자 에너지, 셋 다 큰 숫자 ───────── */
+.ovbar{grid-template-columns:minmax(0,.6fr) minmax(0,1.2fr) minmax(0,1.2fr)}
+.ovbar .ov-e .hero-n.low{color:var(--red)}
+.ovbar .ov-e .gauge{margin-top:6px}
+.ovbar .ov-e .info .tip{left:-8px;right:auto}
+
+/* ───────── v1.8 결과 세 칸은 항상 한 줄 (아주 좁은 화면만 쌓음), 아이맥처럼 넓은 화면은 더 넓게 ───────── */
+.wrap{max-width:min(1720px,100%)}
+@media (max-width:720px){.ovbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ovbar .ov-e{grid-column:1/-1}}
+@media (min-width:1600px){.tool{grid-template-columns:400px minmax(0,1fr)}.canvas-wrap{min-height:min(82vh,900px)}}
+
+/* 화면 높이를 꽉 채움 (전시 모니터) */
+@media (min-width:900px){.intro{min-height:calc(100vh - 44px)}.canvas-wrap{min-height:calc(100vh - 44px)!important}}
+
+/* ───────── v2.0 모임별 키 컬러(채도 높게) + 모임 고르기 여백 ───────── */
+.vchip{background:var(--ink)}
+.lvl2{background:var(--accent-bg)}
+.lvl2 small,.lvl2 b{color:var(--accent)}
+.tool .sk-val ins{color:var(--accent)}
+.e-cards{gap:20px}
+.entry{gap:20px}
+.e-bar{padding:12px 20px}
+.e-img{height:180px}
+.e-head{padding:24px 26px 8px;gap:6px}
+.e-head .ev{right:22px;top:26px}
+.e-cells{padding:12px 18px 0;gap:8px}
+.e-cells .cell{padding:12px 14px}
+.e-txt{padding:18px 26px 22px;gap:10px}
+.e-go{margin:0 18px 18px;padding:14px 18px}
+
+/* ───────── v2.1 볼드한 글자 대비: 큰 제목+위첨자, 두 톤 제목, 동그라미 글자 목록 ───────── */
+.bigt{font-weight:800;letter-spacing:-.03em;line-height:1;display:inline-flex;align-items:flex-start}
+.bigt sup{font-family:var(--f-head);font-weight:600;font-size:.26em;color:var(--soft);letter-spacing:0;margin-left:6px;line-height:1.4;vertical-align:top}
+.e-bar{padding:16px 24px;border-radius:var(--r-lg)}
+.e-bar .bigt{font-size:clamp(40px,4.4vw,64px)}
+.e-logo{gap:16px}
+.e-right{display:flex;align-items:center;gap:14px}
+.e-right small{font-family:var(--f-head);font-weight:600;font-size:13px;color:var(--soft)}
+.c2-l h1.bigt{font-size:clamp(40px,4.6vw,64px)}
+.two{font-weight:800;font-size:clamp(34px,3.6vw,52px);line-height:1.08;letter-spacing:-.03em;display:grid}
+.two span{color:#b9b8b2}
+.mm3{display:grid}
+.mm3 .h{font-size:12px;font-weight:700;color:var(--soft);display:flex;align-items:center;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.mm3 .r{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #e3e2dc}
+.mm3 .r i{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-weight:800;font-size:14px;display:grid;place-items:center;opacity:var(--o)}
+.mm3 .r b{font-weight:800;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
+.mm3 .r em{font-style:normal;font-family:var(--f-head);font-weight:500;font-size:clamp(26px,2.4vw,36px);letter-spacing:-.03em;color:rgba(17,17,17,var(--o))}
+
+/* ───────── v2.2 결과 2열: 왼쪽 = 모임 그림과 다음 행동, 오른쪽 = 진단 ───────── */
+.case3{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:16px;align-items:start}
+@media (max-width:900px){.case3{grid-template-columns:minmax(0,1fr)}}
+.c3-l{display:grid;gap:14px}
+.c3-l .no{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-weight:700;font-size:13px;color:var(--soft)}
+.c3-l .back{background:var(--card)}
+.c3-l .photo2{max-width:none}
+.c3-l h1.bigt{font-size:clamp(36px,3.4vw,52px)}
+.c3-l .cell{background:var(--card);border-radius:var(--r-md);padding:12px 16px}
+.c3-l .cell p{font-size:13px;line-height:1.5;font-weight:700}
+.c3-r{background:var(--card);border-radius:var(--r-lg);padding:28px;display:grid;gap:16px}
+.diag{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:end;padding-bottom:6px}
+.diag .lbl{font-size:12px;font-weight:700;color:var(--soft)}
+.diag p{font-size:15px;line-height:1.55;margin-top:10px}
+.diag .big2{justify-items:end;text-align:right}
+.c3-r .big2 .hero-n{font-size:clamp(110px,11vw,190px)}
+.c3-r .two{font-size:clamp(40px,4vw,64px)}
+.goal-k{margin-left:auto;font-size:12px;font-weight:700;color:var(--soft);display:flex;align-items:center;gap:6px}
+.goal-k i{width:2px;height:12px;background:var(--ink);display:inline-block}
+.mm3 .r{grid-template-columns:40px minmax(0,1fr) 130px}
+.mm3 .r i{opacity:1;font-family:var(--f-head);font-size:15px}
+.mm3 .r .w{display:grid;gap:6px}
+.mm3 .r b,.mm3 .r em{color:var(--ink)}
+.mm3 .r em{text-align:right}
+.mm3 .r em small{font-size:.42em;color:var(--soft);margin-left:2px;letter-spacing:0}
+.mm3 .r.ok em,.mm3 .r.ok b{color:var(--accent)}
+.mm3 .r.ok i{background:var(--accent)}
+.track{position:relative;height:6px;border-radius:3px;background:#e6e5df;display:block}
+.track s{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--ink);text-decoration:none}
+.mm3 .r.ok .track s{background:var(--accent)}
+.track u{position:absolute;top:-4px;width:2px;height:14px;background:var(--ink);text-decoration:none}
+
+/* ───────── v2.3 결과 다듬기 ───────── */
+.c3-l .photo2{position:relative;aspect-ratio:1}
+.c3-l .photo2 img{width:100%;height:100%;object-fit:contain}
+.c3-l .photo2 .back{position:absolute;left:16px;top:16px;z-index:1;background:var(--cell)}
+.c3-l h1.bigt sup{white-space:nowrap}
+.one{font-weight:800;font-size:clamp(34px,3.2vw,52px);line-height:1.12;letter-spacing:-.03em;margin-top:6px}
+.c3-r .mm3{margin-top:30px}
+
+.cname{display:flex;align-items:baseline;gap:10px;margin:0}
+.cname b{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.cname span{font-family:var(--f-head);font-weight:600;font-size:13px;color:var(--soft)}
+
+/* ───────── v2.5 Skills: 영문 앞글자 동그라미 + 굵은 영문 이름 목록 ───────── */
+.sk-head{padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.sk-head h3{font-family:var(--f-head);font-weight:700;font-size:22px;letter-spacing:-.02em}
+.pcard .sk{padding:10px 0 8px;border-bottom:1px solid #e3e2dc;gap:6px}
+.sk-name{gap:10px}
+.sk-name .ini{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-family:var(--f-head);font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+.sk-name label{font-family:var(--f-head);font-weight:700;font-size:24px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px}
+.sk-name label small{font-family:var(--f-body);font-weight:700;font-size:13px;color:var(--soft);letter-spacing:0}
+.sk-val{font-size:22px}
+
+/* ───────── v2.6 위쪽 뒤로 버튼, 모임 특성·Goal·Skills 상자 ───────── */
+.topnav{display:flex;align-items:center;margin-bottom:12px}
+@media (min-width:900px){.canvas-wrap{min-height:calc(100vh - 100px)!important}}
+.pcard{gap:8px}.tool .panel{gap:10px}
+.topnav .back{background:var(--card);width:40px;height:40px;font-size:18px}
+.sk-head{border-bottom:0;padding-bottom:4px}
+.pcard .btn#go,.pcard .btn[disabled]{margin-top:16px}
+.tfacts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tfacts .cell b{font-size:15px}
+.trait{font-size:13.5px;line-height:1.5}
+.trait b{font-weight:800;margin-right:8px}
+.trait.neg b{color:var(--red)}
+.eh{font-family:var(--f-head);font-weight:700;font-size:22px;letter-spacing:-.02em}
+.goal-t{font-size:18px;font-weight:800;line-height:1.45}
+
+.goal-t{font-weight:500}
+.e-bar{background:transparent!important;padding:0 4px!important;box-shadow:none}
+
+.ptitle{font-size:clamp(40px,4.4vw,64px);margin:34px 4px 22px}
+.topnav + .entry,.topnav + .case3{margin-top:28px}
+.ptitle sup{white-space:nowrap}
+.pcard .cat{font-size:13px;color:var(--ink);font-weight:700}
+@media (min-width:900px){.canvas-wrap{min-height:calc(100vh - 200px)!important}}
+
+.mclock{display:flex;align-items:center;gap:14px;margin-top:4px}
+.mclock svg{width:clamp(84px,6.4vw,112px);height:auto;flex:none}
+.mclock .hero-n{font-size:clamp(40px,3.6vw,56px)}
+.ovbar{grid-template-columns:minmax(0,.9fr) minmax(0,1.15fr) minmax(0,1.15fr)}
+
+/* ───────── 모임 상자 자체가 시계: 12시부터 시계 방향으로 채워지고 바늘이 돌아요 ───────── */
+@property --p{syntax:'<percentage>';inherits:false;initial-value:0%}
+.ovbar .ov.ovclock,.ovclock{position:relative;overflow:hidden;--a:0deg;
+  background:repeating-conic-gradient(from -.5deg at 50% 58%,rgba(255,255,255,.9) 0 1deg,transparent 1deg 45deg),
+    conic-gradient(from 0deg at 50% 58%,#d9d8d1 0 var(--p),var(--cell) var(--p) 100%);
+  transition:--p .6s ease}
+.ovbar .ov.ovclock{top:auto;right:auto;left:auto;bottom:auto;width:auto;align-self:stretch;min-height:150px}
+.ovclock small{position:relative;z-index:2}
+.ovclock .hand{position:absolute;left:50%;top:58%;width:4px;height:34%;background:var(--ink);border-radius:2px;transform-origin:50% 0;transform:translateX(-50%) rotate(calc(var(--a) + 180deg));transition:transform .6s ease;z-index:1}
+.ovclock::after{content:"";position:absolute;left:50%;top:58%;width:14px;height:14px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);z-index:1}
+.ovclock .hero-n{position:absolute;right:16px;bottom:12px;z-index:2;font-size:clamp(40px,3.4vw,56px)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -291,7 +725,7 @@ const SKILLS=[
   {k:'welcome',en:'Welcome',name:'맞이',c:COL.red,sub:'처음 온 사람이 누군가와 이어져요',down:''},
   {k:'rhythm',en:'Rhythm',name:'리듬',c:COL.blue,sub:'다시 올 이유와 때가 생겨요',down:'맞이 없이 높으면 부담이 돼요'},
   {k:'conn',en:'Connect',name:'연결',c:COL.green,sub:'구성원끼리 관계가 쌓여요',down:'문이 닫히면 배타적이 돼요'},
-  {k:'roles',en:'Roles',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
+  {k:'roles',en:'Share',name:'자리',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
 ];
 const VERDICTS={
   self:{t:'스스로 굴러가는 모임',c:COL.green,d:'운영자가 없어도 누군가 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'새로 이끄는 사람은 앞으로 어디서 나올까요?'},
@@ -301,10 +735,12 @@ const VERDICTS={
   burn:{t:'운영자가 지친 모임',c:COL.yellow,d:'모든 일이 한 사람에게 몰려 운영자가 먼저 지쳤어요. 커뮤니티는 출시 후에도 계속 가꿔야 해요.',q:'조금 더 하고 싶은 사람이 맡을 수 있는 자리가 있었나요?'},
   root:{t:'아직 뿌리내리지 못한 모임',c:COL.mute,d:'사람이 오고 갔지만 자리 잡은 사람이 적어요.',q:'사람들이 다시 와야 할 이유는 무엇인가요?'}
 };
+const VSPLIT={self:['스스로 굴러가는','모임'],quiet:['조용히 자라는','모임'],crowd:['북적이지만','머무르지 않는 모임'],closed:['끈끈하지만','닫힌 모임'],burn:['운영자가','지친 모임'],root:['아직 뿌리내리지','못한 모임']};
 const VORDER=['self','quiet','crowd','closed','burn','root'];
 const STAGE_NAMES=['처음 온 사람','다시 온 사람','자리 잡은 사람','함께 이끄는 사람'];
-const STAGE_C=[COL.paper,COL.blue,COL.green,COL.red];
-const RING=[.76,.57,.39,.22];
+const ACC='#2f6fe0';
+const STAGE_C=['#d9d8d2','#9e9d97',ACC,'#173a86'];
+const RING=[.82,.5,.14,.04];
 const MAXLV=5, START_PTS=8, MEETINGS=8, HALF=4, TICK=1800;
 
 const app=document.getElementById('app');
@@ -323,7 +759,7 @@ function freshState(type){
 function seed(){for(let i=0;i<2;i++)addPerson(2,1);st.links.push([st.people[0].id,st.people[1].id,0]);layout(true);}
 function newGame(type){
   clearInterval(timer);savedId=null;logLines=[];
-  st=freshState(type);seed();
+  st=freshState(type);seed();st.t0=Date.now();
   log(`${TYPES[type].name}을(를) 열었어요. 지금은 나와 친구 2명.`);
   render();
 }
@@ -351,15 +787,16 @@ function layout(snap){
     for(let it=0;it<30&&n>1;it++)for(let i=0;i<n;i++){const j=(i+1)%n;let df=ang[j]-ang[i];if(j===0)df+=TAU;
       if(df<gap){const push=(gap-df)/2;ang[i]-=push;ang[j]+=push;}}
     // 위쪽 쐐기는 구역 이름 자리로 비워 둬요
-    const W0=.7;
+    const W0=0;
     grp.forEach((p,i)=>{const r=RING[s]+(i%2?.02:-.02);const t=(((ang[i]%TAU)+TAU)%TAU)/TAU;const A=-Math.PI/2+W0/2+t*(TAU-W0);
       p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
   }
 }
-function tag(p,text,color){st.tags.push({p,text,color,life:1});}
+function tag(){}
 
 // 한 번의 모임
 function step(){
+  st.prevE=st.E;
   const k=st.skills, eff=st.E<25?.7:1, T=TYPES[st.type];
   let back=0,settle=0,lead=0,gone=0;
   for(const p of alive()){
@@ -454,11 +891,35 @@ plays=loadLocal();
     },()=>{});
   }catch(e){}
 })();
-async function savePlay(rec){
-  if(savedId)return;savedId='pending';
-  if(db){try{const ref=await db.collection('plays').add(rec);savedId=ref.id;return;}catch(e){}}
-  saveLocal(rec);plays=[rec,...plays];savedId='local';
+// 기록 모으기: 로그인 없이 구글 시트(Apps Script 웹 앱)로 보냄. 주소는 moim.html?collect=웹앱URL 로 한 번 열면 기억됨
+const COLLECT_URL=(()=>{try{const q=new URLSearchParams(location.search).get('collect');if(q){localStorage.setItem('moim-collect',q);return q;}return localStorage.getItem('moim-collect')||'';}catch(e){return '';}})();
+function queueGet(){try{return JSON.parse(localStorage.getItem('moim-queue')||'[]');}catch(e){return [];}}
+function queueSet(a){try{localStorage.setItem('moim-queue',JSON.stringify(a.slice(-500)));}catch(e){}}
+async function sendRemote(rec){
+  if(!COLLECT_URL)return false;
+  try{await fetch(COLLECT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});return true;}catch(e){return false;}
 }
+async function flushQueue(){const q=queueGet();if(!q.length||!COLLECT_URL)return;const left=[];for(const r of q){if(!(await sendRemote(r)))left.push(r);}queueSet(left);}
+async function loadRemote(){
+  if(!COLLECT_URL)return;
+  try{const res=await fetch(COLLECT_URL+(COLLECT_URL.includes('?')?'&':'?')+'n=300');const rows=await res.json();
+    if(!Array.isArray(rows))return;const seen=new Set(plays.map(p=>p.id||p.t));
+    plays=plays.concat(rows.filter(r=>r&&!seen.has(r.id||r.t)&&TYPES[r.type]&&VERDICTS[r.verdict])).sort((a,b)=>(b.t||0)-(a.t||0));
+    if(!st&&screen==='intro')renderIntro();}catch(e){}
+}
+async function savePlay(rec){
+  if(savedId)return;savedId='local';
+  saveLocal(rec);plays=[rec,...plays];
+  if(db){try{await db.collection('plays').add(rec);}catch(e){}}
+  if(!(await sendRemote(rec))){const q=queueGet();q.push(rec);queueSet(q);}
+}
+flushQueue();loadRemote();
+// 운영자용: Shift + D 를 누르면 이 컴퓨터에 쌓인 기록을 CSV로 내려받음 (인터넷이 끊겼을 때 대비)
+document.addEventListener('keydown',e=>{if(!(e.shiftKey&&(e.key==='D'||e.key==='d')))return;
+  const K=['open','welcome','rhythm','conn','roles'],rows=loadLocal();
+  const head=['id','t','type','verdict','total','rooted','leaders','links','rate','energy'].concat(K.map(k=>'final_'+k),K.map(k=>'start_'+k),['gain','playSec']);
+  const csv=[head.join(',')].concat(rows.map(r=>[r.id,r.t,r.type,r.verdict,r.total,r.rooted,r.leaders,r.links,r.rate,r.energy].concat(K.map(k=>(r.skills||{})[k]||0),K.map(k=>(r.alloc1||{})[k]||0),[r.gain||0,r.playSec||0]).join(','))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='moim-plays-'+new Date().toISOString().slice(0,10)+'.csv';a.click();});
 
 /* ───────── 화면 전환 ───────── */
 function render(){
@@ -557,6 +1018,29 @@ function drawMap(rows,centers){
     g.fillStyle=cl;g.globalAlpha=Math.min(1,.5+.15*v);g.beginPath();g.arc(i*cell+cell/2,j*cell+cell/2,rad,0,Math.PI*2);g.fill();}
   g.globalAlpha=1;
 }
+// 모임 하나 = 겹친 원. 바깥 옅은 원 = 다녀간 사람(클수록 많이 왔다 감), 가운데 진한 원 = 남은 관계,
+// 진하기 = 관계의 촘촘함, 가장 안쪽 점 = 함께 이끄는 사람. 단단하고 작은 모임은 진하고 작게, 느슨한 모임은 크고 옅게 퍼져요
+function glyphParts(r,u){
+  const tot=Math.max(3,r.total||3),ro=r.rooted||0,le=r.leaders||0,V=r.verdict;
+  const coh=clamp((r.links||0)/Math.max(1,ro)/1.4,0,1);
+  let halo=u*(.16+tot*.024),core=u*Math.min(.36,.07+ro*.026),mid=core*(1.25+.6*(1-coh));
+  const K=TPAL[r.type]||TPAL.book;
+  let hc=K.mid,ho=.14+.14*(1-coh),cc=K.dark,co=.4+.6*coh,mc=K.dark,mo=.14+.22*coh;
+  if(V==='closed'){halo=core*1.25;cc=K.ink;co=.95;mc=K.dark;mo=.7;}
+  if(V==='crowd'){core=Math.max(u*.1,core*.7);mid=core*1.4;ho=.16;}
+  if(V==='root'){halo*=.6;co=.3;mo=.12;}
+  if(V==='burn'){hc='#c9c8c2';mc='#c9c8c2';}
+  const out=[{r:halo,fill:hc,a:ho},{r:mid,fill:mc,a:mo}];
+  if(V==='burn')out.push({r:core,stroke:K.dark,a:.7,w:u*.05,dash:[u*.09,u*.07]});else out.push({r:core,fill:cc,a:co});
+  if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:K.ink,a:1});
+  return out;
+}
+function commGlyph(r,x,y,u){
+  return glyphParts(r,u).map(c=>c.fill?`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="${c.fill}" fill-opacity="${c.a.toFixed(2)}"/>`
+    :`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="none" stroke="${c.stroke}" stroke-opacity="${c.a}" stroke-width="${c.w.toFixed(1)}" stroke-dasharray="${c.dash.map(v=>v.toFixed(1)).join(' ')}"/>`).join('');
+}
+const LEGEND={self:{total:30,rooted:10,leaders:3,links:14},quiet:{total:16,rooted:6,leaders:1,links:6},crowd:{total:42,rooted:3,leaders:0,links:2},
+  closed:{total:10,rooted:6,leaders:1,links:14},burn:{total:22,rooted:4,leaders:0,links:4},root:{total:8,rooted:1,leaders:0,links:0}};
 function renderIntro(){
   screen='intro';
   const real=plays.filter(p=>p&&p.skills&&VERDICTS[p.verdict]&&TYPES[p.type]);
@@ -564,68 +1048,65 @@ function renderIntro(){
   const need=Math.max(0,48-real.length);
   const rows=real.slice(0,48).concat(examples.slice(0,need));
   const sumL=real.reduce((a,r)=>a+(r.links||0),0), sumT=real.reduce((a,r)=>a+(r.total||0),0);
-  const counts={};VORDER.forEach(k=>counts[k]=0);rows.forEach(r=>counts[r.verdict]++);
-  const centers=mapCenters(rows.length);
-  // 연결선으로 보여 줄 모임 세 개: 방금 만든 모임, 최근 모임, 결과가 서로 다른 모임 순
-  const feat=[];const mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));if(mine>=0)feat.push(mine);
-  for(let i=0;i<rows.length&&feat.length<3;i++){if(!feat.includes(i)&&!feat.some(f=>rows[f].verdict===rows[i].verdict))feat.push(i);}
-  const slots=[{x:6,y:7},{x:94,y:40},{x:9,y:72}];
-  // 연결선이 잘 보이도록 고른 모임을 카드에서 떨어진 자리로 옮겨요
-  [{x:.45,y:.3},{x:.6,y:.68},{x:.42,y:.62}].forEach((tg,si)=>{const ri=feat[si];if(ri===undefined)return;
-    let best=-1,bd=9;centers.forEach((c,j)=>{if(feat.includes(j)&&j!==ri)return;const dd=Math.hypot(c.x-tg.x,c.y-tg.y);if(dd<bd){bd=dd;best=j;}});
-    if(best>=0){const tmp=centers[ri];centers[ri]=centers[best];centers[best]=tmp;}});
-  const cards=feat.map((ri,si)=>{const r=rows[ri],V=VERDICTS[r.verdict],T=TYPES[r.type],s=slots[si];
-    return `<div class="ucard u${si}" style="${s.x>50?`right:${100-s.x}%;transform:translate(6px,-6px)`:`left:${s.x}%`};top:${s.y}%"><i class="av" style="background:${T.c}"></i>
-      <div><b>${T.code} · ${String(r.t%10000).padStart(4,'0')}${r.example?' (예시)':''}</b><span>${V.t}</span></div><span class="ck" style="color:${V.c}">●</span>
-      ${si===0?`<div class="pg"><span>다시 온 비율</span><em><s style="width:${r.rate}%"></s></em><span>${r.rate}%</span></div>`:''}</div>`;}).join('');
-  const wires=feat.map((ri,si)=>{const c=centers[ri],s=slots[si],x=c.x*100,y=c.y*100,mx=x,my=s.y;
-    return `<path class="u${si}" d="M${s.x} ${s.y} Q${mx} ${my} ${x} ${y}" fill="none" stroke="#111" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
-      <rect x="${x-.7}" y="${y-.9}" width="1.4" height="1.8" fill="#111"/>`;}).join('');
+  const COLS=6,ROWS=Math.ceil(rows.length/COLS),u=100,W=COLS*u,H=ROWS*u,J=rng(11);
+  let mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
+  // 방금 만든 모임은 지도 한가운데에
+  if(mine>=0){const c=Math.floor(ROWS/2)*COLS+Math.floor(COLS/2);if(c<rows.length){const t=rows[c];rows[c]=rows[mine];rows[mine]=t;mine=c;}}
+  const g=rows.map((r,i)=>{const x=(i%COLS+.5)*u+(J()-.5)*u*.3,y=(Math.floor(i/COLS)+.5)*u+(J()-.5)*u*.3;
+    return `<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,x.toFixed(1),y.toFixed(1),u)}${i===mine?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`;}).join('');
   app.innerHTML=`<div class="intro">
-    <div class="map"><canvas id="mapcv" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개를 점 무리로 그린 지도"></canvas>
-      <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${wires}</svg>${cards}
-      <div class="maplab"><span><i style="background:var(--dot-blue)"></i>다녀간 사람</span><span><i style="background:var(--dot-green)"></i>자리 잡은 사람</span><span><i style="background:var(--dot-orange)"></i>함께 이끄는 사람</span><span>${rows.length} communities${need?` · 흐린 ${need}개는 예시`:''}</span></div></div>
+    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임">${g}</svg>
+      <div class="htip" id="htip" role="tooltip"></div>
+      <span class="maplab2">${info('원 하나가 관람객이 만든 모임 하나예요. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임이에요. 원에 마우스를 올리면 어떤 모임인지 보여요.')}${need?`흐린 ${need}개는 예시`:'읽는 법'}</span></div>
     <div class="head">
-      <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span><span>MOIM LAB</span></div>
+      <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span></div>
         <h1>How might we design a community filled with connection?</h1></div>
       <div class="h-bot">
-        <p class="lead2">모임을 하나 골라 직접 설계하고, 여덟 번의 모임 동안 사람들이 어떻게 이어지고 떠나는지 지켜보세요. 결과는 가입자 수가 아니라 남은 관계로 평가해요.</p>
-        <div class="istats"><div><b>${real.length}</b><span>만들어진 모임</span></div><div><b>${sumL}</b><span>이어진 관계</span></div><div><b>${sumT}</b><span>다녀간 사람</span></div></div>
-        <div><div class="lab"><span>결과 유형</span><span>${rows.length}개 모임</span></div>
-          <div class="dist">${VORDER.filter(k=>counts[k]).map(k=>`<i style="flex:${counts[k]};background:${VERDICTS[k].c}" title="${VERDICTS[k].t} ${counts[k]}"></i>`).join('')}</div>
-          <div class="dlist">${VORDER.map(k=>`<span><i class="sq" style="background:${VERDICTS[k].c}"></i>${VERDICTS[k].t}<b>${counts[k]}</b></span>`).join('')}</div></div>
-        <button class="btn" id="start"><span>모임 고르기 · 한 판 1~2분</span><span>→</span></button>
-        <div class="brand"><b><i class="sq" style="background:var(--ink)"></i>Moim Lab</b><span>졸업 전시 · 만드는 디자이너, 관계를 설계하다</span></div>
-        <p class="foot">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>
+        <p class="lead2">모임을 하나 골라 직접 설계하고, 여덟 번의 모임 동안 사람들이 어떻게 이어지고 떠나는지 지켜보세요.</p>
+        <button class="btn" id="start"><span>모임 고르기</span><span>→</span></button>
       </div></div></div>`;
-  drawMap(rows,centers);
-  mapRedraw=()=>drawMap(rows,centers);
+  mapRedraw=null;
+  const tip=document.getElementById('htip'),map=app.querySelector('.map');
+  const show=(gEl,cx,cy)=>{const r=rows[+gEl.dataset.i],V=VERDICTS[r.verdict],T=TYPES[r.type];
+    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b>${V.t}</b><p>${V.d}</p><span>머무는 사람 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
+    const mb=map.getBoundingClientRect(),w=260;let x=cx-mb.left+14,y=cy-mb.top+14;if(x+w>mb.width-8)x=cx-mb.left-w-14;if(y+150>mb.height)y=cy-mb.top-150;
+    tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
+  app.querySelectorAll('.cg').forEach(gEl=>{
+    gEl.addEventListener('pointermove',e=>show(gEl,e.clientX,e.clientY));
+    gEl.addEventListener('pointerleave',()=>tip.classList.remove('on'));
+    gEl.addEventListener('focus',()=>{const b=gEl.getBoundingClientRect();show(gEl,b.left+b.width/2,b.top+b.height/2);});
+    gEl.addEventListener('blur',()=>tip.classList.remove('on'));});
   document.getElementById('start').onclick=()=>{screen='select';render();};
 }
-// 모임 카드 그림: 하프톤 점 바탕 + 모임의 길(검은 선)
-function typeArt(k,c){
-  const R=rng(k.length*131+7);let dots='';
-  for(let y=6;y<250;y+=10)for(let x=6;x<400;x+=10){const n=.5+.5*Math.sin(x*.018+y*.011+R()*.6)*Math.cos(y*.02-x*.007);
-    const rr=n*n*4.2;if(rr>.6)dots+=`<circle cx="${x}" cy="${y}" r="${rr.toFixed(1)}"/>`;}
-  const path={book:'M80 170 Q140 130 200 165 Q260 130 320 170 L320 95 Q260 55 200 90 Q140 55 80 95 Z M200 90 L200 165',
-    run:'M110 160 C70 160 70 90 120 85 C170 80 180 120 230 110 C290 98 330 120 320 150 C310 185 230 175 200 168 C170 160 140 160 110 160 Z',
-    plog:'M40 120 C90 80 130 160 180 120 C230 80 270 160 320 120 C340 105 355 105 370 112'}[k];
-  const extra=k==='plog'?[[95,112],[160,132],[250,110],[300,140]].map(([x,y])=>`<rect x="${x}" y="${y}" width="9" height="9" fill="#fff" stroke="#111" stroke-width="3"/>`).join(''):'';
-  return `<svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="${c}" fill-opacity=".55">${dots}</g>
-    <path d="${path}" fill="none" stroke="#fff" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/><path d="${path}" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>${extra}</svg>`;
+const TPAL={book:{bg:'#e3e9ff',mid:'#b3c3ff',dark:'#2f5bff',ink:'#1a2f99'},
+  run:{bg:'#ffe8dd',mid:'#ffbfa3',dark:'#ff5a1f',ink:'#a8320c'},
+  plog:{bg:'#ddf5e6',mid:'#a6e3bd',dark:'#13a352',ink:'#0b6534'}};
+function typeArt(k){
+  const P=TPAL[k],W=400,H=190;
+  const shape={
+    book:'<rect x="0" y="120" width="400" height="70"/><rect x="60" y="80" width="280" height="40"/><rect x="130" y="40" width="140" height="40"/><rect x="175" y="0" width="50" height="40"/>',
+    run:'<circle cx="200" cy="190" r="150"/>',
+    plog:'<rect x="40" y="20" width="70" height="55"/><rect x="250" y="20" width="70" height="55"/><rect x="145" y="75" width="70" height="55"/><rect x="40" y="130" width="70" height="60"/><rect x="320" y="110" width="80" height="80"/>'}[k];
+  let thin='',thick='';
+  for(let x=2;x<W;x+=6)thin+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`;
+  for(let x=1;x<W;x+=3)thick+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><clipPath id="cp-${k}">${shape}</clipPath></defs>
+    <rect width="${W}" height="${H}" fill="${P.bg}"/>
+    <g stroke="${P.mid}" stroke-width="1.2">${thin}</g>
+    <g clip-path="url(#cp-${k})"><rect width="${W}" height="${H}" fill="${P.mid}" fill-opacity=".45"/><g stroke="${P.dark}" stroke-width="1.4">${thick}</g></g></svg>`;
 }
 function renderSelect(){
   screen='select';
   const now=new Date(),clock=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  app.innerHTML=`<section class="entry">
-    <div class="e-bar"><span class="e-logo"><i></i>Community Entry</span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-clock num">${clock}</span></div>
-    <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c}" aria-label="${v.name} 시작">
-      <div class="e-img">${typeArt(k,v.c)}<span class="chip"><i></i>참가 가능</span><span class="tag">▸ TYPE ${'ABC'[i]}</span><div class="e-code"><b>${v.code}</b><span>${v.name} · ${v.place}</span></div></div>
-      <div class="e-next"><div><small>Next Meeting</small><span>${v.when}</span></div><b class="num">${v.time}</b></div>
-      <div class="e-stats">${[['유입',v.st[0]],['머무름',v.st[1]],['운영 부담',v.st[2]]].map(([n,x])=>`<div><small>${n}</small><span class="seg">${[1,2,3,4,5].map(j=>`<i class="${j<=x?'on':''}"></i>`).join('')}</span></div>`).join('')}</div>
-      <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p><small>근거 ${v.ev}</small></div>
-      <div class="e-go" style="background:${v.c}"><span>이 모임 운영하기</span><span>▶</span></div></button>`;}).join('')}</div>
-    <div class="e-foot"><button class="btn ghost" id="back"><span>← 처음 화면</span></button><span>특징과 주의는 연구 근거 표의 발견(F 번호)에서 왔어요.</span></div></section>`;
+  app.innerHTML=`<nav class="topnav"><button class="back" id="back" aria-label="처음 화면으로">←</button></nav><section class="entry">
+    <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c};--tbg:${TPAL[k].bg};--tink:${TPAL[k].ink}" aria-label="${v.name} 시작">
+      <div class="e-img">${typeArt(k)}</div>
+      <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
+      <div class="cgrid e-cells">${[['유입',v.st[0]],['머무름',v.st[1]],['운영 부담',v.st[2]]].map(([n,x])=>`<div class="cell"><small>${n}</small><b>${x}<em>/5</em></b></div>`).join('')}</div>
+      <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p></div>
+      <div class="e-go"><span>시작하기</span><span>▶</span></div></button>`;}).join('')}</div>
+    </section>`;
   app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
   document.getElementById('back').onclick=()=>{screen='intro';render();};
 }
@@ -634,46 +1115,88 @@ function renderSelect(){
 function log(s){logLines.push(s);}
 function renderTool(){
   const T=TYPES[st.type];
-  app.innerHTML=`<div class="tool">
+  app.innerHTML=`<nav class="topnav"><button class="back" id="quit" aria-label="처음 화면으로">←</button></nav><h1 class="bigt ptitle">${T.name}</h1><div class="tool" style="--accent:${TPAL[st.type].dark};--accent-ink:${TPAL[st.type].ink};--accent-bg:${TPAL[st.type].bg}">
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
-      <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name}</span><span id="mt"></span></div>
-      <div class="c-cap"><span id="cap"></span>
-        <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="sq" style="background:${STAGE_C[i]};border:2px solid #111"></i>${n}</span>`).join('')}<span><i style="width:18px;height:3px;background:${COL.yellow};display:inline-block"></i>관계</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
+      <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
+      <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
+      <div class="ov ov-e" id="ovE"></div></div>
+      <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
+        <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
     <div class="hints"><span class="dots">●●●●</span><span>NAVIGATION</span><span><kbd>×</kbd>슬라이더로 포인트 나누기</span><span><kbd>○</kbd>모임 시작</span><span><kbd>←</kbd>처음 화면</span><span class="r">${T.code} · ${T.name} · 은유적 모델이에요</span></div>`;
   canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
+  if(window.ResizeObserver){new ResizeObserver(()=>sizeCanvas()).observe(canvas.parentElement);}
   sizeCanvas();renderPanel();loop();
 }
-function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);}
+function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.round(r.width*d),h=Math.round(r.height*d);if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
 window.addEventListener('resize',()=>{sizeCanvas();if(!st&&screen==='intro'&&mapRedraw)mapRedraw();});
+// 지금 상황을 한 문장으로: 남은 관계와 운영자 에너지가 바뀔 때마다 문구도 바뀌어요
+function relMsg(n){
+  if(st.meeting===0)return '시작을 누르면 첫 모임이 열려요.';
+  if(n===0)return '아직 자리 잡은 사람이 없어요. 처음 온 사람이 누군가와 이어져야 다시 와요.';
+  if(n<=2)return '첫 관계가 자리 잡기 시작했어요.';
+  if(n<=5)return '다시 오는 사람이 늘며 모임의 중심이 생기고 있어요.';
+  if(n<=9)return '관계가 관계를 부르고 있어요.';
+  return '모임이 스스로 굴러갈 만큼 단단해졌어요.';
+}
+function energyMsg(e,leaders){
+  const up=st.prevE!==undefined&&e>Math.round(st.prevE);
+  let m=up?'함께 이끄는 사람 덕분에 숨을 돌렸어요.':e>=75?'여유 있어요. 아직은 혼자서도 괜찮아요.':e>=50?'조금씩 바빠지고 있어요.':e>=30?'지쳐 가고 있어요. 일을 나눌 사람이 필요해요.':e>=10?'많이 지쳤어요. 혼자 다 하기엔 벅차요.':'한계예요. 모임이 멈출 수 있어요.';
+  if(leaders&&!up)m+=` 함께 이끄는 사람 ${leaders}명이 일을 나눠 들고 있어요.`;
+  return m;
+}
+// (i) 아이콘: 마우스를 올리거나 눌러서 포커스하면 설명이 보여요
+function info(text){return `<span class="info" tabindex="0" role="button" aria-label="설명: ${text.replace(/<[^>]+>/g,'')}">i<span class="tip" role="tooltip">${text}</span></span>`;}
+const SKICON={
+  open:'<path d="M5 21V3h10v18"/><path d="M15 5l4 1.5V21"/><path d="M3 21h18"/>',
+  welcome:'<path d="M8 11V6.5a1.5 1.5 0 013 0V10m0 0V5a1.5 1.5 0 013 0v5m0-.5V7a1.5 1.5 0 013 0v7a6 6 0 01-6 6h-.8a6 6 0 01-4.9-2.6L4.6 14a1.5 1.5 0 012.5-1.7L8 13.5"/>',
+  rhythm:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  conn:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11l7.4-3.8M8.3 13l7.4 3.8"/>',
+  roles:'<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>'};
+function sicon(k){return `<svg class="sic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SKICON[k]}</svg>`;}
+// 모임 회차를 시계처럼: 여덟 칸이 12시 방향부터 시계 방향으로 차고, 바늘이 지금 회차를 가리켜요
+function clockSVG(m){
+  const N=MEETINGS,R=46,seg=[];
+  const pt=(a,r)=>[(Math.cos(a)*r).toFixed(2),(Math.sin(a)*r).toFixed(2)];
+  for(let i=0;i<N;i++){const a0=-Math.PI/2+i*2*Math.PI/N+.13,a1=a0+2*Math.PI/N-.26,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R);
+    seg.push(`<path d="M${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1}" fill="none" stroke="${i<m?'var(--ink)':'#dcdbd5'}" stroke-width="10" stroke-linecap="butt"/>`);}
+  const ah=-Math.PI/2+m*2*Math.PI/N,[hx,hy]=pt(ah,30);
+  return `<svg viewBox="-60 -60 120 120" role="img" aria-label="모임 ${m}번째 / ${N}번">${seg.join('')}<line x1="0" y1="0" x2="${hx}" y2="${hy}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" style="transition:all .6s"/><circle r="6" fill="var(--ink)"/></svg>`;
+}
+function gauge(e){
+  const N=12,on=Math.ceil(e/100*N),c=e>=30?'var(--ink)':'var(--red)';
+  return `<div class="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${e}" aria-label="운영자 에너지">${Array.from({length:N},(_,i)=>`<i style="${i<on?`background:${c}`:''}"></i>`).join('')}</div>`;
+}
 function renderPanel(){
   const P=document.getElementById('panel');if(!P)return;
-  const editable=st.phase==='alloc'||st.phase==='levelup', lv=st.phase==='levelup';
-  document.getElementById('mt').innerHTML=`<span class="latin">Meeting ${pad(st.meeting)}/${pad(MEETINGS)}</span>`;
+  const editable=st.phase==='alloc'||st.phase==='levelup', lv=st.phase==='levelup', T=TYPES[st.type];
+  const L=alive(), rooted=L.filter(p=>p.stage>=2).length, leaders=L.filter(p=>p.stage===3).length;
+  document.getElementById('mt').innerHTML=`모임 ${st.meeting}/${MEETINGS}`;
+  {const e=Math.round(st.E);
+  document.getElementById('ovN').innerHTML=`${rooted}<em>명</em>`;
+  document.getElementById('ovT').textContent=`다녀간 사람 ${st.total+2}명`;
+  document.getElementById('ovMsg').textContent=relMsg(rooted);
+  {const oc=document.getElementById('ovR');oc.style.setProperty('--p',(st.meeting/MEETINGS*100)+'%');oc.style.setProperty('--a',(st.meeting*360/MEETINGS)+'deg');oc.setAttribute('aria-label',`모임 ${st.meeting}번째 / ${MEETINGS}번`);}
+  document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
+  document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
   P.innerHTML=`
-    <div class="p-head" style="--c:${TYPES[st.type].c}"><small>COMMUNITY DESIGN</small>
-      <div class="p-type"><span>TYPE ${'ABC'[TKEYS.indexOf(st.type)]} / 3</span><b>${TYPES[st.type].code}</b></div>
-      <div class="p-name"><strong>${TYPES[st.type].name}</strong><span>${TYPES[st.type].place} · ${TYPES[st.type].when} ${TYPES[st.type].time}</span></div>
-      <div class="p-trait"><span>＋ ${TYPES[st.type].plus}</span><span class="neg">－ ${TYPES[st.type].minus}</span></div></div>
-    <p style="font-weight:700;font-size:14px;border:2px solid var(--ink);padding:8px 10px">목표: 여덟 번의 모임이 끝났을 때, 사람들이 <span style="background:var(--yellow)">서로 이어져 남아 있는</span> 모임 만들기</p>
-    ${lv?`<div class="lvl"><span>LEVEL UP</span><span>+${st.gain}</span></div>`:''}
-    <div class="sec"><div class="sec-h">Points<em>${editable?'나누는 중':'진행 중'}</em></div>
-      <div class="pts"><span>남은 스킬 포인트</span><b>${pad(st.points)}</b></div></div>
-    <div class="sec"><div class="sec-h">Skill Statistics</div>
+    <section class="pcard">
+      <div class="cat">${T.place} · ${T.when} ${T.time}${info(`근거 ${T.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</div>
+      <p class="trait"><b>특징</b>${T.plus}</p><p class="trait neg"><b>주의</b>${T.minus}</p>
+    </section>
+    <section class="pcard"><h3 class="eh">Goal</h3><p class="goal-t">여덟 번째 모임이 끝났을 때, 서로 이어져 남아 있는 사람이 많은 모임</p></section>
+    <section class="pcard">
+      <div class="ph sk-head"><h3>Skills</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
+      ${lv?`<div class="lvl2"><small>LEVEL UP · 모임 4번 뒤 진단</small><div class="row2"><b class="hero-n">+${st.gain}</b><span>포인트</span></div><p>${diagnosis()}</p></div>`:''}
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><label class="sk-name" for="r-${s.k}"><i class="sq" style="background:${s.c};width:14px;height:14px"></i>${s.name}<small>${s.en}</small></label><span class="box num">${v} / ${MAXLV}${v>lk&&lv?` +${v-lk}`:''}</span></div>
-        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}>
-        <span class="sk-desc">${s.sub}${s.down?` · <span class="neg">${s.down}</span>`:''}</span></div>`;}).join('')}</div>
-    <div class="sec"><div class="sec-h">Energy<span class="box num">${e}%</span></div>
-      <div class="ebar ${e<30?'low':''}"><i style="width:${e}%"></i></div>
-      <span class="sk-desc">스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.</span></div>
-    <div class="sec"><div class="sec-h">Log</div>
-      <div class="log" id="log">${logLines.map(l=>l.startsWith('!')?`<span class="o">${l.slice(1)}</span>`:l).join('\n')}</div></div>
-    ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>진행 중</span><span>…</span></button>`}
-    <button class="btn ghost" id="quit"><span>처음 화면으로</span><span>←</span></button>`;
-  const lg=document.getElementById('log');lg.scrollTop=lg.scrollHeight;
+        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${info(`${s.sub}${s.down?`<br><span class="neg">${s.down}</span>`:''}`)}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
+      ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
+    </section>
+`;
   P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
     const k=inp.dataset.k, old=st.skills[k];let v=+inp.value;
     v=clamp(v,st.lock[k],old+st.points);st.points-=v-old;st.skills[k]=v;renderPanel();resetIdle();
@@ -682,6 +1205,7 @@ function renderPanel(){
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
 function run(){
+  if(!st.alloc1)st.alloc1={...st.skills};
   st.phase='run';
   log(`설계: ${SKILLS.map(s=>s.name+' '+st.skills[s.k]).join(' / ')}`);
   const tick=()=>{step();const l=st.last;
@@ -691,7 +1215,7 @@ function run(){
   timer=setInterval(()=>{
     tick();
     if(st.meeting===HALF){clearInterval(timer);renderPanel();setTimeout(levelUp,900);}
-    else if(st.meeting>=MEETINGS){clearInterval(timer);renderPanel();setTimeout(finish,1300);}
+    else if(st.meeting>=MEETINGS){clearInterval(timer);renderPanel();setTimeout(()=>{if(!st)return;st.glyph={t0:performance.now(),r:summary()};setTimeout(finish,1900);},700);}
     else renderPanel();
   },TICK);
 }
@@ -700,64 +1224,59 @@ function levelUp(){
   st.gain=clamp(Math.floor(st.xp/3),2,6);st.points=st.gain;
   st.lock={...st.skills};st.phase='levelup';
   log(`!LEVEL UP · 경험치 ${st.xp} → 포인트 +${st.gain}`);
-  log(`!진단: ${diagnosis()}`);
   renderPanel();
 }
 function finish(){
   if(!st)return;
-  try{st.photo=canvas.toDataURL('image/png');}catch(e){st.photo='';}
-  st.result=summary();st.phase='report';
+  try{const g=st.geo||{cx:canvas.width/2,cy:canvas.height/2,S:Math.min(canvas.width,canvas.height)/2};
+    const side=Math.round(Math.min(canvas.width,2*Math.min(g.cy,canvas.height-g.cy),2*Math.min(g.cx,canvas.width-g.cx))),c=document.createElement('canvas');c.width=c.height=side;
+    const sx=clamp(g.cx-side/2,0,canvas.width-side),sy=clamp(g.cy-side/2,0,canvas.height-side);
+    c.getContext('2d').drawImage(canvas,sx,sy,side,side,0,0,side,side);st.photo=c.toDataURL('image/png');}catch(e){st.photo='';}
+  st.result=Object.assign(summary(),{id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),alloc1:st.alloc1||{},gain:st.gain||0,playSec:Math.round((Date.now()-(st.t0||Date.now()))/1000)});st.phase='report';
   lastRec=st.result;savePlay(st.result);
   render();
 }
 
 // 사람: 네모난 머리와 검은 몸 (포스터의 걷는 사람들처럼)
 function figure(x,y,r,head,hollow,a){
-  ctx.globalAlpha=a;
-  ctx.fillStyle=COL.ink;ctx.strokeStyle=COL.ink;
   const d=window.devicePixelRatio||1;
-  // 몸통과 다리
-  ctx.fillRect(x-r*.38,y-r*.1,r*.76,r*.7);
-  ctx.lineWidth=Math.max(1.5,r*.16);ctx.beginPath();ctx.moveTo(x-r*.2,y+r*.6);ctx.lineTo(x-r*.32,y+r*1.05);ctx.moveTo(x+r*.2,y+r*.6);ctx.lineTo(x+r*.3,y+r*1.05);ctx.stroke();
-  // 머리
-  const h=r*.78;
-  ctx.fillStyle=head;ctx.fillRect(x-h/2,y-r*.25-h,h,h);
-  ctx.lineWidth=1.5*d;ctx.strokeRect(x-h/2,y-r*.25-h,h,h);
-  if(hollow){ctx.globalAlpha=a*.5;}
+  ctx.globalAlpha=a;ctx.beginPath();ctx.arc(x,y,r*.68,0,Math.PI*2);ctx.fillStyle=head;ctx.fill();
 }
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
-  const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.8,cx=W/2,cy=H/2;
+  sizeCanvas();
+  const d=window.devicePixelRatio||1,W=canvas.width,H=canvas.height,ob=document.getElementById('ovbar'),top=ob?(ob.offsetTop+ob.offsetHeight)*d:0,AH=H-top,S=Math.min(W,AH)/2*.86,cx=W/2,cy=top+AH/2;
+  st.geo={cx,cy,S};
   ctx.clearRect(0,0,W,H);
   // 구역: 검은 실선 동심원
   const B=[.86,.665,.48,.305,.09];
-  ctx.strokeStyle=COL.ink;
-  B.slice(0,4).forEach((r,i)=>{ctx.lineWidth=(i===0?2:1)*d;ctx.setLineDash(i===0?[]:[2*d,4*d]);ctx.beginPath();ctx.arc(cx,cy,r*S,0,Math.PI*2);ctx.stroke();});
-  ctx.setLineDash([]);
-  ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=`700 ${12*d}px Pretendard,sans-serif`;
-  STAGE_NAMES.forEach((n,i)=>{const y=cy-((B[i]+B[i+1])/2)*S;const w=ctx.measureText(n).width;const x0=cx-(w+16*d)/2;
-    ctx.fillStyle=STAGE_C[i];ctx.fillRect(x0,y-5*d,10*d,10*d);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5*d;ctx.strokeRect(x0,y-5*d,10*d,10*d);
-    ctx.fillStyle=COL.ink;ctx.fillText(n,x0+16*d,y);});
-  ctx.textBaseline='alphabetic';
   // 움직임
-  for(const p of st.people){p.x+=(p.tx-p.x)*.07;p.y+=(p.ty-p.y)*.07;
-    if(p.leaving)p.alpha=Math.max(0,p.alpha-.02);else p.alpha=Math.min(1,p.alpha+.05);}
+  {const P=st.people,rr=(9*d)/S*2.25,byIdM=new Map(P.map(q=>[q.id,q]));
+    for(const p of P){p.vx=(p.vx||0)+(p.tx-p.x)*(p.leaving?.004:.0025);p.vy=(p.vy||0)+(p.ty-p.y)*(p.leaving?.004:.0025);
+      p.vx+=(Math.random()-.5)*.0006;p.vy+=(Math.random()-.5)*.0006;}
+    for(const l of st.links){const a=byIdM.get(l[0]),b=byIdM.get(l[1]);if(!a||!b||a.leaving||b.leaving)continue;
+      const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||1e-6;if(dist>rr*1.1){const f=(dist-rr)*.006;a.vx+=dx/dist*f;a.vy+=dy/dist*f;b.vx-=dx/dist*f;b.vy-=dy/dist*f;}}
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j];const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||1e-6;
+      if(dist<rr){const f=(rr-dist)*.18;a.vx-=dx/dist*f;a.vy-=dy/dist*f;b.vx+=dx/dist*f;b.vy+=dy/dist*f;}}
+    for(const p of P){p.vx*=.86;p.vy*=.86;p.x+=p.vx;p.y+=p.vy;
+      if(p.leaving)p.alpha=Math.max(0,p.alpha-.012);else p.alpha=Math.min(1,p.alpha+.05);}}
   st.people=st.people.filter(p=>!(p.leaving&&p.alpha<=0));
   // 관계 선: 굵은 노란 직선, 새로 생기면 더 굵게
   const byId=new Map(st.people.map(p=>[p.id,p])), now=performance.now();
+  // 끝난 뒤: 첫 화면과 같은 원 그림이 점들 뒤에서 자라나요
+  if(st.glyph){const t=Math.min(1,(now-st.glyph.t0)/1400),e=1-Math.pow(1-t,3);
+    for(const c of glyphParts(st.glyph.r,S)){ctx.globalAlpha=c.a*e*.5;ctx.beginPath();ctx.arc(cx,cy,c.r*(.55+.45*e),0,Math.PI*2);
+      if(c.fill){ctx.fillStyle=c.fill;ctx.fill();}else{ctx.strokeStyle=c.stroke;ctx.lineWidth=c.w;ctx.setLineDash(c.dash);ctx.stroke();ctx.setLineDash([]);}}
+    ctx.globalAlpha=1;}
   for(const l of st.links){const a=byId.get(l[0]),b=byId.get(l[1]);if(!a||!b)continue;
     const fresh=l[2]?Math.max(0,1-(now-l[2])/1500):0;
-    ctx.strokeStyle=fresh>0?COL.orange:COL.yellow;ctx.lineWidth=(3+fresh*4)*d;ctx.globalAlpha=Math.min(a.alpha,b.alpha);
-    ctx.beginPath();ctx.moveTo(cx+a.x*S,cy+a.y*S);ctx.lineTo(cx+b.x*S,cy+b.y*S);ctx.stroke();}
+    const ax=cx+a.x*S,ay=cy+a.y*S,bx=cx+b.x*S,by=cy+b.y*S,qx=cx+(a.x+b.x)/2*S*.72,qy=cy+(a.y+b.y)/2*S*.72;
+    ctx.lineCap='round';ctx.globalAlpha=Math.min(a.alpha,b.alpha);
+    if(fresh>0){ctx.strokeStyle='rgba(17,17,17,.75)';ctx.globalAlpha=Math.min(a.alpha,b.alpha)*fresh;ctx.lineWidth=2.6*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();}}
   ctx.globalAlpha=1;
-  // 가운데: 나와 에너지
-  ctx.lineWidth=7*d;ctx.strokeStyle='#e6e6e6';ctx.beginPath();ctx.arc(cx,cy,24*d,0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle=st.E<30?COL.red:COL.yellow;ctx.beginPath();ctx.arc(cx,cy,24*d,-Math.PI/2,-Math.PI/2+Math.PI*2*st.E/100);ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,15*d,0,Math.PI*2);ctx.fillStyle=COL.ink;ctx.fill();
-  ctx.fillStyle=COL.paper;ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('나',cx,cy+.5*d);ctx.textBaseline='alphabetic';
   // 사람
-  for(const p of st.people){const r=(p.stage===3?15:13)*d;
-    figure(cx+p.x*S,cy+p.y*S,r,p.leaving?'#ffffff':STAGE_C[p.stage],false,p.leaving?p.alpha*.5:p.alpha);}
+  for(const p of st.people){const r=(p.stage===3?14:13)*d;
+    figure(cx+p.x*S,cy+p.y*S,r,p.stage<2?STAGE_C[p.stage]:(p.stage===2?TPAL[st.type].dark:TPAL[st.type].ink),false,p.leaving?p.alpha*.6:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
   ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';
@@ -770,43 +1289,38 @@ function loop(){
 
 /* ───────── 결과: 기록지 ───────── */
 function renderReport(){
-  const r=st.result, V=VERDICTS[r.verdict], k=r.skills;
+  const r=st.result, V=VERDICTS[r.verdict], k=r.skills, T=TYPES[r.type];
   const real=plays.filter(p=>p&&p.skills&&!p.example);
   const caseNo=String(Math.max(real.length,1)).padStart(4,'0');
   const better=real.length>1?Math.round(real.filter(p=>p.rooted<r.rooted).length/real.length*100):null;
   const g={'소속감':clamp(15+10*k.rhythm+6*k.conn-(k.open>=4?10:0),0,100),'영향력':clamp(10+15*k.roles+5*r.leaders,0,100),
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
-  app.innerHTML=`<section class="case">
-    <div class="c-title">
-      <span class="no"><i class="sq" style="background:${V.c};width:14px;height:14px;border:2px solid #111"></i>CASE No. ${caseNo}</span>
-      <h1>${TYPES[r.type].name}</h1>
-      <p>${V.d}</p>
-      <div class="photo"><span class="tape"></span>${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}<div class="cap"><span>EVIDENCE</span><span>여덟 번째 모임 뒤</span></div></div>
-    </div>
-    <div class="sheet-col"><div class="sheet">
-      <div class="sheet-h"><b>Report</b><span>설계 기록 · ${new Date(r.t).toLocaleDateString('ko-KR')}</span></div>
-      <div class="verdict"><i style="background:${V.c}"></i><b>${V.t}</b></div>
-      <dl>
-        <div class="row"><dt>다녀간 사람</dt><dd>${r.total}명<small>가입자 수로만 보면</small></dd></div>
-        <div class="row"><dt>남은 관계</dt><dd>${r.rooted}명<small>자리 잡거나 함께 이끄는 사람</small></dd></div>
-        <div class="row"><dt>다시 온 비율</dt><dd>${r.rate}%</dd></div>
-        <div class="row"><dt>관계의 선</dt><dd>${r.links}개</dd></div>
-        <div class="row"><dt>함께 이끄는 사람</dt><dd>${r.leaders}명</dd></div>
-        <div class="row"><dt>운영자 에너지</dt><dd>${r.energy}%${r.energy<30?'<small>지쳤어요</small>':''}</dd></div>
-        <div class="row" style="align-items:start"><dt>설계</dt><dd><div class="design">${SKILLS.map(s=>`<div><span class="bar"><i style="height:${k[s.k]/MAXLV*100}%;background:${s.c}"></i></span><span>${s.name} ${k[s.k]}</span></div>`).join('')}</div></dd></div>
-      </dl>
-      <div class="mm"><div class="row"><dt>공동체 의식</dt><dd><small style="margin:0">McMillan &amp; Chavis(1986)의 네 요소</small></dd></div>
-        ${Object.entries(g).map(([n,x])=>`<div class="row"><dt>${n}</dt><dd><span class="hbar"><i style="width:${x}%"></i></span></dd></div>`).join('')}</div>
-    </div></div>
-    <div class="sideR">
-      <div class="note"><small>NEXT QUESTION</small>${V.q}</div>
-      ${better!==null?`<div class="strip blue">지금까지 만들어진 모임 ${real.length}개 중, 남은 관계가 이 모임보다 적은 모임은 ${better}%예요.</div>`:''}
-      <div class="strip">앱은 마찰을 없앨수록 좋아지지만, 모임은 사람과 사람 사이에 선이 생겨야 남아요.</div>
+  const GOAL=60;
+  app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button></nav><section class="case3" style="--accent:${TPAL[r.type].dark};--accent-bg:${TPAL[r.type].bg}">
+    <div class="c3-l">
+      <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
+      <div class="q2"><small>NEXT QUESTION</small><b>${V.q}</b></div>
+      ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
       <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><button class="btn ghost" id="home"><span>다른 모임들 보기</span><span>→</span></button></div>
-      <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요. 이 화면은 잠시 후 처음으로 돌아가요.</p>
+      <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>
+    </div>
+    <div class="c3-r">
+      <div class="diag">
+        <div><p class="cname"><b>${T.name}</b><span>No.${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span></p><h2 class="one">${V.t}</h2><p>${V.d}</p></div>
+        <div class="big2"><small>머무는 사람</small><b class="hero-n">${r.rooted}<em>명</em></b><span>다녀간 ${r.total}명 가운데</span></div>
+      </div>
+      <div class="cgrid c2-cells">
+        <div class="cell"><small>다시 온 비율</small><b>${r.rate}%</b></div>
+        <div class="cell"><small>관계의 선</small><b>${r.links}개</b></div>
+        <div class="cell"><small>함께 이끄는 사람</small><b>${r.leaders}명</b></div>
+        <div class="cell"><small>운영자 에너지</small><b style="${r.energy<30?'color:var(--red)':''}">${r.energy}%</b></div></div>
+      <div class="cgrid c2-skill">${SKILLS.map(s=>`<div class="cell"><small>${s.name}</small><b>${k[s.k]}</b></div>`).join('')}</div>
+      <div class="mm3"><span class="h">공동체 의식${info(`McMillan &amp; Chavis(1986)의 네 요소를 설계에서 은유적으로 추정한 값이에요. 만점은 100, 목표선 ${GOAL}은 이 게임에서 정한 기준이에요.`)}<span class="goal-k">만점 100 · 목표 <i></i>${GOAL}</span></span>
+        ${Object.entries(g).map(([n,x],i)=>{x=Math.round(x);const ok=x>=GOAL;return `<div class="r ${ok?'ok':''}"><i>${i+1}</i><div class="w"><b>${n}</b><span class="track"><s style="width:${x}%"></s><u style="left:${GOAL}%"></u></span></div><em>${x}<small>/100</small></em></div>`;}).join('')}</div>
     </div></section>`;
   document.getElementById('again').onclick=()=>newGame(st.type);
   document.getElementById('home').onclick=()=>{st=null;screen='intro';render();};
+  document.getElementById('home2').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
 
 // 전시용: 아무도 만지지 않으면 처음 화면으로

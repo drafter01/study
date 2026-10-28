@@ -759,7 +759,7 @@ function freshState(type){
 function seed(){for(let i=0;i<2;i++)addPerson(2,1);st.links.push([st.people[0].id,st.people[1].id,0]);layout(true);}
 function newGame(type){
   clearInterval(timer);savedId=null;logLines=[];
-  st=freshState(type);seed();
+  st=freshState(type);seed();st.t0=Date.now();
   log(`${TYPES[type].name}을(를) 열었어요. 지금은 나와 친구 2명.`);
   render();
 }
@@ -891,11 +891,35 @@ plays=loadLocal();
     },()=>{});
   }catch(e){}
 })();
-async function savePlay(rec){
-  if(savedId)return;savedId='pending';
-  if(db){try{const ref=await db.collection('plays').add(rec);savedId=ref.id;return;}catch(e){}}
-  saveLocal(rec);plays=[rec,...plays];savedId='local';
+// 기록 모으기: 로그인 없이 구글 시트(Apps Script 웹 앱)로 보냄. 주소는 moim.html?collect=웹앱URL 로 한 번 열면 기억됨
+const COLLECT_URL=(()=>{try{const q=new URLSearchParams(location.search).get('collect');if(q){localStorage.setItem('moim-collect',q);return q;}return localStorage.getItem('moim-collect')||'';}catch(e){return '';}})();
+function queueGet(){try{return JSON.parse(localStorage.getItem('moim-queue')||'[]');}catch(e){return [];}}
+function queueSet(a){try{localStorage.setItem('moim-queue',JSON.stringify(a.slice(-500)));}catch(e){}}
+async function sendRemote(rec){
+  if(!COLLECT_URL)return false;
+  try{await fetch(COLLECT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});return true;}catch(e){return false;}
 }
+async function flushQueue(){const q=queueGet();if(!q.length||!COLLECT_URL)return;const left=[];for(const r of q){if(!(await sendRemote(r)))left.push(r);}queueSet(left);}
+async function loadRemote(){
+  if(!COLLECT_URL)return;
+  try{const res=await fetch(COLLECT_URL+(COLLECT_URL.includes('?')?'&':'?')+'n=300');const rows=await res.json();
+    if(!Array.isArray(rows))return;const seen=new Set(plays.map(p=>p.id||p.t));
+    plays=plays.concat(rows.filter(r=>r&&!seen.has(r.id||r.t)&&TYPES[r.type]&&VERDICTS[r.verdict])).sort((a,b)=>(b.t||0)-(a.t||0));
+    if(!st&&screen==='intro')renderIntro();}catch(e){}
+}
+async function savePlay(rec){
+  if(savedId)return;savedId='local';
+  saveLocal(rec);plays=[rec,...plays];
+  if(db){try{await db.collection('plays').add(rec);}catch(e){}}
+  if(!(await sendRemote(rec))){const q=queueGet();q.push(rec);queueSet(q);}
+}
+flushQueue();loadRemote();
+// 운영자용: Shift + D 를 누르면 이 컴퓨터에 쌓인 기록을 CSV로 내려받음 (인터넷이 끊겼을 때 대비)
+document.addEventListener('keydown',e=>{if(!(e.shiftKey&&(e.key==='D'||e.key==='d')))return;
+  const K=['open','welcome','rhythm','conn','roles'],rows=loadLocal();
+  const head=['id','t','type','verdict','total','rooted','leaders','links','rate','energy'].concat(K.map(k=>'final_'+k),K.map(k=>'start_'+k),['gain','playSec']);
+  const csv=[head.join(',')].concat(rows.map(r=>[r.id,r.t,r.type,r.verdict,r.total,r.rooted,r.leaders,r.links,r.rate,r.energy].concat(K.map(k=>(r.skills||{})[k]||0),K.map(k=>(r.alloc1||{})[k]||0),[r.gain||0,r.playSec||0]).join(','))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='moim-plays-'+new Date().toISOString().slice(0,10)+'.csv';a.click();});
 
 /* ───────── 화면 전환 ───────── */
 function render(){
@@ -1181,6 +1205,7 @@ function renderPanel(){
   document.getElementById('quit').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
 function run(){
+  if(!st.alloc1)st.alloc1={...st.skills};
   st.phase='run';
   log(`설계: ${SKILLS.map(s=>s.name+' '+st.skills[s.k]).join(' / ')}`);
   const tick=()=>{step();const l=st.last;
@@ -1207,7 +1232,7 @@ function finish(){
     const side=Math.round(Math.min(canvas.width,2*Math.min(g.cy,canvas.height-g.cy),2*Math.min(g.cx,canvas.width-g.cx))),c=document.createElement('canvas');c.width=c.height=side;
     const sx=clamp(g.cx-side/2,0,canvas.width-side),sy=clamp(g.cy-side/2,0,canvas.height-side);
     c.getContext('2d').drawImage(canvas,sx,sy,side,side,0,0,side,side);st.photo=c.toDataURL('image/png');}catch(e){st.photo='';}
-  st.result=summary();st.phase='report';
+  st.result=Object.assign(summary(),{id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),alloc1:st.alloc1||{},gain:st.gain||0,playSec:Math.round((Date.now()-(st.t0||Date.now()))/1000)});st.phase='report';
   lastRec=st.result;savePlay(st.result);
   render();
 }
