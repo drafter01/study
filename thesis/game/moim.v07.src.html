@@ -548,6 +548,14 @@ body{background:var(--page)}
 .maplab2{display:flex;align-items:center;gap:6px;flex-direction:row-reverse}
 .maplab2 .info{margin-left:0}
 .maplab2 .info .tip{top:auto;bottom:calc(100% + 8px)}
+
+/* ───────── v1.6 radius 더 크게 ───────── */
+:root{--r-lg:36px;--r-md:26px;--r-sm:18px}
+.pcard,.panel .pcard{padding:20px}
+.btn{border-radius:999px;padding-inline:20px}
+.ov{padding:16px 18px}
+.goal3,.legend div,.c2-m .cell,.e-cells .cell,.lvl2{border-radius:var(--r-sm)}
+.info .tip,.htip{border-radius:var(--r-sm)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
