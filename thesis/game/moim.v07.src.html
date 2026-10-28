@@ -681,6 +681,11 @@ body{background:var(--page)}
 .ptitle sup{white-space:nowrap}
 .pcard .cat{font-size:13px;color:var(--ink);font-weight:700}
 @media (min-width:900px){.canvas-wrap{min-height:calc(100vh - 200px)!important}}
+
+.mclock{display:flex;align-items:center;gap:14px;margin-top:4px}
+.mclock svg{width:clamp(84px,6.4vw,112px);height:auto;flex:none}
+.mclock .hero-n{font-size:clamp(40px,3.6vw,56px)}
+.ovbar{grid-template-columns:minmax(0,.9fr) minmax(0,1.15fr) minmax(0,1.15fr)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1078,7 +1083,7 @@ function renderTool(){
     <div class="panel" id="panel"></div>
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
-      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><b class="hero-n" id="ovM"></b></div>
+      <div class="ovbar" id="ovbar"><div class="ov ov-r"><small>모임</small><div class="mclock" id="ovM"></div></div>
       <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
@@ -1114,6 +1119,15 @@ const SKICON={
   conn:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11l7.4-3.8M8.3 13l7.4 3.8"/>',
   roles:'<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>'};
 function sicon(k){return `<svg class="sic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SKICON[k]}</svg>`;}
+// 모임 회차를 시계처럼: 여덟 칸이 12시 방향부터 시계 방향으로 차고, 바늘이 지금 회차를 가리켜요
+function clockSVG(m){
+  const N=MEETINGS,R=46,seg=[];
+  const pt=(a,r)=>[(Math.cos(a)*r).toFixed(2),(Math.sin(a)*r).toFixed(2)];
+  for(let i=0;i<N;i++){const a0=-Math.PI/2+i*2*Math.PI/N+.13,a1=a0+2*Math.PI/N-.26,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R);
+    seg.push(`<path d="M${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1}" fill="none" stroke="${i<m?'var(--ink)':'#dcdbd5'}" stroke-width="10" stroke-linecap="butt"/>`);}
+  const ah=-Math.PI/2+m*2*Math.PI/N,[hx,hy]=pt(ah,30);
+  return `<svg viewBox="-60 -60 120 120" role="img" aria-label="모임 ${m}번째 / ${N}번">${seg.join('')}<line x1="0" y1="0" x2="${hx}" y2="${hy}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" style="transition:all .6s"/><circle r="6" fill="var(--ink)"/></svg>`;
+}
 function gauge(e){
   const N=12,on=Math.ceil(e/100*N),c=e>=30?'var(--ink)':'var(--red)';
   return `<div class="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${e}" aria-label="운영자 에너지">${Array.from({length:N},(_,i)=>`<i style="${i<on?`background:${c}`:''}"></i>`).join('')}</div>`;
@@ -1127,7 +1141,7 @@ function renderPanel(){
   document.getElementById('ovN').innerHTML=`${rooted}<em>명</em>`;
   document.getElementById('ovT').textContent=`다녀간 사람 ${st.total+2}명`;
   document.getElementById('ovMsg').textContent=relMsg(rooted);
-  document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
+  document.getElementById('ovM').innerHTML=`${clockSVG(st.meeting)}<b class="hero-n">${st.meeting}<em>/${MEETINGS}</em></b>`;
   document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
