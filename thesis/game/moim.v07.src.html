@@ -4,16 +4,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Black+Han+Sans&family=Inter+Tight:wght@500;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap">
 <style>
-@font-face{font-family:"KoddiUD OnGothic";src:url(data:font/woff2;base64,__KODDI_R__) format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"KoddiUD OnGothic";src:url(data:font/woff2;base64,__KODDI_B__) format("woff2");font-weight:700;font-display:swap}
-@font-face{font-family:"KoddiUD OnGothic";src:url(data:font/woff2;base64,__KODDI_EB__) format("woff2");font-weight:800;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_R__) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_B__) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Gothic A1";src:url(data:font/woff2;base64,__GOTHIC_EB__) format("woff2");font-weight:800;font-display:swap}
 /* 컨셉: 흰 바탕 + 검은 직선 + 원색 포인트 (포스터형). 제목은 굵은 그로테스크와 네모난 한글, 본문은 전부 Pretendard
    레이아웃: 첫 화면 = 포스터처럼 위아래 큰 제목 사이에 데이터 / 설계 = 왼쪽 패널, 오른쪽 캔버스 / 결과 = 기록지 */
 :root{
   color-scheme:light;
   --paper:#ffffff; --ink:#111111; --mute:#6f6f6f; --rule:#111111; --hair:#d9d9d9;
   --red:#e8372b; --blue:#2f6fe0; --yellow:#f6b72c; --green:#2a9a46; --violet:#6b5ce7; --orange:#f05a28;
-  --f-body:"KoddiUD OnGothic",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"Gothic A1",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --f-latin:"Archivo","Pretendard",sans-serif;
   --f-kdisp:"Black Han Sans","Pretendard",sans-serif;
   --f-head:"Inter Tight","Pretendard",sans-serif;
@@ -533,6 +533,21 @@ body{background:var(--page)}
 .legend div{background:var(--cell);border-radius:var(--r-sm);padding:8px;display:grid;justify-items:center;gap:4px;text-align:center}
 .legend svg{width:64px;height:64px;overflow:visible}
 .legend span{font-size:12px;font-weight:700;line-height:1.3}
+
+/* ───────── v1.5 첫 화면은 그림과 질문만, 원 위에 마우스를 올리면 설명 ───────── */
+.comms .cg{cursor:pointer;transition:opacity .2s;outline:none}
+.comms .cg.ex{opacity:.75}
+.comms:hover .cg{opacity:.35}
+.comms .cg:hover,.comms .cg:focus{opacity:1}
+.htip{position:absolute;z-index:5;width:260px;background:#fff;border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.16);padding:10px 12px;display:grid;gap:3px;pointer-events:none;opacity:0;transition:opacity .12s}
+.htip.on{opacity:1}
+.htip small{font-size:11.5px;font-weight:700;color:var(--soft)}
+.htip b{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.htip p{font-size:13px;line-height:1.5}
+.htip span{font-size:11.5px;font-weight:700;color:var(--soft)}
+.maplab2{display:flex;align-items:center;gap:6px;flex-direction:row-reverse}
+.maplab2 .info{margin-left:0}
+.maplab2 .info .tip{top:auto;bottom:calc(100% + 8px)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -830,21 +845,23 @@ function drawMap(rows,centers){
 }
 // 모임 하나 = 겹친 원. 바깥 옅은 원 = 다녀간 사람(클수록 많이 왔다 감), 가운데 진한 원 = 남은 관계,
 // 진하기 = 관계의 촘촘함, 가장 안쪽 점 = 함께 이끄는 사람. 단단하고 작은 모임은 진하고 작게, 느슨한 모임은 크고 옅게 퍼져요
-function commGlyph(r,x,y,u){
+function glyphParts(r,u){
   const tot=Math.max(3,r.total||3),ro=r.rooted||0,le=r.leaders||0,V=r.verdict;
   const coh=clamp((r.links||0)/Math.max(1,ro)/1.4,0,1);
   let halo=u*(.16+tot*.024),core=u*Math.min(.36,.07+ro*.026),mid=core*(1.25+.6*(1-coh));
-  let hc='#a9c6f7',ho=.07+.09*(1-coh),cc='#2f6fe0',co=.25+.72*coh,mc='#7fa6f2',mo=.12+.3*coh,out='';
+  let hc='#a9c6f7',ho=.07+.09*(1-coh),cc='#2f6fe0',co=.25+.72*coh,mc='#7fa6f2',mo=.12+.3*coh;
   if(V==='closed'){halo=core*1.25;cc='#173a86';co=.95;mc='#2f55b0';mo=.7;}
   if(V==='crowd'){core=Math.max(u*.1,core*.7);mid=core*1.4;ho=.16;}
   if(V==='root'){halo*=.6;co=.3;mo=.12;}
   if(V==='burn'){hc='#c9c8c2';mc='#c9c8c2';}
-  out+=`<circle cx="${x}" cy="${y}" r="${halo.toFixed(1)}" fill="${hc}" fill-opacity="${ho.toFixed(2)}"/>`;
-  out+=`<circle cx="${x}" cy="${y}" r="${mid.toFixed(1)}" fill="${mc}" fill-opacity="${mo.toFixed(2)}"/>`;
-  if(V==='burn')out+=`<circle cx="${x}" cy="${y}" r="${core.toFixed(1)}" fill="none" stroke="#2f6fe0" stroke-opacity=".6" stroke-width="${(u*.05).toFixed(1)}" stroke-dasharray="${(u*.09).toFixed(1)} ${(u*.07).toFixed(1)}"/>`;
-  else out+=`<circle cx="${x}" cy="${y}" r="${core.toFixed(1)}" fill="${cc}" fill-opacity="${co.toFixed(2)}"/>`;
-  if(le)out+=`<circle cx="${x}" cy="${y}" r="${(u*(.04+Math.sqrt(le)*.035)).toFixed(1)}" fill="#0d2766"/>`;
+  const out=[{r:halo,fill:hc,a:ho},{r:mid,fill:mc,a:mo}];
+  if(V==='burn')out.push({r:core,stroke:'#2f6fe0',a:.6,w:u*.05,dash:[u*.09,u*.07]});else out.push({r:core,fill:cc,a:co});
+  if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:'#0d2766',a:1});
   return out;
+}
+function commGlyph(r,x,y,u){
+  return glyphParts(r,u).map(c=>c.fill?`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="${c.fill}" fill-opacity="${c.a.toFixed(2)}"/>`
+    :`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="none" stroke="${c.stroke}" stroke-opacity="${c.a}" stroke-width="${c.w.toFixed(1)}" stroke-dasharray="${c.dash.map(v=>v.toFixed(1)).join(' ')}"/>`).join('');
 }
 const LEGEND={self:{total:30,rooted:10,leaders:3,links:14},quiet:{total:16,rooted:6,leaders:1,links:6},crowd:{total:42,rooted:3,leaders:0,links:2},
   closed:{total:10,rooted:6,leaders:1,links:14},burn:{total:22,rooted:4,leaders:0,links:4},root:{total:8,rooted:1,leaders:0,links:0}};
@@ -856,22 +873,33 @@ function renderIntro(){
   const rows=real.slice(0,48).concat(examples.slice(0,need));
   const sumL=real.reduce((a,r)=>a+(r.links||0),0), sumT=real.reduce((a,r)=>a+(r.total||0),0);
   const COLS=6,ROWS=Math.ceil(rows.length/COLS),u=100,W=COLS*u,H=ROWS*u,J=rng(11);
-  const mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
+  let mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
+  // 방금 만든 모임은 지도 한가운데에
+  if(mine>=0){const c=Math.floor(ROWS/2)*COLS+Math.floor(COLS/2);if(c<rows.length){const t=rows[c];rows[c]=rows[mine];rows[mine]=t;mine=c;}}
   const g=rows.map((r,i)=>{const x=(i%COLS+.5)*u+(J()-.5)*u*.3,y=(Math.floor(i/COLS)+.5)*u+(J()-.5)*u*.3;
-    return `<g opacity="${r.example?.75:1}"><title>${TYPES[r.type].name} · ${VERDICTS[r.verdict].t}${r.example?' (예시)':''}</title>${commGlyph(r,x.toFixed(1),y.toFixed(1),u)}${i===mine?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`;}).join('');
+    return `<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,x.toFixed(1),y.toFixed(1),u)}${i===mine?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`;}).join('');
   app.innerHTML=`<div class="intro">
     <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임">${g}</svg>
-      ${need?`<span class="maplab2">흐린 ${need}개는 예시</span>`:''}</div>
+      <div class="htip" id="htip" role="tooltip"></div>
+      <span class="maplab2">${info('원 하나가 관람객이 만든 모임 하나예요. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임이에요. 원에 마우스를 올리면 어떤 모임인지 보여요.')}${need?`흐린 ${need}개는 예시`:'읽는 법'}</span></div>
     <div class="head">
       <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span></div>
         <h1>How might we design a community filled with connection?</h1></div>
       <div class="h-bot">
         <p class="lead2">모임을 하나 골라 직접 설계하고, 여덟 번의 모임 동안 사람들이 어떻게 이어지고 떠나는지 지켜보세요.</p>
-        <div class="istats"><div><b>${real.length}</b><span>만들어진 모임</span></div><div><b>${sumL}</b><span>이어진 관계</span></div><div><b>${sumT}</b><span>다녀간 사람</span></div></div>
-        <div class="legend">${VORDER.map(k=>`<div><svg viewBox="-50 -50 100 100" aria-hidden="true">${commGlyph({...LEGEND[k],verdict:k},0,0,70)}</svg><span>${VERDICTS[k].t}</span></div>`).join('')}</div>
         <button class="btn" id="start"><span>모임 고르기</span><span>→</span></button>
       </div></div></div>`;
   mapRedraw=null;
+  const tip=document.getElementById('htip'),map=app.querySelector('.map');
+  const show=(gEl,cx,cy)=>{const r=rows[+gEl.dataset.i],V=VERDICTS[r.verdict],T=TYPES[r.type];
+    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b><i class="dot" style="background:${V.c}"></i>${V.t}</b><p>${V.d}</p><span>남은 관계 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
+    const mb=map.getBoundingClientRect(),w=260;let x=cx-mb.left+14,y=cy-mb.top+14;if(x+w>mb.width-8)x=cx-mb.left-w-14;if(y+150>mb.height)y=cy-mb.top-150;
+    tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
+  app.querySelectorAll('.cg').forEach(gEl=>{
+    gEl.addEventListener('pointermove',e=>show(gEl,e.clientX,e.clientY));
+    gEl.addEventListener('pointerleave',()=>tip.classList.remove('on'));
+    gEl.addEventListener('focus',()=>{const b=gEl.getBoundingClientRect();show(gEl,b.left+b.width/2,b.top+b.height/2);});
+    gEl.addEventListener('blur',()=>tip.classList.remove('on'));});
   document.getElementById('start').onclick=()=>{screen='select';render();};
 }
 const TPAL={book:{bg:'#e4ecfb',mid:'#a9c1ef',dark:'#3a68c8',ink:'#1f438f'},
@@ -1002,7 +1030,7 @@ function run(){
   timer=setInterval(()=>{
     tick();
     if(st.meeting===HALF){clearInterval(timer);renderPanel();setTimeout(levelUp,900);}
-    else if(st.meeting>=MEETINGS){clearInterval(timer);renderPanel();setTimeout(finish,1300);}
+    else if(st.meeting>=MEETINGS){clearInterval(timer);renderPanel();setTimeout(()=>{if(!st)return;st.glyph={t0:performance.now(),r:summary()};setTimeout(finish,1900);},700);}
     else renderPanel();
   },TICK);
 }
@@ -1047,6 +1075,11 @@ function loop(){
   st.people=st.people.filter(p=>!(p.leaving&&p.alpha<=0));
   // 관계 선: 굵은 노란 직선, 새로 생기면 더 굵게
   const byId=new Map(st.people.map(p=>[p.id,p])), now=performance.now();
+  // 끝난 뒤: 첫 화면과 같은 원 그림이 점들 뒤에서 자라나요
+  if(st.glyph){const t=Math.min(1,(now-st.glyph.t0)/1400),e=1-Math.pow(1-t,3);
+    for(const c of glyphParts(st.glyph.r,S)){ctx.globalAlpha=c.a*e;ctx.beginPath();ctx.arc(cx,cy,c.r*(.55+.45*e),0,Math.PI*2);
+      if(c.fill){ctx.fillStyle=c.fill;ctx.fill();}else{ctx.strokeStyle=c.stroke;ctx.lineWidth=c.w;ctx.setLineDash(c.dash);ctx.stroke();ctx.setLineDash([]);}}
+    ctx.globalAlpha=1;}
   for(const l of st.links){const a=byId.get(l[0]),b=byId.get(l[1]);if(!a||!b)continue;
     const fresh=l[2]?Math.max(0,1-(now-l[2])/1500):0;
     const ax=cx+a.x*S,ay=cy+a.y*S,bx=cx+b.x*S,by=cy+b.y*S,qx=cx+(a.x+b.x)/2*S*.72,qy=cy+(a.y+b.y)/2*S*.72;
