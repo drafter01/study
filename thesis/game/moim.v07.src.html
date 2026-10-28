@@ -510,6 +510,21 @@ body{background:var(--page)}
 .ovbar .info .tip{top:calc(100% + 8px);bottom:auto}
 .ovbar .ov-e .info .tip{left:auto;right:-8px}
 .ovbar .ov-e .gauge{margin-top:auto}
+
+/* ───────── v1.3 추상 세로줄 그래픽, 왼쪽 위 뒤로 버튼, 동그라미 사람 ───────── */
+.ecard{background:var(--tbg)}
+.e-img{margin:0;border-radius:0;aspect-ratio:auto;height:150px;background:transparent}
+.e-head .code{color:var(--tink)}
+.e-head .sub{color:color-mix(in srgb,var(--tink) 70%,#fff)}
+.e-cells .cell{background:rgba(255,255,255,.6)}
+.e-txt{color:#222}
+.back{width:34px;height:34px;border-radius:50%;border:0;background:var(--cell);font-size:17px;font-weight:700;display:inline-grid;place-items:center;flex:none;line-height:1}
+.back:hover{background:var(--ink);color:#fff}
+.e-logo{gap:10px}
+.e-logo .back{background:var(--page)}
+.pcard .cat{gap:10px}
+.c2-l .no{display:flex;align-items:center;gap:10px}
+.c2-l .back{background:var(--card)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -550,8 +565,8 @@ const VERDICTS={
 const VORDER=['self','quiet','crowd','closed','burn','root'];
 const STAGE_NAMES=['처음 온 사람','다시 온 사람','자리 잡은 사람','함께 이끄는 사람'];
 const ACC='#2f6fe0';
-const STAGE_C=[COL.paper,'#cfcec8',ACC,ACC];
-const RING=[.76,.57,.39,.22];
+const STAGE_C=[COL.paper,'#a3a29c',ACC,ACC];
+const RING=[.82,.5,.14,.04];
 const MAXLV=5, START_PTS=8, MEETINGS=8, HALF=4, TICK=1800;
 
 const app=document.getElementById('app');
@@ -598,7 +613,7 @@ function layout(snap){
     for(let it=0;it<30&&n>1;it++)for(let i=0;i<n;i++){const j=(i+1)%n;let df=ang[j]-ang[i];if(j===0)df+=TAU;
       if(df<gap){const push=(gap-df)/2;ang[i]-=push;ang[j]+=push;}}
     // 위쪽 쐐기는 구역 이름 자리로 비워 둬요
-    const W0=.7;
+    const W0=0;
     grp.forEach((p,i)=>{const r=RING[s]+(i%2?.02:-.02);const t=(((ang[i]%TAU)+TAU)%TAU)/TAU;const A=-Math.PI/2+W0/2+t*(TAU-W0);
       p.tx=Math.cos(A)*r;p.ty=Math.sin(A)*r;if(snap){p.x=p.tx;p.y=p.ty;p.alpha=1;}});
   }
@@ -851,30 +866,36 @@ function renderIntro(){
   document.getElementById('start').onclick=()=>{screen='select';render();};
 }
 // 모임 카드 그림: 하프톤 점 바탕 + 모임의 길(검은 선)
-const ACT_PATH={};let ACT_D={};
-function typeArt(k,c){
-  const R=rng(k.length*131+7);let dots='';
-  for(let y=6;y<250;y+=10)for(let x=6;x<400;x+=10){const n=.5+.5*Math.sin(x*.018+y*.011+R()*.6)*Math.cos(y*.02-x*.007);
-    const rr=n*n*4.2;if(rr>.6)dots+=`<circle cx="${x}" cy="${y}" r="${rr.toFixed(1)}"/>`;}
-  const path=(ACT_D={book:'M80 170 Q140 130 200 165 Q260 130 320 170 L320 95 Q260 55 200 90 Q140 55 80 95 Z M200 90 L200 165',
-    run:'M110 160 C70 160 70 90 120 85 C170 80 180 120 230 110 C290 98 330 120 320 150 C310 185 230 175 200 168 C170 160 140 160 110 160 Z',
-    plog:'M40 120 C90 80 130 160 180 120 C230 80 270 160 320 120 C340 105 355 105 370 112'})[k];
-  const extra=k==='plog'?[[95,112],[160,132],[250,110],[300,140]].map(([x,y])=>`<rect x="${x}" y="${y}" width="9" height="9" fill="#fff" stroke="#111" stroke-width="3"/>`).join(''):'';
-  return `<svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="${c}" fill-opacity=".55">${dots}</g>
-    <path d="${path}" fill="none" stroke="#fff" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/><path d="${path}" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>${extra}</svg>`;
+const TPAL={book:{bg:'#e4ecfb',mid:'#a9c1ef',dark:'#3a68c8',ink:'#1f438f'},
+  run:{bg:'#fbe7e3',mid:'#f2b2a8',dark:'#d24a37',ink:'#8f2c1e'},
+  plog:{bg:'#e3f3e6',mid:'#a3d6ad',dark:'#2f8e48',ink:'#1d5e2f'}};
+function typeArt(k){
+  const P=TPAL[k],W=400,H=190;
+  const shape={
+    book:'<rect x="0" y="120" width="400" height="70"/><rect x="60" y="80" width="280" height="40"/><rect x="130" y="40" width="140" height="40"/><rect x="175" y="0" width="50" height="40"/>',
+    run:'<circle cx="200" cy="190" r="150"/>',
+    plog:'<rect x="40" y="20" width="70" height="55"/><rect x="250" y="20" width="70" height="55"/><rect x="145" y="75" width="70" height="55"/><rect x="40" y="130" width="70" height="60"/><rect x="320" y="110" width="80" height="80"/>'}[k];
+  let thin='',thick='';
+  for(let x=2;x<W;x+=6)thin+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`;
+  for(let x=1;x<W;x+=3)thick+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><clipPath id="cp-${k}">${shape}</clipPath></defs>
+    <rect width="${W}" height="${H}" fill="${P.bg}"/>
+    <g stroke="${P.mid}" stroke-width="1.2">${thin}</g>
+    <g clip-path="url(#cp-${k})"><rect width="${W}" height="${H}" fill="${P.mid}" fill-opacity=".45"/><g stroke="${P.dark}" stroke-width="1.4">${thick}</g></g></svg>`;
 }
 function renderSelect(){
   screen='select';
   const now=new Date(),clock=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
   app.innerHTML=`<section class="entry">
-    <div class="e-bar"><span class="e-logo"><i></i>Community Entry</span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-clock num">${clock}</span></div>
-    <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c}" aria-label="${v.name} 시작">
-      <div class="e-img">${typeArt(k,v.c)}<div class="e-top"><span class="pill"><i class="dot" style="background:${v.c}"></i>TYPE ${'ABC'[i]}</span></div></div>
+    <div class="e-bar"><span class="e-logo"><button class="back" id="back" aria-label="처음 화면으로">←</button>Community Entry</span><span class="e-mid">모임을 하나 고르세요. 같은 설계라도 모임마다 결과가 달라요.</span><span class="e-clock num">${clock}</span></div>
+    <div class="e-cards">${TKEYS.map((k,i)=>{const v=TYPES[k];return `<button class="ecard" data-t="${k}" style="--c:${v.c};--tbg:${TPAL[k].bg};--tink:${TPAL[k].ink}" aria-label="${v.name} 시작">
+      <div class="e-img">${typeArt(k)}</div>
       <div class="e-head"><span class="code">${v.code}</span><span class="ev">${info(`근거 ${v.ev}: 선행연구에서 뽑은 발견 번호예요.`)}</span><span class="sub">${v.name} · ${v.place} · ${v.when} ${v.time}</span></div>
       <div class="cgrid e-cells">${[['유입',v.st[0]],['머무름',v.st[1]],['운영 부담',v.st[2]]].map(([n,x])=>`<div class="cell"><small>${n}</small><b>${x}<em>/5</em></b></div>`).join('')}</div>
       <div class="e-txt"><p><b>특징</b>${v.plus}</p><p class="neg"><b>주의</b>${v.minus}</p></div>
       <div class="e-go"><span>이 모임 운영하기</span><span>▶</span></div></button>`;}).join('')}</div>
-    <div class="e-foot"><button class="btn ghost" id="back"><span>← 처음 화면</span></button><span>특징과 주의는 연구 근거 표의 발견(F 번호)에서 왔어요.</span></div></section>`;
+    </section>`;
   app.querySelectorAll('.ecard').forEach(b=>b.onclick=()=>newGame(b.dataset.t));
   document.getElementById('back').onclick=()=>{screen='intro';render();};
 }
@@ -943,7 +964,7 @@ function renderPanel(){
   const e=Math.round(st.E);
   P.innerHTML=`
     <section class="pcard">
-      <div class="cat">${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]} · ${T.place} · ${T.when} ${T.time}</div>
+      <div class="cat"><button class="back" id="quit" aria-label="처음 화면으로">←</button>${T.code} · TYPE ${'ABC'[TKEYS.indexOf(st.type)]} · ${T.place} · ${T.when} ${T.time}</div>
       <h2 class="pname">${T.name}${info(`<b>특징</b> ${T.plus}<br><b class="neg">주의</b> ${T.minus}<br><small>근거 ${T.ev}</small>`)}</h2>
       <div class="goal3"><small>목표</small><p>여덟 번째 모임이 끝났을 때, <mark>서로 이어져 남아 있는 사람</mark>이 많은 모임</p></div>
     </section>
@@ -955,7 +976,7 @@ function renderPanel(){
         <input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}></div>`;}).join('')}
       ${editable?`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'모임 8번 시작'}</span><span>▶</span></button>`:`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}
     </section>
-    <button class="btn ghost" id="quit"><span>처음 화면으로</span><span>←</span></button>`;
+`;
   P.querySelectorAll('input[type=range]').forEach(inp=>inp.oninput=()=>{
     const k=inp.dataset.k, old=st.skills[k];let v=+inp.value;
     v=clamp(v,st.lock[k],old+st.points);st.points-=v-old;st.skills[k]=v;renderPanel();resetIdle();
@@ -994,17 +1015,9 @@ function finish(){
 
 // 사람: 네모난 머리와 검은 몸 (포스터의 걷는 사람들처럼)
 function figure(x,y,r,head,hollow,a){
-  ctx.globalAlpha=a;
-  ctx.fillStyle=COL.ink;ctx.strokeStyle=COL.ink;
   const d=window.devicePixelRatio||1;
-  // 몸통과 다리
-  ctx.fillRect(x-r*.38,y-r*.1,r*.76,r*.7);
-  ctx.lineWidth=Math.max(1.5,r*.16);ctx.beginPath();ctx.moveTo(x-r*.2,y+r*.6);ctx.lineTo(x-r*.32,y+r*1.05);ctx.moveTo(x+r*.2,y+r*.6);ctx.lineTo(x+r*.3,y+r*1.05);ctx.stroke();
-  // 머리
-  const h=r*.78;
-  ctx.fillStyle=head;ctx.fillRect(x-h/2,y-r*.25-h,h,h);
-  ctx.lineWidth=1.5*d;ctx.strokeRect(x-h/2,y-r*.25-h,h,h);
-  if(hollow){ctx.globalAlpha=a*.5;}
+  ctx.globalAlpha=a;ctx.beginPath();ctx.arc(x,y,r*.68,0,Math.PI*2);ctx.fillStyle=head;ctx.fill();
+  if(head==='#ffffff'||head===COL.paper){ctx.lineWidth=1.5*d;ctx.strokeStyle='#8a8a86';ctx.stroke();}
 }
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
@@ -1013,10 +1026,16 @@ function loop(){
   ctx.clearRect(0,0,W,H);
   // 구역: 검은 실선 동심원
   const B=[.86,.665,.48,.305,.09];
-  ['#f6f5f2','#efeee9','#e8e7e1','#e0dfd8'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,B[i]*S,0,Math.PI*2);ctx.fill();});
   // 움직임
-  for(const p of st.people){p.x+=(p.tx-p.x)*.07;p.y+=(p.ty-p.y)*.07;
-    if(p.leaving)p.alpha=Math.max(0,p.alpha-.02);else p.alpha=Math.min(1,p.alpha+.05);}
+  {const P=st.people,rr=(9*d)/S*2.25,byIdM=new Map(P.map(q=>[q.id,q]));
+    for(const p of P){p.vx=(p.vx||0)+(p.tx-p.x)*(p.leaving?.004:.0025);p.vy=(p.vy||0)+(p.ty-p.y)*(p.leaving?.004:.0025);
+      p.vx+=(Math.random()-.5)*.0006;p.vy+=(Math.random()-.5)*.0006;}
+    for(const l of st.links){const a=byIdM.get(l[0]),b=byIdM.get(l[1]);if(!a||!b||a.leaving||b.leaving)continue;
+      const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||1e-6;if(dist>rr*1.1){const f=(dist-rr)*.006;a.vx+=dx/dist*f;a.vy+=dy/dist*f;b.vx-=dx/dist*f;b.vy-=dy/dist*f;}}
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j];const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||1e-6;
+      if(dist<rr){const f=(rr-dist)*.18;a.vx-=dx/dist*f;a.vy-=dy/dist*f;b.vx+=dx/dist*f;b.vy+=dy/dist*f;}}
+    for(const p of P){p.vx*=.86;p.vy*=.86;p.x+=p.vx;p.y+=p.vy;
+      if(p.leaving)p.alpha=Math.max(0,p.alpha-.012);else p.alpha=Math.min(1,p.alpha+.05);}}
   st.people=st.people.filter(p=>!(p.leaving&&p.alpha<=0));
   // 관계 선: 굵은 노란 직선, 새로 생기면 더 굵게
   const byId=new Map(st.people.map(p=>[p.id,p])), now=performance.now();
@@ -1024,15 +1043,10 @@ function loop(){
     const fresh=l[2]?Math.max(0,1-(now-l[2])/1500):0;
     const ax=cx+a.x*S,ay=cy+a.y*S,bx=cx+b.x*S,by=cy+b.y*S,qx=cx+(a.x+b.x)/2*S*.72,qy=cy+(a.y+b.y)/2*S*.72;
     ctx.lineCap='round';ctx.globalAlpha=Math.min(a.alpha,b.alpha);
-    ctx.strokeStyle='rgba(17,17,17,.26)';ctx.lineWidth=1.4*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();
     if(fresh>0){ctx.strokeStyle='rgba(17,17,17,.75)';ctx.globalAlpha=Math.min(a.alpha,b.alpha)*fresh;ctx.lineWidth=2.6*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();}}
   ctx.globalAlpha=1;
-  // 가운데: 모임이 함께하는 활동 (모임 고르기 카드의 그림과 같은 선)
-  ctx.beginPath();ctx.arc(cx,cy,30*d,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();
-  if(!ACT_PATH[st.type])ACT_PATH[st.type]=new Path2D(ACT_D[st.type]);
-  {const k=40*d/300;ctx.save();ctx.translate(cx,cy);ctx.scale(k,k);ctx.translate(-205,-125);ctx.strokeStyle=COL.ink;ctx.lineWidth=2*d/k;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke(ACT_PATH[st.type]);ctx.restore();}
   // 사람
-  for(const p of st.people){const r=(p.stage===3?15:13)*d;
+  for(const p of st.people){const r=(p.stage===3?14:13)*d;
     figure(cx+p.x*S,cy+p.y*S,r,p.leaving?'#ffffff':STAGE_C[p.stage],false,p.leaving?p.alpha*.5:p.alpha);}
   ctx.globalAlpha=1;
   // 사람마다 무슨 일이 있었는지
@@ -1054,7 +1068,7 @@ function renderReport(){
     '욕구 충족':clamp(20+8*k.rhythm+8*k.welcome,0,100),'정서적 연결':clamp(10+12*k.conn+Math.min(30,r.links*2),0,100)};
   app.innerHTML=`<section class="case2">
     <div class="c2-l">
-      <span class="no">CASE No. ${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span>
+      <span class="no"><button class="back" id="home2" aria-label="처음 화면으로">←</button>CASE No. ${caseNo} · ${new Date(r.t).toLocaleDateString('ko-KR')}</span>
       <h1>${T.name}</h1>
       <span class="vchip" style="background:${V.c}">${V.t}</span>
       <p>${V.d}</p>
@@ -1080,6 +1094,7 @@ function renderReport(){
     </div></section>`;
   document.getElementById('again').onclick=()=>newGame(st.type);
   document.getElementById('home').onclick=()=>{st=null;screen='intro';render();};
+  document.getElementById('home2').onclick=()=>{clearInterval(timer);st=null;screen='intro';render();};
 }
 
 // 전시용: 아무도 만지지 않으면 처음 화면으로
