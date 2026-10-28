@@ -750,15 +750,12 @@ body{background:var(--page)}
 /* ───────── v2.16 쉬운 스킬 이름, 포인트를 다 나눠야 시작, 결과는 다음 질문이 주인공 ───────── */
 .sk-sub{margin-left:34px}
 .sk-head h3{display:flex;align-items:center;gap:6px}
-.panel.need-pts .pcard:has(.sk-head){box-shadow:0 0 0 3px var(--accent);animation:needp 1.6s ease-in-out infinite}
-@keyframes needp{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 35%,transparent)}}
 #go:disabled{background:var(--cell);color:var(--soft);cursor:not-allowed}
 .c3-r .big2 .hero-n{font-size:clamp(56px,4.6vw,76px);color:var(--ink)}
 .big2 .hero-n em{font-size:.36em}
 .c3-l .q2{padding:24px 28px 28px;gap:12px}
 .c3-l .q2 small{font-size:13px}
 .c3-l .q2 b{font-size:clamp(28px,2.3vw,36px);line-height:1.28}
-@media (prefers-reduced-motion:reduce){.panel.need-pts .pcard:has(.sk-head){animation:none}}
 
 /* ───────── v2.17 시뮬레이션 영역 가운데 큰 Start, 패널 버튼은 키 컬러 ───────── */
 .cstart{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:3;display:none}
