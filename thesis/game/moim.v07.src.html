@@ -380,6 +380,54 @@ input[type=range]::-moz-range-thumb{border-radius:50%;border:0;background:var(--
 .q2 small{font-family:var(--f-head);font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--soft)}
 .q2 b{font-size:20px;font-weight:800;line-height:1.4}
 .c2-r .cell p{font-size:13px;line-height:1.5;font-weight:700}
+
+/* ───────── v0.8 부드러운 상자: 검은 선 없이, 큰 radius의 흰 상자를 따뜻한 회색 바탕 위에 ───────── */
+:root{--page:#ecebe7;--card:#ffffff;--cell:#f2f1ed;--r-lg:24px;--r-md:16px;--r-sm:12px}
+body{background:var(--page)}
+.wrap{padding-block:16px 28px}
+.btn{border:0;border-radius:var(--r-sm)}
+.btn.ghost{background:var(--card)}
+.btn:disabled{background:#cfcec9;color:#fff;opacity:1}
+.lab{border-top:0;padding-top:0}
+/* 첫 화면 */
+.intro{border:0;gap:10px;min-height:min(88vh,780px)}
+.map{border:0!important;background:var(--card);border-radius:var(--r-lg)}
+.head{background:var(--card);border-radius:var(--r-lg);overflow:hidden}
+.h-bot{border-top:0;padding-top:4px}
+.ucard{border:0;border-radius:var(--r-sm);box-shadow:0 6px 20px rgba(0,0,0,.10)}
+.maplab{border-radius:var(--r-sm);padding:6px 8px}
+.istats div{border-radius:var(--r-sm)}
+/* 모임 고르기 */
+.entry{border:0;display:grid;gap:10px}
+.e-bar{border:0;background:var(--card);border-radius:999px;padding:10px 18px}
+.e-cards{padding:0}
+.ecard{border:0;border-radius:var(--r-lg)}
+.ecard:hover,.ecard:focus-visible{box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.e-img{border-radius:var(--r-md);margin:10px 10px 0}
+.e-cells{padding:8px 10px 0}
+.e-cells .cell{border-radius:var(--r-sm)}
+.e-go{margin:0 10px 10px;border-radius:var(--r-sm)}
+.e-foot{padding:0}
+/* 설계 화면 */
+.tool{border:0;gap:10px;grid-template-columns:350px minmax(0,1fr)}
+@media (max-width:820px){.tool{grid-template-columns:minmax(0,1fr)}}
+.panel{border:0!important;background:var(--card);border-radius:var(--r-lg)}
+.canvas-wrap{border-radius:var(--r-lg);overflow:hidden;background-color:var(--card);background-image:radial-gradient(#e6e5e0 1px,transparent 1px);background-size:20px 20px}
+.canvas-wrap::after{display:none}
+.sec-h{border-top:0;padding-top:2px}
+.p-name,.goal,.pts2,.log,.lvl2{border-radius:var(--r-sm)}
+.lvl2{border-left:0;background:#eef3ff}
+.c-cap #cap{border:0;border-radius:var(--r-sm);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.hints{border:0;background:var(--card);border-radius:999px;margin-top:10px;padding:8px 18px}
+.hints kbd{border-color:#9a9a96}
+/* 결과 */
+.c2-l h1{margin-top:2px}
+.photo2{border:0;border-radius:var(--r-lg)}
+.photo2 .cap{border-top:0;background:var(--cell)}
+.c2-m{border:0;background:var(--card);border-radius:var(--r-lg);padding:18px}
+.c2-m .cell{border-radius:var(--r-sm)}
+.q2{border:0;background:var(--card);border-radius:var(--r-lg)}
+.c2-r .cell{background:var(--card);border-radius:var(--r-md);padding:12px 14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -695,8 +743,8 @@ function renderIntro(){
       <div><b>${T.code} · ${String(r.t%10000).padStart(4,'0')}${r.example?' (예시)':''}</b><span>${V.t}</span></div><span class="ck" style="color:${V.c}">●</span>
       ${si===0?`<div class="pg"><span>다시 온 비율</span><em><s style="width:${r.rate}%"></s></em><span>${r.rate}%</span></div>`:''}</div>`;}).join('');
   const wires=feat.map((ri,si)=>{const c=centers[ri],s=slots[si],x=c.x*100,y=c.y*100,mx=x,my=s.y;
-    return `<path class="u${si}" d="M${s.x} ${s.y} Q${mx} ${my} ${x} ${y}" fill="none" stroke="#111" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
-      <rect x="${x-.7}" y="${y-.9}" width="1.4" height="1.8" fill="#111"/>`;}).join('');
+    return `<path class="u${si}" d="M${s.x} ${s.y} Q${mx} ${my} ${x} ${y}" fill="none" stroke="#6b6b67" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
+      <rect x="${x-.7}" y="${y-.9}" width="1.4" height="1.8" fill="#6b6b67"/>`;}).join('');
   app.innerHTML=`<div class="intro">
     <div class="map"><canvas id="mapcv" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개를 점 무리로 그린 지도"></canvas>
       <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${wires}</svg>${cards}
@@ -756,12 +804,13 @@ function renderTool(){
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
       <div class="c-hero"><small>지금 남아 있는 관계</small><b class="hero-n" id="hero">0</b><span id="hero2"></span></div>
       <div class="c-cap"><span id="cap"></span>
-        <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="sq" style="background:${STAGE_C[i]};border:2px solid #111"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
+        <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
     <div class="hints"><span class="dots">●●●●</span><span>NAVIGATION</span><span><kbd>×</kbd>슬라이더로 포인트 나누기</span><span><kbd>○</kbd>모임 시작</span><span><kbd>←</kbd>처음 화면</span><span class="r">${T.code} · ${T.name} · 은유적 모델이에요</span></div>`;
   canvas=document.getElementById('cv');ctx=canvas.getContext('2d');
+  if(window.ResizeObserver){new ResizeObserver(()=>sizeCanvas()).observe(canvas.parentElement);}
   sizeCanvas();renderPanel();loop();
 }
-function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);}
+function sizeCanvas(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.round(r.width*d),h=Math.round(r.height*d);if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
 window.addEventListener('resize',()=>{sizeCanvas();if(!st&&screen==='intro'&&mapRedraw)mapRedraw();});
 function renderPanel(){
   const P=document.getElementById('panel');if(!P)return;
@@ -843,16 +892,15 @@ function figure(x,y,r,head,hollow,a){
 }
 function loop(){
   if(!st||!canvas||!document.body.contains(canvas))return;
+  sizeCanvas();
   const W=canvas.width,H=canvas.height,d=window.devicePixelRatio||1,S=Math.min(W,H)/2*.8,cx=W/2,cy=H/2;
   ctx.clearRect(0,0,W,H);
   // 구역: 검은 실선 동심원
   const B=[.86,.665,.48,.305,.09];
-  ctx.strokeStyle=COL.ink;
-  B.slice(0,4).forEach((r,i)=>{ctx.lineWidth=(i===0?2:1)*d;ctx.setLineDash(i===0?[]:[2*d,4*d]);ctx.beginPath();ctx.arc(cx,cy,r*S,0,Math.PI*2);ctx.stroke();});
-  ctx.setLineDash([]);
+  ['#f6f5f2','#efeee9','#e8e7e1','#e0dfd8'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,B[i]*S,0,Math.PI*2);ctx.fill();});
   ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=`700 ${12*d}px Pretendard,sans-serif`;
   STAGE_NAMES.forEach((n,i)=>{const y=cy-((B[i]+B[i+1])/2)*S;const w=ctx.measureText(n).width;const x0=cx-(w+16*d)/2;
-    ctx.fillStyle=STAGE_C[i];ctx.fillRect(x0,y-5*d,10*d,10*d);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5*d;ctx.strokeRect(x0,y-5*d,10*d,10*d);
+    ctx.fillStyle=STAGE_C[i];ctx.beginPath();ctx.arc(x0+5*d,y,5*d,0,Math.PI*2);ctx.fill();if(i===0){ctx.strokeStyle="#9a9a96";ctx.lineWidth=1.2*d;ctx.stroke();}
     ctx.fillStyle=COL.ink;ctx.fillText(n,x0+16*d,y);});
   ctx.textBaseline='alphabetic';
   // 움직임
@@ -869,7 +917,7 @@ function loop(){
     if(fresh>0){ctx.strokeStyle=COL.orange;ctx.globalAlpha=Math.min(a.alpha,b.alpha)*fresh;ctx.lineWidth=2.6*d;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(qx,qy,bx,by);ctx.stroke();}}
   ctx.globalAlpha=1;
   // 가운데: 나와 에너지
-  ctx.lineWidth=7*d;ctx.strokeStyle='#e6e6e6';ctx.beginPath();ctx.arc(cx,cy,24*d,0,Math.PI*2);ctx.stroke();
+  ctx.lineWidth=7*d;ctx.strokeStyle='#d6d5cf';ctx.beginPath();ctx.arc(cx,cy,24*d,0,Math.PI*2);ctx.stroke();
   ctx.strokeStyle=st.E<30?COL.red:COL.yellow;ctx.beginPath();ctx.arc(cx,cy,24*d,-Math.PI/2,-Math.PI/2+Math.PI*2*st.E/100);ctx.stroke();
   ctx.beginPath();ctx.arc(cx,cy,15*d,0,Math.PI*2);ctx.fillStyle=COL.ink;ctx.fill();
   ctx.fillStyle=COL.paper;ctx.font=`800 ${12*d}px Pretendard,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('나',cx,cy+.5*d);ctx.textBaseline='alphabetic';
