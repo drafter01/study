@@ -949,6 +949,13 @@ body{background:var(--page)}
 /* ───────── v2.26 첫 화면 질문은 Unbounded ───────── */
 .head h1{font-family:"Unbounded",var(--f-head)!important;font-weight:500!important;letter-spacing:-.03em!important;line-height:1.08!important;font-size:clamp(30px,3.5vw,60px)!important}
 @media (max-width:820px){.head h1{font-size:clamp(26px,7.4vw,40px)!important}}
+
+/* ───────── v2.27 첫 화면: 왼쪽 정렬, 해바라기 배치 지도 ───────── */
+.head h1{text-align:left!important}
+.head .kick,.head .h-bot{text-align:left}
+.comms .cg{transition:opacity .25s}
+.comms:hover .cg{opacity:.55}
+.comms .cg:hover{opacity:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1293,7 +1300,7 @@ function renderWall(){
 }
 let page=null;
 function render(){
-  resetIdle();cancelAnimationFrame(raf);window.scrollTo(0,0);
+  resetIdle();cancelAnimationFrame(raf);cancelAnimationFrame(homeRaf);window.scrollTo(0,0);
   if(page==='types'){renderTypes();return;}
   if(page==='wall'){renderWall();return;}
   if(!st){if(screen==='select')renderSelect();else renderIntro();return;}
@@ -1413,23 +1420,26 @@ function commGlyph(r,x,y,u){
 }
 const LEGEND={self:{total:30,rooted:10,leaders:3,links:14},quiet:{total:16,rooted:6,leaders:1,links:6},crowd:{total:42,rooted:3,leaders:0,links:2},
   closed:{total:10,rooted:6,leaders:1,links:14},burn:{total:22,rooted:4,leaders:0,links:4},root:{total:8,rooted:1,leaders:0,links:0}};
+let homeRaf=0;
 function renderIntro(){
   screen='intro';
   const real=plays.filter(p=>p&&p.skills&&VERDICTS[p.verdict]&&TYPES[p.type]);
-  if(!examples)examples=makeExamples(48);
-  const need=Math.max(0,48-real.length);
-  const rows=real.slice(0,48).concat(examples.slice(0,need));
-  const sumL=real.reduce((a,r)=>a+(r.links||0),0), sumT=real.reduce((a,r)=>a+(r.total||0),0);
-  const COLS=6,ROWS=Math.ceil(rows.length/COLS),u=100,W=COLS*u,H=ROWS*u,J=rng(11);
+  const NMAX=96;
+  if(!examples||examples.length<NMAX)examples=makeExamples(NMAX);
+  const need=Math.max(0,NMAX-real.length);
+  const rows=real.slice(0,NMAX).concat(examples.slice(0,need));
+  // 방금 만든 커뮤니티는 한가운데에
   let mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
-  // 방금 만든 모임은 지도 한가운데에
-  if(mine>=0){const c=Math.floor(ROWS/2)*COLS+Math.floor(COLS/2);if(c<rows.length){const t=rows[c];rows[c]=rows[mine];rows[mine]=t;mine=c;}}
-  const g=rows.map((r,i)=>{const x=(i%COLS+.5)*u+(J()-.5)*u*.3,y=(Math.floor(i/COLS)+.5)*u+(J()-.5)*u*.3;
-    return `<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,x.toFixed(1),y.toFixed(1),u)}${i===mine?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`;}).join('');
+  if(mine>0){const t=rows[0];rows[0]=rows[mine];rows[mine]=t;mine=0;}
+  // 해바라기 씨처럼 가운데에서 바깥으로 자연스럽게 모인 배치
+  const W=1000,H=1000,u=62,GA=Math.PI*(3-Math.sqrt(5)),N=rows.length;
+  const pos=rows.map((r,i)=>{const rr=440*Math.sqrt((i+.6)/N),a=i*GA;return {x:W/2+Math.cos(a)*rr,y:H/2+Math.sin(a)*rr,ph:i*1.7};});
+  const g=rows.map((r,i)=>`<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" transform="translate(${pos[i].x.toFixed(1)} ${pos[i].y.toFixed(1)})" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,0,0,u)}${i===mine?`<circle r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`).join('');
+  const touch=window.matchMedia&&matchMedia('(hover:none)').matches;
   app.innerHTML=`<div class="intro">
-    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임">${g}</svg>
+    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="지금까지 만들어진 모임 ${rows.length}개. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임">${g}</svg>
       <div class="htip" id="htip" role="tooltip"></div>
-      <span class="maplab2">${info('원 하나가 관람객이 만든 모임 하나예요. 작고 진한 원은 단단한 모임, 크고 옅게 퍼진 원은 느슨한 모임이에요. 원에 마우스를 올리면 어떤 모임인지 보여요.')}${need?`흐린 ${need}개는 예시`:'읽는 법'}</span></div>
+      <span class="maplab2">${info('원 하나가 관람객이 만든 커뮤니티 하나예요. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티예요.')}${touch?'원을 눌러 보세요':'원에 마우스를 올려 보세요'}</span></div>
     <div class="head">
       <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span></div>
         <h1>How might we design a community filled with connection?</h1></div>
@@ -1449,6 +1459,21 @@ function renderIntro(){
     gEl.addEventListener('focus',()=>{const b=gEl.getBoundingClientRect();show(gEl,b.left+b.width/2,b.top+b.height/2);});
     gEl.addEventListener('blur',()=>tip.classList.remove('on'));});
   document.getElementById('start').onclick=playIntro;
+  // 움직임: 천천히 숨 쉬듯 떠다니고, 손(마우스)이 가까우면 렌즈처럼 커지며 주변이 살짝 밀려남
+  const svg=app.querySelector('.comms'),els=[...app.querySelectorAll('.cg')];let ptr=null,pk=0;
+  const toSvg=e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();return m?pt.matrixTransform(m.inverse()):null;};
+  svg.addEventListener('pointermove',e=>{ptr=toSvg(e);});
+  svg.addEventListener('pointerleave',()=>{ptr=null;});
+  svg.addEventListener('pointerdown',e=>{ptr=toSvg(e);const gEl=e.target.closest('.cg');if(gEl)show(gEl,e.clientX,e.clientY);});
+  const still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  cancelAnimationFrame(homeRaf);
+  const tick=now=>{if(!document.body.contains(svg))return;pk+=((ptr?1:0)-pk)*.12;
+    for(let i=0;i<els.length;i++){const P=pos[i];let x=P.x,y=P.y,sc=1;
+      if(!still){x+=Math.sin(now/2600+P.ph)*7;y+=Math.cos(now/3100+P.ph*1.3)*7;sc=1+Math.sin(now/1900+P.ph)*.04;}
+      if(ptr&&pk>.01){const dx=x-ptr.x,dy=y-ptr.y,dd=Math.hypot(dx,dy)||1,f=Math.exp(-(dd*dd)/(150*150))*pk;sc*=1+1.5*f;x+=dx/dd*46*f;y+=dy/dd*46*f;}
+      els[i].setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sc.toFixed(3)})`);}
+    homeRaf=requestAnimationFrame(tick);};
+  homeRaf=requestAnimationFrame(tick);
 }
 // 커뮤니티 종류에는 색을 두지 않음. 색은 결과(가까운 결과 유형)가 정함
 const NEUTRAL={bg:'#f1f0eb',mid:'#d3d2cb',dark:'#55544f',ink:'#1e1e1c'};
