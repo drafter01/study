@@ -11,7 +11,8 @@ out_path = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else here / "community
 fonts = {"__PRETENDARD__": "pretendard-variable-subset.woff2", "__KODDI_R__": "KoddiUDOnGothic-Regular.woff2",
          "__KODDI_B__": "KoddiUDOnGothic-Bold.woff2", "__KODDI_EB__": "KoddiUDOnGothic-ExtraBold.woff2",
          "__GOTHIC_R__": "GothicA1-Regular-subset.woff2", "__GOTHIC_B__": "GothicA1-Bold-subset.woff2", "__GOTHIC_EB__": "GothicA1-ExtraBold-subset.woff2",
-         "__UNBOUNDED__": "Unbounded-latin.woff2"}
+         "__UNBOUNDED__": "Unbounded-latin.woff2",
+         "__SPOQA_B__": "SpoqaHanSansNeo-Bold.woff2", "__SPOQA_M__": "SpoqaHanSansNeo-Medium.woff2", "__SPOQA_R__": "SpoqaHanSansNeo-Regular.woff2"}
 b64 = lambda data: base64.b64encode(data).decode()
 
 
