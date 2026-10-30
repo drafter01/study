@@ -1476,9 +1476,16 @@ function glyphParts(r,u){
   if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:K.ink,a:1});
   return out;
 }
+// 원 가장자리를 부드럽게: 색마다 가운데에서 바깥으로 옅어지는 그라데이션을 하나씩 만들어 씀
+const glyphGrads=new Map();
+function glyphGrad(col,soft){const id='sg'+col.replace('#','')+(soft?'h':'c');
+  if(!glyphGrads.has(id))glyphGrads.set(id,`<radialGradient id="${id}">`+(soft
+    ?`<stop offset="0" stop-color="${col}"/><stop offset=".45" stop-color="${col}" stop-opacity=".8"/><stop offset="1" stop-color="${col}" stop-opacity="0"/>`
+    :`<stop offset="0" stop-color="${col}"/><stop offset=".55" stop-color="${col}" stop-opacity=".95"/><stop offset=".8" stop-color="${col}" stop-opacity=".5"/><stop offset="1" stop-color="${col}" stop-opacity="0"/>`)+'</radialGradient>');
+  return `url(#${id})`;}
 function commGlyph(r,x,y,u){
-  return glyphParts(r,u).map(c=>c.fill?`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="${c.fill}" fill-opacity="${c.a.toFixed(2)}"/>`
-    :`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="none" stroke="${c.stroke}" stroke-opacity="${c.a}" stroke-width="${c.w.toFixed(1)}" stroke-dasharray="${c.dash.map(v=>v.toFixed(1)).join(' ')}"/>`).join('');
+  return glyphParts(r,u).map((c,k)=>c.fill?`<circle cx="${x}" cy="${y}" r="${(c.r*(k<2?1.4:1.3)).toFixed(1)}" fill="${glyphGrad(c.fill,k<2)}" fill-opacity="${c.a.toFixed(2)}"/>`
+    :`<circle cx="${x}" cy="${y}" r="${c.r.toFixed(1)}" fill="none" stroke="${c.stroke}" stroke-opacity="${c.a}" stroke-width="${c.w.toFixed(1)}" stroke-dasharray="${c.dash.map(v=>v.toFixed(1)).join(' ')}" filter="url(#sgblur)"/>`).join('');
 }
 const LEGEND={self:{total:30,rooted:10,leaders:3,links:14},quiet:{total:16,rooted:6,leaders:1,links:6},crowd:{total:42,rooted:3,leaders:0,links:2},
   closed:{total:10,rooted:6,leaders:1,links:14},burn:{total:22,rooted:4,leaders:0,links:4},root:{total:8,rooted:1,leaders:0,links:0}};
@@ -1500,7 +1507,7 @@ function renderIntro(){
   const g=rows.map((r,i)=>`<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" transform="translate(${pos[i].x.toFixed(1)} ${pos[i].y.toFixed(1)})" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,0,0,u)}${i===mine?`<circle r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`).join('');
   const touch=window.matchMedia&&matchMedia('(hover:none)').matches;
   app.innerHTML=`<div class="intro">
-    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 커뮤니티 ${rows.length}개. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티">${g}</svg>
+    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 커뮤니티 ${rows.length}개. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티"><defs><filter id="sgblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>${[...glyphGrads.values()].join('')}</defs>${g}</svg>
       <div class="htip" id="htip" role="tooltip"></div>
       <span class="maplab2">${info('원 하나가 관람객이 만든 커뮤니티 하나예요. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티예요. 색은 결과 유형이에요.')}${touch?'원을 눌러 보세요':'원에 마우스를 올려 보세요'}</span></div>
     <div class="head">
