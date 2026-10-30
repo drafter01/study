@@ -45,7 +45,7 @@ def shape(k,fill,ink):  # 820 x 980 영역
         return s
     if k=='root':  # 아래가 뾰족한 씨앗, 땅(선)과 떨어져 떠 있음
         return (f'<path d="M110,170 Q110,110 170,110 L650,110 Q710,110 710,170 L710,560 Q710,610 670,640 L450,800 Q410,830 370,800 L150,640 Q110,610 110,560 Z" fill="{fill}"/>'
-                f'<rect x="60" y="930" width="700" height="10" rx="5" fill="{fill}" opacity=".7"/>')
+                '')
 TPOS={'self':470,'quiet':540,'crowd':480,'closed':490,'burn':330,'root':380}
 css=f'''@font-face{{font-family:P;src:url(file://{F});font-weight:100 900}}
 *{{box-sizing:border-box;margin:0}}body{{background:#111;font-family:P,sans-serif}}
