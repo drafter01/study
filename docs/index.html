@@ -1398,7 +1398,7 @@ function glyphParts(r,u){
   if(V==='root'){halo*=.6;co=.3;mo=.12;}
   if(V==='burn'){hc='#c9c8c2';mc='#c9c8c2';}
   const out=[{r:halo,fill:hc,a:ho},{r:mid,fill:mc,a:mo}];
-  if(V==='burn')out.push({r:core,stroke:K.dark,a:.7,w:u*.05,dash:[u*.09,u*.07]});else out.push({r:core,fill:cc,a:co});
+  if(V==='burn')out.push({r:core,stroke:K.dark,a:.7,w:u*.018,dash:[u*.028,u*.02]});else out.push({r:core,fill:cc,a:co});
   if(le)out.push({r:u*(.04+Math.sqrt(le)*.035),fill:K.ink,a:1});
   return out;
 }
