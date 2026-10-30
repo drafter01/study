@@ -941,7 +941,7 @@ body{background:var(--page)}
 .vnear span{display:grid;font-size:14px;font-weight:800;line-height:1.2}
 .vnear small{font-size:11px;font-weight:600;color:var(--soft)}
 .tool .ovbar .hero-n,.tool .sk-val ins,.tool .lvl2 b{transition:color .6s}
-@media (max-width:820px){.vnear{left:8px;bottom:52px;padding:4px 12px 4px 4px}.vnear i{width:28px;height:28px}}
+@media (max-width:820px){.canvas-wrap:has(.cstart.on) .vnear{display:none}.vnear{left:8px;bottom:52px;padding:4px 12px 4px 4px}.vnear i{width:28px;height:28px}}
 
 /* ───────── v2.25 스킬마다 고유 색 동그라미 ───────── */
 .sk-name .ini,.qp-sk em i{color:#111!important;font-weight:800}
@@ -964,6 +964,17 @@ body{background:var(--page)}
 .comms:hover .cg{opacity:.5}
 .comms .cg:hover{opacity:1}
 .comms .cg.mine .ci{filter:drop-shadow(0 6px 14px rgba(0,0,0,.18))}
+
+/* ───────── v2.29 버튼은 검정, 지표 상자 정렬, 커뮤니티 카드 분리 ───────── */
+.c3-l .photo2{background:#fff!important}
+.c3-l .photo2 img{mix-blend-mode:normal!important}
+.cs-go,.panel #go:not(:disabled){background:#111!important;color:#fff!important}
+.ovbar .ov-l,.ovbar .ov-e{display:flex!important;flex-direction:column}
+.ovbar .ov-l .msg,.ovbar .ov-e .msg,.ovbar .ov-e p{margin-top:auto!important}
+.ovbar .msg,.ovbar .ov-e p{font-weight:500!important}
+.ecard{background:#fff!important;box-shadow:0 1px 0 rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.06)}
+.e-cells .cell{background:#f4f3ef!important}
+.e-want span{background:#f4f3ef!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1540,7 +1551,7 @@ function renderTool(){
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
       <div class="cstart" id="cstart"></div><div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
-      <div class="ov ov-l"><small>머무는 사람${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
+      <div class="ov ov-l"><small>커뮤니티 인원${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="vnear" id="vnear" aria-live="polite"></div><div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
         <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
@@ -1756,7 +1767,7 @@ function renderReport(){
   app.innerHTML=`<nav class="topnav"><button class="back" id="home2" aria-label="처음 화면으로">←</button>${stepBar(4)}</nav><section class="case3" style="--accent:${CARDS[r.verdict].bg};--accent-ink:${CARDS[r.verdict].ink};--accent-bg:${CARDS[r.verdict].sh}">
     <div class="c3-l">
       <div class="photo2">${st.photo?`<img src="${st.photo}" alt="여덟 번째 모임이 끝난 뒤 모임의 모습">`:''}</div>
-      <div class="q2" id="q2" role="button" tabindex="0" aria-haspopup="dialog"><i class="q2-sym" title="${CARDS[r.verdict].mean}">${sym(r.verdict)}</i><small>NEXT QUESTION</small><b>${V.q}</b><span class="q2-more">왜 이 질문일까요? <i>+</i></span></div>
+      <div class="q2" id="q2" role="button" tabindex="0" aria-haspopup="dialog"><small>NEXT QUESTION</small><b>${V.q}</b><span class="q2-more">왜 이 질문일까요? <i>+</i></span></div>
       ${better!==null?`<div class="cell"><small>다른 모임과 비교</small><p>지금까지 만들어진 모임 ${real.length}개 중, 머무는 사람이 이 모임보다 적은 모임은 ${better}%예요.</p></div>`:''}
       <div class="r-actions"><button class="btn" id="again"><span>다르게 설계해 보기</span><span>↻</span></button><div class="r-2"><button class="btn ghost" id="types"><span>결과 카드 모두 보기</span><span>→</span></button><button class="btn ghost" id="wallb"><span>한마디 남기기</span><span>✎</span></button></div></div>
       <p class="r-note">연구 근거를 바탕으로 만든 은유적 모델이며, 숫자는 실제 데이터가 아니에요.</p>
