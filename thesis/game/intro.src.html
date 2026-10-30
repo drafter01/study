@@ -110,6 +110,12 @@ const dots=Array.from({length:N},()=>{const a=rnd(0,TAU),r=rnd(1.1,1.6);return {
 let yearV=null,yearRaf=0;
 let kwAll=false,mode=null,flowFrom=0,bubbles=[],tired=0;
 let fires=[],fireA=0,fireTA=0,bgT=0,bgTT=0,rings=0,ringsT=0,caveA=0,caveTA=0;
+// 정직한 원 대신: 몇 명씩 무리 지어 앉은 듯 반지름과 간격이 들쭉날쭉한 배치
+function organic(n,r,cx,cy,sd){let a=sd*9301+49297;const R=()=>{a=(a*9301+49297)%233280;return a/233280;};
+  const g=Math.max(1,Math.round(n/3.5)),out=[];
+  for(let i=0;i<n;i++){const c=i%g,base=(c/g)*TAU+R()*.6,ang=base+(R()-.5)*(TAU/g)*.75,rr=r*(1+(R()-.5)*.38);out.push([cx+Math.cos(ang)*rr,cy+Math.sin(ang)*rr*.92]);}
+  return out;}
+let links=[],linksA=0,linksT=0;
 const ring=(n,r,cx=0,cy=0,off=0)=>Array.from({length:n},(_,i)=>[cx+Math.cos(off+i/n*TAU)*r,cy+Math.sin(off+i/n*TAU)*r]);
 function place(list,start=0,col,alpha=1){list.forEach(([x,y],k)=>{const p=dots[start+k];if(!p)return;p.tx=x;p.ty=y;p.ta=alpha;if(col)p.tc=hex(col);});return start+list.length;}
 function hideFrom(n){for(let i=n;i<N;i++)dots[i].ta=0;}
@@ -144,7 +150,8 @@ const SCENES=[
     bubbles=[{p:L1,t:'아는 사람이 없네…',at:t0+500},{p:L2,t:'다음에 올게요',at:t0+1500},{p:dots[0],t:'혼자 하기 벅차요',at:t0+3300,keep:1,off:100}];
     setTimeout(()=>{if(si<0)return;[L1,L2].forEach(p=>{p.tx=p.leave[0];p.ty=p.leave[1];p.ta=.0;p.slow=true;});},3000);}],
   ['이제, 사람이 머무는 커뮤니티를 직접 설계해 보세요.',3200,()=>{kwAll=false;bubbles=[];tired=0;dots.forEach(p=>p.slow=false);let k=0;const st=['#d9d8d2','#9e9d97','#ff5a1f','#173a86'];
-    k=place(ring(4,.05,0,-.14,.4),k,st[3]);k=place(ring(10,.15,0,-.14,.2),k,st[2]);k=place(ring(20,.29,0,-.14),k,st[1]);k=place(ring(30,.46,0,-.14,.1),k,st[0]);hideFrom(k);ringsT=1;}],
+    k=place(organic(4,.06,0,-.14,1),k,st[3]);const a2=k;k=place(organic(10,.16,0,-.14,2),k,st[2]);k=place(organic(20,.3,0,-.14,3),k,st[1]);k=place(organic(30,.47,0,-.14,4),k,st[0]);hideFrom(k);ringsT=.7;
+    links=[];for(let i=0;i<a2+10;i++)for(let j=i+1;j<a2+30&&j<k;j++){const A=dots[i],B=dots[j];if(Math.hypot(A.tx-B.tx,A.ty-B.ty)<.13&&Math.random()<.55)links.push([i,j]);}linksT=1;}],
   ['',0,()=>{dots.forEach(p=>p.ta*=.18);ringsT=.6;}]
 ];
 const LAST=SCENES.length-1,NOW=SCENES.findIndex(x=>x[0].startsWith('지금 우리는'));
@@ -173,6 +180,8 @@ function frame(now){
     const fl=1+Math.sin(now/120)*.04+Math.sin(now/47)*.03,lx=cx+Math.sin(now/1300)*W*.06;
     const g=ctx.createRadialGradient(lx,H*.5,0,lx,H*.5,Math.max(W,H)*.62*fl);g.addColorStop(0,'rgba(255,170,90,.10)');g.addColorStop(.55,'rgba(0,0,0,.25)');g.addColorStop(1,'rgba(0,0,0,.88)');
     ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+  linksA+=(linksT-linksA)*.05;
+  if(linksA>.01&&links.length){ctx.lineWidth=1.6*d;ctx.lineCap='round';for(const [i,j] of links){const A=dots[i],B=dots[j];const al=Math.min(A.a,B.a)*linksA*.35;if(al<.01)continue;ctx.strokeStyle=`rgba(17,17,17,${al})`;ctx.beginPath();ctx.moveTo(cx+A.x*S,cy+A.y*S);ctx.quadraticCurveTo(cx+(A.x+B.x)/2*S*.94,cy+(A.y+B.y)/2*S*.94,cx+B.x*S,cy+B.y*S);ctx.stroke();}}
   if(rings>.01){ctx.lineWidth=1.5*d;ctx.strokeStyle=`rgba(17,17,17,${.08*rings})`;for(const r of [.54,.38,.22,.1]){ctx.beginPath();ctx.arc(cx,cy-.14*S,r*S,0,TAU);ctx.stroke();}}
   if(fireA>.01)for(const [fx,fy,fr] of fires){const fl=1+Math.sin(now/90+fx*7)*.05+Math.sin(now/37+fy*5)*.03;const g=ctx.createRadialGradient(cx+fx*S,cy+fy*S,0,cx+fx*S,cy+fy*S,fr*S*fl);
     g.addColorStop(0,`rgba(255,176,90,${.55*fireA})`);g.addColorStop(.35,`rgba(255,120,40,${.22*fireA})`);g.addColorStop(1,'rgba(255,100,30,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx+fx*S,cy+fy*S,fr*S*fl,0,TAU);ctx.fill();
@@ -184,7 +193,7 @@ function frame(now){
   for(const p of dots){const sk=p.slow?.0025:.012;p.vx+=(p.tx-p.x)*sk;p.vy+=(p.ty-p.y)*sk;p.vx*=.86;p.vy*=.86;p.x+=p.vx;p.y+=p.vy;
     p.a+=(p.ta-p.a)*(p.slow?.012:.045);p.c=mix(p.c,p.tc,.05);if(p.a<.01)continue;
     const wob=si<=1?.012:.003,x=cx+(p.x+Math.cos(now/900+p.j)*wob)*S,y=cy+(p.y+Math.sin(now/1100+p.j)*wob)*S;
-    ctx.globalAlpha=p.a;ctx.fillStyle=`rgb(${p.c.map(Math.round)})`;ctx.beginPath();ctx.arc(x,y,8.5*d,0,TAU);ctx.fill();}
+    ctx.globalAlpha=p.a;ctx.fillStyle=`rgb(${p.c.map(Math.round)})`;ctx.beginPath();ctx.arc(x,y,Math.min(8.5*d,S*.028),0,TAU);ctx.fill();}
   ctx.globalAlpha=1;
   if(bubbles.length){ctx.font=`500 ${17*d}px Pretendard,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
     for(const b of bubbles){if(now<b.at)continue;const a=Math.min(1,(now-b.at)/400)*(b.keep?1:Math.min(1,b.p.a*1.6+.05)),x=cx+b.p.x*S,y=cy+b.p.y*S-(b.off||38)*d,w=ctx.measureText(b.t).width+28*d,h=38*d;
