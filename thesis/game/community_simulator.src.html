@@ -1486,33 +1486,23 @@ let homeRaf=0;
 function renderIntro(){
   screen='intro';
   const real=plays.filter(p=>p&&p.skills&&VERDICTS[p.verdict]&&TYPES[p.type]);
-  const NMAX=72;
+  const NMAX=48;
   if(!examples||examples.length<NMAX)examples=makeExamples(NMAX);
   const need=Math.max(0,NMAX-real.length);
   const rows=real.slice(0,NMAX).concat(examples.slice(0,need));
   // 방금 만든 커뮤니티는 한가운데에
   let mine=rows.findIndex(r=>r===lastRec||(r.id&&r.id===savedId));
   if(mine>0){const t=rows[0];rows[0]=rows[mine];rows[mine]=t;mine=0;}
-  // 결과 유형 도형 콜라주: 왼쪽 위에서 오른쪽 아래로 쏟아지는 덩어리. 도형 하나 = 관람객이 만든 커뮤니티 하나
-  const W=1000,H=1150,N=rows.length,RND=rng(29);
-  const gauss=()=>{let u=0,v=0;while(!u)u=RND();while(!v)v=RND();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
-  const pos=rows.map((r,i)=>{const t=i===mine?.5:RND();
-    const x=i===mine?W*.48:W*(.12+.7*t)+gauss()*W*.1,y=i===mine?H*.48:H*(.1+.76*t)+gauss()*H*.085;
-    // 아래쪽 안내 문구 자리는 비워 둠
-    const yy=Math.min(y,H*.84);
-    const big=i===mine?200:(RND()<.14?130+RND()*50:58+RND()*52);
-    const mode=i===mine?'solid':(RND()<.78?'solid':'light');
-    return {x,y:yy,sz:big,rot:[0,0,0,90,-90,180][Math.floor(RND()*6)],mode,ph:i*1.7};});
-  const ico=(r,mode)=>{const C=CARDS[r.verdict];let b=C.svg;
-    if(mode==='outline')b=b.split('fill="__F__"').join(`fill="none" stroke="${C.bg}" stroke-width="56"`).split('stroke="__F__"').join(`stroke="${C.bg}"`).split('__I__').join(C.bg);
-    else b=b.split('__F__').join(mode==='light'?C.sh:C.bg).split('__I__').join(mode==='light'?C.bg:C.sh);return b;};
-  const deco='';
-  const g=rows.map((r,i)=>`<g class="cg${r.example?' ex':''}${i===mine?' mine':''}" data-i="${i}" tabindex="0" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}"><g class="ci">${ico(r,pos[i].mode)}</g></g>`).join('');
+  // 원 하나 = 관람객이 만든 커뮤니티 하나. 살짝 흐트러진 격자에 놓고, 방금 만든 커뮤니티는 한가운데에
+  const COLS=6,ROWS=Math.ceil(rows.length/COLS),u=100,W=COLS*u,H=ROWS*u,J=rng(11);
+  if(mine>=0){const c=Math.floor(ROWS/2)*COLS+Math.floor(COLS/2);if(c<rows.length){const t=rows[c];rows[c]=rows[mine];rows[mine]=t;mine=c;}}
+  const pos=rows.map((r,i)=>({x:(i%COLS+.5)*u+(J()-.5)*u*.3,y:(Math.floor(i/COLS)+.5)*u+(J()-.5)*u*.3,ph:i*1.7}));
+  const g=rows.map((r,i)=>`<g class="cg${r.example?' ex':''}" data-i="${i}" tabindex="0" transform="translate(${pos[i].x.toFixed(1)} ${pos[i].y.toFixed(1)})" aria-label="${TYPES[r.type].name}, ${VERDICTS[r.verdict].t}">${commGlyph(r,0,0,u)}${i===mine?`<circle r="${(u*.62).toFixed(1)}" fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="3 4"/>`:''}</g>`).join('');
   const touch=window.matchMedia&&matchMedia('(hover:none)').matches;
   app.innerHTML=`<div class="intro">
-    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 커뮤니티 ${rows.length}개. 도형은 결과 유형">${deco}${g}</svg>
+    <div class="map"><svg class="comms" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="지금까지 만들어진 커뮤니티 ${rows.length}개. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티">${g}</svg>
       <div class="htip" id="htip" role="tooltip"></div>
-      <span class="maplab2">${info('도형 하나가 관람객이 만든 커뮤니티 하나예요. 모양과 색은 결과 유형이에요.')}${touch?'도형을 눌러 보세요':'도형에 마우스를 올려 보세요'}</span></div>
+      <span class="maplab2">${info('원 하나가 관람객이 만든 커뮤니티 하나예요. 작고 진한 원은 단단한 커뮤니티, 크고 옅게 퍼진 원은 느슨한 커뮤니티예요. 색은 결과 유형이에요.')}${touch?'원을 눌러 보세요':'원에 마우스를 올려 보세요'}</span></div>
     <div class="head">
       <div class="h-top"><div class="kick"><span>COMMUNITY DESIGN SIMULATOR</span></div>
         <h1>How might we design a community filled with connection?</h1></div>
@@ -1523,7 +1513,7 @@ function renderIntro(){
   mapRedraw=null;
   const tip=document.getElementById('htip'),map=app.querySelector('.map');
   const show=(gEl,cx,cy)=>{const r=rows[+gEl.dataset.i],V=VERDICTS[r.verdict],T=TYPES[r.type];
-    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b>${V.t}</b><p>${V.d}</p><span>머무는 사람 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
+    tip.innerHTML=`<small>${T.name}${r.example?' · 예시':''}</small><b>${V.t}</b><p>${V.d}</p><span>커뮤니티 인원 ${r.rooted}명 · 다녀간 사람 ${r.total}명</span>`;
     const mb=map.getBoundingClientRect(),w=260;let x=cx-mb.left+14,y=cy-mb.top+14;if(x+w>mb.width-8)x=cx-mb.left-w-14;if(y+150>mb.height)y=cy-mb.top-150;
     tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
   app.querySelectorAll('.cg').forEach(gEl=>{
@@ -1542,9 +1532,9 @@ function renderIntro(){
   cancelAnimationFrame(homeRaf);
   const tick=now=>{if(!document.body.contains(svg))return;pk+=((ptr?1:0)-pk)*.12;
     for(let i=0;i<els.length;i++){const P=pos[i];let x=P.x,y=P.y,sc=1;
-      if(!still){x+=Math.sin(now/2600+P.ph)*7;y+=Math.cos(now/3100+P.ph*1.3)*7;sc=1+Math.sin(now/1900+P.ph)*.04;}
-      if(ptr&&pk>.01){const dx=x-ptr.x,dy=y-ptr.y,dd=Math.hypot(dx,dy)||1,f=Math.exp(-(dd*dd)/(130*130))*pk;sc*=1+1.3*f;x+=dx/dd*40*f;y+=dy/dd*40*f;}
-      const k=P.sz*sc/980;els[i].setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${P.rot}) scale(${k.toFixed(4)}) translate(-410 -490)`);}
+      if(!still){x+=Math.sin(now/2600+P.ph)*4;y+=Math.cos(now/3100+P.ph*1.3)*4;sc=1+Math.sin(now/1900+P.ph)*.04;}
+      if(ptr&&pk>.01){const dx=x-ptr.x,dy=y-ptr.y,dd=Math.hypot(dx,dy)||1,f=Math.exp(-(dd*dd)/(90*90))*pk;sc*=1+.6*f;x+=dx/dd*18*f;y+=dy/dd*18*f;}
+      els[i].setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sc.toFixed(3)})`);}
     homeRaf=requestAnimationFrame(tick);};
   homeRaf=requestAnimationFrame(tick);
 }
