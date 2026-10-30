@@ -975,6 +975,16 @@ body{background:var(--page)}
 .ecard{background:#fff!important;box-shadow:0 1px 0 rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.06)}
 .e-cells .cell{background:#f4f3ef!important}
 .e-want span{background:#f4f3ef!important}
+
+/* ───────── v2.30 지표 상자: 숫자 옆에 보조 정보, 흰 상자는 아래 여백을 좌우와 같게 ───────── */
+.head h1{text-align:right!important}
+.ovbar .ov-l,.ovbar .ov-e{padding:16px 18px 18px!important}
+.ovrow{display:flex;align-items:flex-end;gap:16px;min-width:0}
+.ovrow .hero-n{flex:none}
+.ovrow #ovT{padding-bottom:6px;font-size:13px;font-weight:600;color:var(--soft)}
+.ovrow .gauge{flex:1;margin:0 0 8px!important;max-width:320px}
+.ovbar .ov .msg{margin:auto 0 0!important;border-radius:14px!important;padding:12px 16px!important;break-inside:auto;display:block}
+@media (max-width:820px){.ovrow{display:block}.ovrow .gauge{margin-top:4px!important}.ovbar .ov-l,.ovbar .ov-e{padding:8px 10px!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1551,7 +1561,7 @@ function renderTool(){
     <div class="canvas-wrap"><canvas id="cv" role="img" aria-label="모임 현장: 바깥에서 안쪽으로 처음 온 사람, 다시 온 사람, 자리 잡은 사람, 함께 이끄는 사람"></canvas>
       <div class="c-top"><span><span class="latin">${T.en}</span> · ${T.name} · <span id="mt"></span></span></div>
       <div class="cstart" id="cstart"></div><div class="ovbar" id="ovbar"><div class="ov ov-r ovclock" id="ovR"><small>모임</small><i class="hand" aria-hidden="true"></i><b class="hero-n" id="ovM"></b></div>
-      <div class="ov ov-l"><small>커뮤니티 인원${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><b class="hero-n" id="ovN"></b><span id="ovT"></span><p class="msg" id="ovMsg"></p></div>
+      <div class="ov ov-l"><small>커뮤니티 인원${info('파란 점: 자리를 잡았거나 함께 이끄는 사람이에요. 한 번 다녀간 사람과 달리 모임에 계속 머물러요.')}</small><div class="ovrow"><b class="hero-n" id="ovN"></b><span id="ovT"></span></div><p class="msg" id="ovMsg"></p></div>
       <div class="ov ov-e" id="ovE"></div></div>
       <div class="vnear" id="vnear" aria-live="polite"></div><div class="c-cap"><span id="cap"></span><span class="c-key2">${info(`바깥에서 안쪽으로 ${STAGE_NAMES.join(' → ')}. 선은 사람 사이의 관계예요. 가운데는 모임이 함께하는 활동이에요. 사람들은 운영자가 아니라 활동을 가운데 두고 모여요.`)}</span>
         <span class="c-key">${STAGE_NAMES.map((n,i)=>`<span><i class="dot" style="background:${STAGE_C[i]};${i===0?'box-shadow:inset 0 0 0 1.5px #9a9a96':''}"></i>${n}</span>`).join('')}<span><i style="width:18px;height:2px;background:#9a9a9a;display:inline-block;border-radius:2px"></i>관계 (새로 생기면 주황)</span><span><i class="sq" style="background:${COL.ink};border-radius:50%"></i>나와 에너지</span></span></div></div></div>
@@ -1623,7 +1633,7 @@ function renderPanel(){
   document.getElementById('ovMsg').textContent=relMsg(rooted);
   {const oc=document.getElementById('ovR');oc.style.setProperty('--p',(st.meeting/MEETINGS*100)+'%');oc.style.setProperty('--a',(st.meeting*360/MEETINGS)+'deg');oc.setAttribute('aria-label',`모임 ${st.meeting}번째 / ${MEETINGS}번`);}
   document.getElementById('ovM').innerHTML=`${st.meeting}<em>/${MEETINGS}</em>`;
-  document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}<p class="msg">${energyMsg(e,leaders)}</p>`;}
+  document.getElementById('ovE').innerHTML=`<small>운영자 에너지${info('스킬을 많이 쓸수록 운영자가 바빠지고, 함께 이끄는 사람이 생기면 덜 지쳐요.')}</small><div class="ovrow"><b class="hero-n ${e<30?'low':''}">${e}<em>%</em></b>${gauge(e)}</div><p class="msg">${energyMsg(e,leaders)}</p>`;}
   document.getElementById('cap').innerHTML=st.phase==='alloc'?'왼쪽에서 스킬 포인트를 나누고 시작을 누르세요.':lv?'4번의 모임이 끝났어요. 포인트를 더 나눠 보세요.':(st.cap||(st.last?`새로 온 사람 <b>${st.last.n}</b> · 다시 온 사람 <b>${st.last.back}</b> · 자리 잡은 사람 <b>${st.last.settle}</b> · 떠난 사람 <b>${st.last.gone}</b>`:''));
   const e=Math.round(st.E);
   P.classList.toggle('is-lv',lv);P.classList.toggle('need-pts',editable&&st.points>0);
