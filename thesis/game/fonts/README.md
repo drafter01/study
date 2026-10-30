@@ -6,3 +6,6 @@
 
 ## Unbounded (첫 화면 영문 질문)
 - `Unbounded-latin.woff2`: Google Fonts의 Unbounded 가변 글꼴, 라틴 글자만. SIL Open Font License 1.1 (NamelessDesign). 수정 없이 그대로 사용
+
+## Spoqa Han Sans Neo (시뮬레이션 화면 제목·라벨)
+- `SpoqaHanSansNeo-Bold/Medium/Regular.woff2`: spoqa-han-sans npm 3.3.0의 Subset 버전. SIL Open Font License 1.1 (`SpoqaHanSansNeo-OFL.txt`). 수정 없이 사용
