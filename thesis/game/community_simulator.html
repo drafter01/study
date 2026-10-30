@@ -1284,7 +1284,7 @@ plays=loadLocal();
   }catch(e){}
 })();
 // 기록 모으기: 로그인 없이 구글 시트(Apps Script 웹 앱)로 보냄. 주소는 moim.html?collect=웹앱URL 로 한 번 열면 기억됨
-const DEFAULT_COLLECT=''; // 구글 시트 웹앱 주소 (Apps Script 배포 후 채움)
+const DEFAULT_COLLECT='https://script.google.com/macros/s/AKfycbzqKsiUVSfu6udf-vM1D9bzmbCvO3OuTs-MmFOBFnKLTnjFfrJx7pR65gLg7xpEXebJOw/exec'; // 구글 시트 웹앱 주소 (Apps Script 배포 후 채움)
 const COLLECT_URL=(()=>{try{const q=new URLSearchParams(location.search).get('collect');if(q){localStorage.setItem('moim-collect',q);return q;}return localStorage.getItem('moim-collect')||DEFAULT_COLLECT;}catch(e){return DEFAULT_COLLECT;}})();
 function queueGet(){try{return JSON.parse(localStorage.getItem('moim-queue')||'[]');}catch(e){return [];}}
 function queueSet(a){try{localStorage.setItem('moim-queue',JSON.stringify(a.slice(-500)));}catch(e){}}
