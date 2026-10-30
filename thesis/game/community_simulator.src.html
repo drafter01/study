@@ -1498,9 +1498,11 @@ function renderIntro(){
   const gauss=()=>{let u=0,v=0;while(!u)u=RND();while(!v)v=RND();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
   const pos=rows.map((r,i)=>{const t=i===mine?.5:RND();
     const x=i===mine?W*.48:W*(.12+.7*t)+gauss()*W*.1,y=i===mine?H*.48:H*(.1+.76*t)+gauss()*H*.085;
+    // 아래쪽 안내 문구 자리는 비워 둠
+    const yy=Math.min(y,H*.84);
     const big=i===mine?200:(RND()<.14?130+RND()*50:58+RND()*52);
     const mode=i===mine?'solid':(RND()<.78?'solid':'light');
-    return {x,y,sz:big,rot:[0,0,0,90,-90,180][Math.floor(RND()*6)],mode,ph:i*1.7};});
+    return {x,y:yy,sz:big,rot:[0,0,0,90,-90,180][Math.floor(RND()*6)],mode,ph:i*1.7};});
   const ico=(r,mode)=>{const C=CARDS[r.verdict];let b=C.svg;
     if(mode==='outline')b=b.split('fill="__F__"').join(`fill="none" stroke="${C.bg}" stroke-width="56"`).split('stroke="__F__"').join(`stroke="${C.bg}"`).split('__I__').join(C.bg);
     else b=b.split('__F__').join(mode==='light'?C.sh:C.bg).split('__I__').join(mode==='light'?C.bg:C.sh);return b;};
