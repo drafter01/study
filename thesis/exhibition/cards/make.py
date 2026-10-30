@@ -1,5 +1,6 @@
 import math
 F='/home/user/study/thesis/game/fonts/pretendard-variable-subset.woff2'
+SKC={'O':'#ffd23f','W':'#ff6fae','R':'#3d7bff','C':'#3fd47a','S':'#ff8a2a'}
 SK={'O':('Open','문 열기'),'W':('Welcome','반겨 주기'),'R':('Rhythm','정기 모임'),'C':('Connect','서로 알기'),'S':('Share','역할 나누기')}
 # (키, 배경, 도형, 글자, 영문, 이름, 설명, 도형의 뜻, 질문, 생각해 볼 것, 스킬, 휴리스틱)
 C=[('self','#2153e6','#d6e6ff','#14389e','SELF-RUNNING','스스로 굴러가는\n커뮤니티','운영자가 없어도 누군가 처음 온 사람을 맞이해요.','맞물려 굴러가는 바퀴 — 여러 사람이 서로를 받치며 스스로 굴러가요',
@@ -79,5 +80,5 @@ for i,(k,bg,sh,ink,en,t,d,mean,q,th,sk,h) in enumerate(C,1):
 <div class="c-b"><p><b>{d}</b></p><div class="en mono">{en}</div></div></div>'''
     bk=f'''<div class="card" style="{v}"><div class="pan q"><small class="mono">NEXT QUESTION</small><h2>{q}</h2></div>
 <div class="pan th"><small class="mono">생각해 볼 것</small><ul>{''.join(f'<li>{x}</li>' for x in th)}</ul></div>
-<div class="pan sk"><small class="mono">다시 설계한다면</small>{''.join(f'<em><i>{x}</i><div>{SK[x][0]}<span>{SK[x][1]}</span></div></em>' for x in sk)}</div></div>'''
+<div class="pan sk"><small class="mono">다시 설계한다면</small>{''.join(f'<em><i style="background:{SKC[x]};color:#111">{x}</i><div>{SK[x][0]}<span>{SK[x][1]}</span></div></em>' for x in sk)}</div></div>'''
     for n,b in (('front',fr),('back',bk)):open(f'{n}_{i}.html','w',encoding='utf-8').write(f'<!doctype html><meta charset="utf-8"><style>{css}</style>{b}')

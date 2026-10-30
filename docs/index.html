@@ -939,6 +939,9 @@ body{background:var(--page)}
 .vnear small{font-size:11px;font-weight:600;color:var(--soft)}
 .tool .ovbar .hero-n,.tool .sk-val ins,.tool .lvl2 b{transition:color .6s}
 @media (max-width:820px){.vnear{left:8px;bottom:52px;padding:4px 12px 4px 4px}.vnear i{width:28px;height:28px}}
+
+/* ───────── v2.25 스킬마다 고유 색 동그라미 ───────── */
+.sk-name .ini,.qp-sk em i{color:#111!important;font-weight:800}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -962,11 +965,11 @@ const TYPES={
 };
 const TKEYS=Object.keys(TYPES);
 const SKILLS=[
-  {k:'open',en:'Open',name:'문 열기',c:COL.yellow,sub:'새 사람이 쉽게 찾아와요',down:'너무 높으면 한 명씩 챙기기 어려워요'},
-  {k:'welcome',en:'Welcome',name:'반겨 주기',c:COL.red,sub:'처음 온 사람을 누군가와 이어 줘요',down:''},
-  {k:'rhythm',en:'Rhythm',name:'정기 모임',c:COL.blue,sub:'다시 올 날과 이유가 생겨요',down:'반겨 주기 없이 높으면 부담이 돼요'},
-  {k:'conn',en:'Connect',name:'서로 알기',c:COL.green,sub:'구성원끼리 친해져요',down:'문이 닫히면 배타적이 돼요'},
-  {k:'roles',en:'Share',name:'역할 나누기',c:COL.violet,sub:'함께 이끄는 사람이 생겨요',down:''}
+  {k:'open',en:'Open',name:'문 열기',c:'#ffd23f',sub:'새 사람이 쉽게 찾아와요',down:'너무 높으면 한 명씩 챙기기 어려워요'},
+  {k:'welcome',en:'Welcome',name:'반겨 주기',c:'#ff6fae',sub:'처음 온 사람이 어색하지 않게 챙겨 줘요',down:''},
+  {k:'rhythm',en:'Rhythm',name:'정기 모임',c:'#3d7bff',sub:'다시 올 날과 이유가 생겨요',down:'반겨 주기 없이 높으면 부담이 돼요'},
+  {k:'conn',en:'Connect',name:'서로 알기',c:'#3fd47a',sub:'구성원끼리 친해져요',down:'문이 닫히면 배타적이 돼요'},
+  {k:'roles',en:'Share',name:'역할 나누기',c:'#ff8a2a',sub:'함께 이끄는 사람이 생겨요',down:''}
 ];
 const VERDICTS={
   self:{t:'스스로 굴러가는 커뮤니티',c:COL.green,d:'운영자가 없어도 누군가 처음 온 사람을 맞이해요. 관계가 관계를 부르는 상태예요.',q:'지금 커뮤니티를 이끄는 사람들이 빠지면, 누가 그 자리를 이어받을까요?'},
@@ -1058,7 +1061,7 @@ function questionPop(v,type){
     <small>NEXT QUESTION</small><h2 id="qp-h">${V.q}</h2>
     <div class="qp-sec"><b>왜 이 질문일까요?</b><p>${Q.why}</p></div>
     <div class="qp-sec"><b>생각해 볼 것</b><ul>${CARDS[v].think.map(t=>`<li>${t}</li>`).join('')}</ul></div>
-    <div class="qp-sk"><span>다시 설계한다면</span>${skl.map(s=>`<em><i>${s.en[0]}</i>${s.en}<small>${s.name}</small></em>`).join('')}</div>
+    <div class="qp-sk"><span>다시 설계한다면</span>${skl.map(s=>`<em><i style="background:${s.c}">${s.en[0]}</i>${s.en}<small>${s.name}</small></em>`).join('')}</div>
     <p class="qp-note">정답은 없어요. 이 질문은 연구에서 정리한 커뮤니티 설계 원칙에서 왔어요.</p>
     <div class="qp-btns"><button class="btn ghost" id="qp-close"><span>닫기</span></button><button class="btn" id="qp-again"><span>다르게 설계해 보기</span><span>↻</span></button></div></div>`;
   document.body.appendChild(ov);
@@ -1569,7 +1572,7 @@ function renderPanel(){
     <section class="pcard">
       <div class="ph sk-head"><h3>Skills${info('포인트는 운영자가 쓸 수 있는 시간과 힘이에요. 한정되어 있어서 모든 걸 다 높일 수는 없어요. 4번째 모임이 끝나면 운영하며 배운 만큼 포인트를 더 받아요.')}</h3>${editable?`<span class="pts3 ${st.points?'':'zero'}">남은 포인트 <b>${st.points}</b></span>`:`<span class="pts3 zero">진행 중</span>`}</div>
       ${SKILLS.map(s=>{const v=st.skills[s.k],lk=st.lock[s.k];return `<div class="sk">
-        <div class="sk-row"><span class="sk-name"><i class="ini">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
+        <div class="sk-row"><span class="sk-name"><i class="ini" style="background:${s.c}">${s.en[0]}</i><label for="r-${s.k}">${s.en}<small>${s.name}</small></label>${s.down?info(`<span class="neg">${s.down}</span>`):''}</span><span class="sk-val">${v}<em>/${MAXLV}</em>${v>lk&&lv?`<ins>+${v-lk}</ins>`:''}</span></div>
         <p class="sk-sub">${s.sub}</p>
         <div class="sk-ctl"><button class="stp" data-k="${s.k}" data-d="-1" aria-label="${s.en} 1 내리기" ${editable&&v>lk?'':'disabled'}>−</button><input type="range" id="r-${s.k}" data-k="${s.k}" min="0" max="${MAXLV}" step="1" value="${v}" style="--fill:${v/MAXLV*100}%;--c:${s.c}" ${editable?'':'disabled'}><button class="stp" data-k="${s.k}" data-d="1" aria-label="${s.en} 1 올리기" ${editable&&v<MAXLV&&st.points>0?'':'disabled'}>+</button></div></div>`;}).join('')}
       ${editable?(st.points?`<button class="btn" id="go" disabled><span>포인트 ${st.points}개를 더 나눠 주세요</span><span>▶</span></button>`:`<button class="btn" id="go"><span>${lv?'남은 모임 4번 진행':'Start'}</span><span>▶</span></button>`):`<button class="btn" disabled><span>모임 진행 중</span><span>…</span></button>`}

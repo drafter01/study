@@ -48,7 +48,7 @@ for i,(k,bg,sh,ink,en,t,d,mean,q,th,sk,h) in enumerate(C,1):
     b+=f'<g id="panel-skill"><rect x="670" y="880" width="340" height="560" rx="44" fill="#ffffff"/>'+T(704,945,['다시 설계한다면'],22,ink,fam=FM)
     y=1000
     for x in sk:
-        b+=f'<circle cx="727" cy="{y+12}" r="23" fill="{ink}"/>'+T(727,y+20,[x],21,'#ffffff',700,anchor='middle')+T(764,y+14,[SK[x][0]],34,ink,700)+T(764,y+44,[SK[x][1]],20,ink,600)
+        b+=f'<circle cx="727" cy="{y+12}" r="23" fill="{SKC[x]}"/>'+T(727,y+20,[x],21,'#111111',800,anchor='middle')+T(764,y+14,[SK[x][0]],34,ink,700)+T(764,y+44,[SK[x][1]],20,ink,600)
         y+=80
     b+='</g>'
     open(f'svg/back_{i:02d}.svg','w',encoding='utf-8').write(svg(b))
