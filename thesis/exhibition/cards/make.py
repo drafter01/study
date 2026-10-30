@@ -79,5 +79,5 @@ for i,(k,bg,sh,ink,en,t,d,mean,q,th,sk,h) in enumerate(C,1):
 <div class="c-b"><p><b>{d}</b>{mean}</p><div class="en mono">{en}</div></div></div>'''
     bk=f'''<div class="card" style="{v}"><div class="pan q"><small class="mono">NEXT QUESTION — {i:02d}</small><svg class="mini" viewBox="0 0 820 980">{shape(k,ink,sh)}</svg><h2>{q}</h2></div>
 <div class="pan th"><small class="mono">생각해 볼 것</small><ul>{''.join(f'<li>{x}</li>' for x in th)}</ul></div>
-<div class="pan sk"><small class="mono">다시 설계한다면</small>{''.join(f'<em><i>{x}</i><div>{SK[x][0]}<span>{SK[x][1]}</span></div></em>' for x in sk)}<div class="h mono">휴리스틱<br>{h}</div></div></div>'''
+<div class="pan sk"><small class="mono">다시 설계한다면</small>{''.join(f'<em><i>{x}</i><div>{SK[x][0]}<span>{SK[x][1]}</span></div></em>' for x in sk)}</div></div>'''
     for n,b in (('front',fr),('back',bk)):open(f'{n}_{i}.html','w',encoding='utf-8').write(f'<!doctype html><meta charset="utf-8"><style>{css}</style>{b}')

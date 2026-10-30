@@ -51,6 +51,6 @@ for i,(k,bg,sh,ink,en,t,d,mean,q,th,sk,h) in enumerate(C,1):
     for x in sk:
         b+=f'<circle cx="727" cy="{y+12}" r="23" fill="{ink}"/>'+T(727,y+20,[x],21,'#ffffff',700,anchor='middle')+T(764,y+14,[SK[x][0]],34,ink,700)+T(764,y+44,[SK[x][1]],20,ink,600)
         y+=80
-    b+=T(704,1366,['휴리스틱',h],22,ink,lh=1.4,fam=FM)+'</g>'
+    b+='</g>'
     open(f'svg/back_{i:02d}.svg','w',encoding='utf-8').write(svg(b))
 print('ok')
