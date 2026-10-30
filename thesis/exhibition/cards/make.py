@@ -74,10 +74,10 @@ css=f'''@font-face{{font-family:P;src:url(file://{F});font-weight:100 900}}
 .mini{{position:absolute;right:70px;top:52px;width:110px;height:132px}}'''
 for i,(k,bg,sh,ink,en,t,d,mean,q,th,sk,h) in enumerate(C,1):
     v=f'--bg:{bg};--sh:{sh};--ink:{ink}'
-    fr=f'''<div class="card" style="{v}"><div class="c-t mono"><span>COMMUNITY</span><span>{i:02d} / 06</span></div>
+    fr=f'''<div class="card" style="{v}"><div class="c-t mono"><span>COMMUNITY</span></div>
 <svg class="art" viewBox="0 0 820 980">{shape(k,sh,ink)}</svg><div class="ttl" style="top:{128+TPOS[k]*1.12-105:.0f}px">{t}</div>
-<div class="c-b"><p><b>{d}</b>{mean}</p><div class="en mono">{en}</div></div></div>'''
-    bk=f'''<div class="card" style="{v}"><div class="pan q"><small class="mono">NEXT QUESTION — {i:02d}</small><svg class="mini" viewBox="0 0 820 980">{shape(k,ink,sh)}</svg><h2>{q}</h2></div>
+<div class="c-b"><p><b>{d}</b></p><div class="en mono">{en}</div></div></div>'''
+    bk=f'''<div class="card" style="{v}"><div class="pan q"><small class="mono">NEXT QUESTION</small><h2>{q}</h2></div>
 <div class="pan th"><small class="mono">생각해 볼 것</small><ul>{''.join(f'<li>{x}</li>' for x in th)}</ul></div>
 <div class="pan sk"><small class="mono">다시 설계한다면</small>{''.join(f'<em><i>{x}</i><div>{SK[x][0]}<span>{SK[x][1]}</span></div></em>' for x in sk)}</div></div>'''
     for n,b in (('front',fr),('back',bk)):open(f'{n}_{i}.html','w',encoding='utf-8').write(f'<!doctype html><meta charset="utf-8"><style>{css}</style>{b}')
