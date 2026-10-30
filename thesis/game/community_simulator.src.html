@@ -1755,7 +1755,10 @@ function loop(){
   ctx.clearRect(0,0,W,H);
   // 구역: 아주 연한 동심원 (바깥부터 처음 온 사람 → 다시 온 사람 → 자리 잡은 사람 → 함께 이끄는 사람)
   const B=[.92,.665,.305,.09];
-  ctx.lineWidth=1.5*d;ctx.strokeStyle='rgba(17,17,17,.08)';for(const b of B){ctx.beginPath();ctx.arc(cx,cy,b*S,0,Math.PI*2);ctx.stroke();}
+  // 안쪽은 실선, 바깥으로 갈수록 점선 → 점으로 (머무는 사람일수록 단단하게)
+  {const DASH={.09:[],.305:[12,5],.665:[5,7],.92:[.1,8]};ctx.lineCap='round';
+   for(const b of B){const ds=(DASH[b]||[]).map(v=>v*d);ctx.setLineDash(ds);ctx.lineWidth=(b>=.9?2.4:1.5)*d;ctx.strokeStyle=b>=.9?'rgba(17,17,17,.16)':'rgba(17,17,17,.1)';ctx.beginPath();ctx.arc(cx,cy,b*S,0,Math.PI*2);ctx.stroke();}
+   ctx.setLineDash([]);ctx.lineCap='butt';}
   // 움직임
   {const P=st.people,rr=(9*d)/S*2.25,byIdM=new Map(P.map(q=>[q.id,q]));
     for(const p of P){p.vx=(p.vx||0)+(p.tx-p.x)*(p.leaving?.004:.0025);p.vy=(p.vy||0)+(p.ty-p.y)*(p.leaving?.004:.0025);
