@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>계단 뿌셔!</title>
+<meta name="description" content="30초 동안 계단을 부수고 휠체어 사용자가 들어갈 수 있는 길을 열어 주세요. 계단뿌셔클럽 홍보 게임 프로토타입.">
+<style>
+  :root{
+    --bg:#FFF7E0; --ink:#1b1b1b; --yellow:#FFD66B; --red:#FF5A6E; --blue:#A9CDF5; --card:#ffffff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;overflow:hidden}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #wrap{position:relative;aspect-ratio:9/16;height:100%;max-width:100%;max-height:100%}
+  @media (max-aspect-ratio:9/16){#wrap{height:auto;width:100%}}
+  canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px}
+  .overlay[hidden]{display:none}
+  .card{background:var(--card);border:4px solid var(--ink);border-radius:24px;padding:22px 20px;width:100%;max-width:340px;text-align:center;box-shadow:0 6px 0 var(--ink)}
+  h1{margin:0 0 6px;font-size:34px;letter-spacing:-.5px}
+  h2{margin:0 0 4px;font-size:26px}
+  p{margin:8px 0;line-height:1.5;font-size:15px}
+  .big{font-size:56px;font-weight:900;line-height:1;margin:6px 0}
+  .btn{display:block;width:100%;margin-top:10px;padding:13px 14px;font:inherit;font-weight:800;font-size:17px;color:var(--ink);
+    background:var(--yellow);border:3px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);cursor:pointer;text-decoration:none}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+  .btn.alt{background:#fff}
+  .btn.app{background:var(--blue)}
+  .small{font-size:12px;color:#555}
+  #toast{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 14px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+  #toast.on{opacity:1}
+  #mute{position:absolute;right:10px;bottom:10px;border:3px solid var(--ink);background:#fff;border-radius:12px;font-size:16px;padding:2px 8px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="stage"><div id="wrap">
+  <canvas id="c" aria-label="계단 뿌셔 게임 화면"></canvas>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+
+  <div class="overlay" id="start">
+    <div class="card">
+      <h1>계단 뿌셔!</h1>
+      <p>가게 입구마다 계단이 길을 막고 있어요.<br><b>탭</b>해서 계단을 부수고, 휠체어 사용자가 들어갈 수 있는 길을 열어 주세요.</p>
+      <p class="small">제한 시간 30초</p>
+      <button class="btn" id="go">시작하기</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="over" hidden>
+    <div class="card">
+      <h2>입구를 열었어요!</h2>
+      <div class="big"><span id="score">0</span>곳</div>
+      <p class="small" id="best"></p>
+      <p id="msg"></p>
+      <a class="btn app" id="app" target="_blank" rel="noopener">계단뿌셔클럽 앱 보기</a>
+      <button class="btn" id="share">결과 공유하기</button>
+      <button class="btn alt" id="again">다시 하기</button>
+    </div>
+  </div>
+  <div id="toast"></div>
+</div></div>
+
+<script>
+(() => {
+  // ====== 설정 ======
+  const APP_URL = "https://apps.apple.com/kr/app/%EA%B3%84%EB%8B%A8%EB%BF%8C%EC%85%94%ED%81%B4%EB%9F%BD-%EC%A0%91%EA%B7%BC%EC%84%B1-%EC%A0%95%EB%B3%B4-%ED%83%90%EC%83%89/id6444382843";
+  const TIME_LIMIT = 30;
+  const W = 360, H = 640, GY = 430, CX = 96;   // 논리 해상도, 지면 y, 캐릭터 화면 x
+  const INK = "#111", YELLOW = "#FFD66B", RED = "#FF5A6E", BLUE = "#A9CDF5", CREAM = "#F8FBEA";
+  const SHOP_NAMES = ["카페", "빵집", "식당", "서점", "꽃집", "문구점", "분식", "약국"];
+  const SHOP_COLORS = ["#FFB5A7", "#B5D8F7", "#C7E9B0", "#FFE08A", "#D9C2F0"];
+  const FONT = '"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif';
+
+  const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  const $ = id => document.getElementById(id);
+  let scale = 1;
+  function resize() {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 3);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    scale = cv.width / W;
+  }
+  addEventListener("resize", resize); resize();
+
+  // ====== 소리/진동 ======
+  let muted = false, actx = null;
+  function audio() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return actx; }
+  function beep(freq, dur, type = "square", vol = .12, slide = 0) {
+    if (muted) return; const a = audio(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.value = freq;
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), a.currentTime + dur);
+    g.gain.setValueAtTime(vol, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + dur);
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+  }
+  const vib = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+  $("mute").onclick = e => { e.stopPropagation(); muted = !muted; $("mute").textContent = muted ? "🔇" : "🔊"; };
+
+  // ====== 게임 상태 ======
+  let state = "ready";        // ready | play | over
+  let phase = "walk";         // walk | blocked | ramp | cross | enter | skip
+  let cam = 0, cur = 0, score = 0, timeLeft = TIME_LIMIT, charA = 1, enterT = 0, shake = 0, tt = 0;
+  let shops = [], parts = [], pops = [];
+  let best = 0; try { best = +localStorage.getItem("stairgame-best") || 0; } catch (e) {}
+
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const shopN = i => Math.min(2 + Math.floor(i / 2), 6);
+  function mkShop(i) {
+    const n = shopN(i), h = 12 * n;
+    return { i, n, H: h, L: 36 * n, sx: 560 + i * 560, hits: 0, smashed: false, rampT: 0, opened: false,
+      name: pick(SHOP_NAMES), color: SHOP_COLORS[i % SHOP_COLORS.length], friends: [], shakeT: 0 };
+  }
+  const stairsStart = s => s.sx - 40 - s.L;
+  function reset() {
+    cam = 0; cur = 0; score = 0; timeLeft = TIME_LIMIT; charA = 1; phase = "walk"; enterT = 0;
+    shops = []; parts = []; pops = []; shake = 0;
+    for (let i = 0; i < 3; i++) shops.push(mkShop(i));
+  }
+  reset();
+
+  function start() {
+    audio(); reset(); state = "play";
+    $("start").hidden = true; $("over").hidden = true;
+  }
+  function finish() {
+    state = "over";
+    if (score > best) { best = score; try { localStorage.setItem("stairgame-best", best); } catch (e) {} }
+    $("score").textContent = score;
+    $("best").textContent = "내 최고 기록 " + best + "곳";
+    $("msg").innerHTML = score === 0
+      ? "아직 한 곳도 못 열었어요. 현실에서도 계단 하나가 길을 막기도 해요."
+      : `현실에는 아직 계단 때문에 휠체어 사용자가 들어가기 어려운 가게가 많아요.<br>계단뿌셔클럽에서 가게의 계단 정보를 확인하고, 직접 등록해 주세요.`;
+    $("app").href = APP_URL;
+    $("over").hidden = false;
+  }
+
+  // ====== 입력 ======
+  function tap() {
+    if (state !== "play") return;
+    audio();
+    if (phase !== "blocked") return;
+    const s = shops[cur];
+    s.hits++; s.shakeT = .18; shake = 5;
+    burst(stairsStart(s) - cam + s.L * (.3 + Math.random() * .6), GY - s.H * .6, 7, "#D8C8B0", 140);
+    vib(14); beep(150 + s.hits * 40, .12, "square", .14, -60);
+    if (s.hits >= s.n) {
+      s.smashed = true; phase = "ramp";
+      burst(stairsStart(s) - cam + s.L * .5, GY - s.H * .5, 26, "#D8C8B0", 260);
+      shake = 11; vib(40); beep(90, .3, "sawtooth", .16, -50);
+    }
+  }
+  cv.addEventListener("pointerdown", e => { e.preventDefault(); tap(); });
+  addEventListener("keydown", e => { if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); if (state === "play") tap(); } });
+  $("go").onclick = start; $("again").onclick = start;
+
+  // ====== 공유 ======
+  function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); setTimeout(() => el.classList.remove("on"), 1800); }
+  $("share").onclick = async () => {
+    const text = `계단 뿌셔! 에서 ${score}곳의 입구를 열었어요. 휠체어 사용자가 들어갈 수 있는 가게가 늘어나면 좋겠어요. #계단뿌셔클럽`;
+    const url = location.href.split("#")[0];
+    try {
+      if (navigator.share) { await navigator.share({ title: "계단 뿌셔!", text, url }); return; }
+      await navigator.clipboard.writeText(text + " " + url); toast("결과를 복사했어요");
+    } catch (e) { window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url), "_blank"); }
+  };
+
+  // ====== 파티클/팝업 ======
+  function burst(x, y, n, color, sp) {
+    for (let i = 0; i < n; i++) parts.push({ x, y, vx: rnd(-sp, sp), vy: rnd(-sp * 1.3, -sp * .2), r: rnd(2.5, 6), life: rnd(.4, .8), t: 0, c: color });
+  }
+
+  // ====== 업데이트 ======
+  function groundH() {
+    if (phase !== "cross" && phase !== "enter") return { h: 0, tilt: 0 };
+    const s = shops[cur], x = cam + CX, a = stairsStart(s);
+    const f = Math.max(0, Math.min(1, (x - a) / s.L));
+    return { h: f * s.H, tilt: (f > 0 && f < 1) ? -Math.atan2(s.H, s.L) : 0 };
+  }
+  function update(dt) {
+    tt += dt;
+    for (const p of parts) { p.t += dt; p.vy += 700 * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+    parts = parts.filter(p => p.t < p.life);
+    for (const p of pops) p.t += dt; pops = pops.filter(p => p.t < 1);
+    shake = Math.max(0, shake - dt * 30);
+    for (const s of shops) s.shakeT = Math.max(0, s.shakeT - dt);
+    if (state === "ready") { cam += 60 * dt; return; }
+    if (state !== "play") return;
+
+    timeLeft -= dt;
+    if (timeLeft <= 0) { timeLeft = 0; finish(); return; }
+    while (shops.length < cur + 3) shops.push(mkShop(shops.length));
+    const s = shops[cur];
+
+    if (phase === "walk") {
+      charA = Math.min(1, charA + dt * 5);
+      cam += 170 * dt;
+      const stop = stairsStart(s) - CX - 30;
+      if (cam >= stop) { cam = stop; phase = "blocked"; }
+    } else if (phase === "ramp") {
+      s.rampT = Math.min(1, s.rampT + dt * 4);
+      if (s.rampT >= 1) phase = "cross";
+    } else if (phase === "cross") {
+      cam += 140 * dt;
+      if (cam + CX >= s.sx) {
+        cam = s.sx - CX; phase = "enter"; enterT = 0;
+        s.opened = true; score++;
+        s.friends = ["flag", pick(["cane", "stroller", "chair"])];
+        pops.push({ x: s.sx, y: GY - s.H - 215, t: 0, text: "+1" });
+        beep(660, .12, "triangle", .14); setTimeout(() => beep(880, .18, "triangle", .14), 90);
+        burst(s.sx - cam, GY - s.H - 60, 16, pick(["#FF5A6E", "#FFD66B", "#A9CDF5"]), 200);
+      }
+    } else if (phase === "enter") {
+      enterT += dt; charA = Math.max(0, 1 - enterT / .3);
+      if (enterT >= .45) { phase = "skip"; }
+    } else if (phase === "skip") {
+      cam += 520 * dt;
+      if (cam + CX >= s.sx + 90) { cur++; phase = "walk"; charA = 0; }
+    }
+  }
+
+  // ====== 그리기 도구 ======
+  function line(w, color) { ctx.lineWidth = w; ctx.strokeStyle = color; ctx.lineCap = "round"; ctx.lineJoin = "round"; }
+  function outlined(fill, w = 4) { ctx.fillStyle = fill; ctx.fill(); line(w, INK); ctx.stroke(); }
+
+  // 캐릭터: (x, y)는 발이 닿는 지면. kind: plain | flag | chair | cane | stroller
+  function drawChar(x, y, r, kind, wave = 0) {
+    const chair = kind === "chair";
+    const cy = chair ? y - r * 1.8 : y - r - 9 * (r / 28);
+    const k = r / 28;
+    // 발
+    if (!chair) {
+      for (const dx of [-.45, .42]) { ctx.beginPath(); ctx.ellipse(x + dx * r, y - 6 * k, 12 * k, 8 * k, 0, 0, 7); outlined(YELLOW, 4 * k); }
+    }
+    // 휠체어 뒤 손잡이
+    if (chair) {
+      line(9 * k, INK); ctx.beginPath(); ctx.moveTo(x - r * .85, cy + r * .35); ctx.lineTo(x - r * 1.3, cy - r * .1); ctx.lineTo(x - r * 1.7, cy - r * .1); ctx.stroke();
+      line(4 * k, BLUE); ctx.stroke();
+    }
+    // 몸
+    ctx.beginPath(); ctx.arc(x, cy, r, 0, 7); outlined(YELLOW, 4.5 * k);
+    // 눈
+    ctx.fillStyle = INK;
+    for (const dx of [.12, .5]) { ctx.beginPath(); ctx.arc(x + dx * r, cy + 2 * k, 4.2 * k, 0, 7); ctx.fill(); }
+    if (chair) {
+      // 좌석과 프레임
+      line(11 * k, INK); ctx.beginPath(); ctx.moveTo(x - r * .6, cy + r * .75); ctx.lineTo(x + r * .75, cy + r * .75); ctx.lineTo(x + r * 1.15, y - 10 * k); ctx.stroke();
+      line(5 * k, BLUE); ctx.stroke();
+      // 작은 앞바퀴
+      ctx.beginPath(); ctx.arc(x + r * 1.15, y - 8 * k, 8 * k, 0, 7); outlined(CREAM, 3.5 * k);
+      // 큰 바퀴
+      const wx = x - r * .1, wy = y - 22 * k, wr = 22 * k, ang = (cam * .04) % 6.28;
+      ctx.beginPath(); ctx.arc(wx, wy, wr, 0, 7); outlined(CREAM, 4.5 * k);
+      line(3 * k, INK);
+      for (let i = 0; i < 3; i++) { const a = ang + i * 2.094; ctx.beginPath(); ctx.moveTo(wx, wy); ctx.lineTo(wx + Math.cos(a) * wr * .85, wy + Math.sin(a) * wr * .85); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(wx, wy, 5 * k, 0, 7); ctx.fillStyle = INK; ctx.fill();
+    }
+    if (kind === "flag") {
+      const px = x + r * .75, py0 = cy + r * .35, py1 = cy - r - 34 * k;
+      line(9 * k, INK); ctx.beginPath(); ctx.moveTo(px, py0); ctx.lineTo(px, py1); ctx.stroke();
+      line(4 * k, "#FADADD"); ctx.stroke();
+      const w = Math.sin(tt * 6 + wave) * 4 * k;
+      ctx.beginPath(); ctx.moveTo(px + 3 * k, py1 + 2 * k); ctx.lineTo(px + 46 * k, py1 + 16 * k + w); ctx.lineTo(px + 3 * k, py1 + 30 * k); ctx.closePath(); outlined(RED, 4 * k);
+    }
+    if (kind === "cane") {
+      const px = x + r * 1.05;
+      line(8 * k, INK); ctx.beginPath(); ctx.moveTo(px, cy + r * .3); ctx.lineTo(px + 6 * k, y - 4 * k); ctx.stroke();
+      line(3.5 * k, BLUE); ctx.stroke();
+    }
+    if (kind === "stroller") {
+      const sx = x + r * 1.55, sy = y - 20 * k;
+      ctx.beginPath(); ctx.roundRect(sx - 4 * k, sy - 30 * k, 38 * k, 28 * k, 8 * k); outlined(BLUE, 4 * k);
+      ctx.beginPath(); ctx.arc(sx + 20 * k, sy - 34 * k, 10 * k, 0, 7); outlined(YELLOW, 3.5 * k);
+      line(7 * k, INK); ctx.beginPath(); ctx.moveTo(x + r * .5, cy + r * .4); ctx.lineTo(sx - 4 * k, sy - 22 * k); ctx.stroke();
+      line(3 * k, CREAM); ctx.stroke();
+      for (const wx of [sx + 2 * k, sx + 28 * k]) { ctx.beginPath(); ctx.arc(wx, sy + 2 * k, 7 * k, 0, 7); outlined(CREAM, 3.5 * k); }
+    }
+  }
+
+  function drawStairs(s, ox) {
+    const a = stairsStart(s) - ox, w = s.L / s.n, h = s.H / s.n;
+    const k = s.smashed ? 1 - s.rampT : 1;
+    if (k <= 0) return;
+    const sh = s.shakeT > 0 ? Math.sin(tt * 90) * 3 : 0;
+    ctx.save(); ctx.globalAlpha = k; ctx.translate(sh, 0);
+    for (let i = 0; i < s.n; i++) {
+      ctx.beginPath(); ctx.rect(a + i * w, GY - (i + 1) * h * k, w, (i + 1) * h * k); outlined("#E7D9C0", 3.5);
+    }
+    // 금
+    line(2.5, INK);
+    for (let c = 0; c < s.hits && !s.smashed; c++) {
+      const bx = a + ((c + 1) / (s.n + 1)) * s.L, by = GY - s.H * (.2 + .6 * (c % 2));
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 7, by - 10); ctx.lineTo(bx - 3, by - 18); ctx.lineTo(bx + 6, by - 28); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawRamp(s, ox) {
+    if (!s.smashed) return;
+    const a = stairsStart(s) - ox, b = s.sx - 40 - ox, t = s.rampT;
+    ctx.save(); ctx.globalAlpha = Math.min(1, t * 1.5);
+    ctx.beginPath(); ctx.moveTo(a, GY); ctx.lineTo(a + (b - a) * t, GY - s.H * t); ctx.lineTo(b, GY - s.H * t); ctx.lineTo(b, GY); ctx.closePath(); outlined("#9AD6C0", 4);
+    line(3, "#fff"); const m = 4;
+    for (let i = 1; i <= m; i++) { const f = i / (m + 1) * t; ctx.beginPath(); ctx.moveTo(a + (b - a) * f - 6, GY - s.H * f + 10 * (1)); ctx.lineTo(a + (b - a) * f + 6, GY - s.H * f + 10); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawShop(s) {
+    const ox = cam, x = s.sx - ox;
+    if (x < -300 || x > W + 400) return;
+    // 건물
+    ctx.beginPath(); ctx.rect(x - 70, GY - s.H - 200, 210, 200 + s.H); outlined(s.color, 4);
+    // 어닝
+    ctx.beginPath(); ctx.moveTo(x - 80, GY - s.H - 120); ctx.lineTo(x + 150, GY - s.H - 120); ctx.lineTo(x + 138, GY - s.H - 150); ctx.lineTo(x - 68, GY - s.H - 150); ctx.closePath(); outlined("#fff", 4);
+    for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.rect(x - 68 + i * 41, GY - s.H - 150, 20, 30); ctx.fillStyle = RED; ctx.fill(); }
+    ctx.beginPath(); ctx.moveTo(x - 80, GY - s.H - 120); ctx.lineTo(x + 150, GY - s.H - 120); line(4, INK); ctx.stroke();
+    // 간판
+    ctx.fillStyle = INK; ctx.font = `800 20px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(s.name, x + 35, GY - s.H - 165);
+    // 창문
+    ctx.beginPath(); ctx.roundRect(x + 62, GY - s.H - 100, 60, 56, 8); outlined("#EAF6FF", 3.5);
+    // 문
+    ctx.beginPath(); ctx.roundRect(x - 24, GY - s.H - 78, 48, 78, 6); outlined(s.opened ? "#FFE58A" : "#7B5B3A", 4);
+    if (s.opened) { ctx.fillStyle = INK; ctx.font = `800 12px ${FONT}`; ctx.fillText("OPEN", x, GY - s.H - 40); }
+    // 단 (포치)
+    ctx.beginPath(); ctx.rect(x - 40, GY - s.H, 120, s.H); outlined("#E7D9C0", 4);
+    drawStairs(s, ox); drawRamp(s, ox);
+    // 응원하는 친구들
+    s.friends.forEach((kind, i) => drawChar(x + 22 + i * 40, GY - s.H, 15, kind, i));
+  }
+
+  function render() {
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const sx = shake ? rnd(-shake, shake) : 0, sy = shake ? rnd(-shake, shake) : 0;
+    ctx.save(); ctx.translate(sx, sy);
+    // 하늘
+    ctx.fillStyle = "#FFF7E0"; ctx.fillRect(-20, -20, W + 40, H + 40);
+    // 먼 건물 (패럴랙스)
+    for (let i = -1; i < 8; i++) {
+      const bx = i * 150 - ((cam * .25) % 150), bh = 120 + ((i * 53) % 90 + 90) % 90;
+      ctx.fillStyle = i % 2 ? "#F3E6C4" : "#F0DEB4"; ctx.fillRect(bx, GY - bh, 120, bh);
+    }
+    // 지면
+    ctx.fillStyle = "#E9DCBA"; ctx.fillRect(-20, GY, W + 40, H - GY + 20);
+    line(5, INK); ctx.beginPath(); ctx.moveTo(-20, GY); ctx.lineTo(W + 20, GY); ctx.stroke();
+    ctx.fillStyle = "#D7C79E"; for (let i = 0; i < 12; i++) ctx.fillRect(i * 80 - (cam % 80), GY + 40, 36, 6);
+    // 가게
+    shops.forEach(drawShop);
+    // 주인공 (휠체어 사용자)
+    if (state !== "over" || true) {
+      const g = groundH();
+      ctx.save(); ctx.globalAlpha = state === "ready" ? 1 : charA;
+      const bob = phase === "walk" || state === "ready" ? Math.sin(tt * 14) * 1.5 : 0;
+      ctx.translate(CX, GY - g.h + bob); ctx.rotate(g.tilt);
+      drawChar(0, 0, 28, "chair");
+      ctx.restore();
+    }
+    // 파티클
+    for (const p of parts) { ctx.globalAlpha = 1 - p.t / p.life; ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.r, p.r); line(1.5, INK); ctx.strokeRect(p.x, p.y, p.r, p.r); }
+    ctx.globalAlpha = 1;
+    // +1
+    for (const p of pops) { ctx.globalAlpha = 1 - p.t; ctx.fillStyle = INK; ctx.font = `900 32px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(p.text, p.x - cam, p.y - p.t * 40); }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // HUD
+    if (state === "play") {
+      ctx.textAlign = "left"; ctx.fillStyle = INK; ctx.font = `800 20px ${FONT}`; ctx.fillText(`열린 가게 ${score}`, 16, 34);
+      ctx.textAlign = "right"; ctx.fillText(Math.ceil(timeLeft) + "초", W - 16, 34);
+      ctx.beginPath(); ctx.roundRect(16, 46, W - 32, 12, 6); outlined("#fff", 3);
+      ctx.beginPath(); ctx.roundRect(16, 46, Math.max(0, (W - 32) * timeLeft / TIME_LIMIT), 12, 6); ctx.fillStyle = timeLeft < 8 ? RED : YELLOW; ctx.fill();
+      if (phase === "blocked") {
+        const s = shops[cur], left = s.n - s.hits;
+        ctx.textAlign = "center"; ctx.fillStyle = INK; ctx.font = `900 ${26 + Math.sin(tt * 10) * 2}px ${FONT}`;
+        ctx.fillText("탭! 탭!", W / 2, GY + 90);
+        ctx.font = `700 15px ${FONT}`; ctx.fillText(`계단 ${left}번 더 부수면 길이 열려요`, W / 2, GY + 118);
+      }
+    }
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    update(dt); render(); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // 테스트용 훅
+  window.__game = { tap, get score() { return score; }, get phase() { return phase; }, get state() { return state; } };
+})();
+</script>
+</body>
+</html>
