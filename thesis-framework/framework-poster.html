@@ -3,22 +3,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one member's 12-session timeline as a score. Rows = layers (bottom: offered to all, top: chosen by each);
-   columns = time (together / away / back). Right margin = what to offer vs. what not to make mandatory. */
+/* Layout: keyword score. Rows = four layers (bottom: offered to all → top: chosen by each), columns = one member's 12 sessions
+   (together / away / back). Every label is a keyword; numbers live in small tags and the footnote. */
 :root{
   --bg:#fbfbf9; --ink:#1d2421; --muted:#68716c; --line:#d5dad6;
   --accent:#0f7465; --accent-soft:#d5ebe6; --accent-mid:#8fc6bb; --on-accent:#ffffff;
-  --burden:#c0542a; --burden-soft:#f4e0d6; --away:#eef0ec;
+  --burden:#c0542a; --burden-soft:#f6e6de; --away:#eef0ec;
   --ko:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#121614; --ink:#e3e8e5; --muted:#9aa39e; --line:#303833;
   --accent:#5cc2ae; --accent-soft:#173a33; --accent-mid:#2f7a6c; --on-accent:#0d1412;
-  --burden:#e98b60; --burden-soft:#3b2519; --away:#1a1f1c; color-scheme:dark }}
+  --burden:#e98b60; --burden-soft:#33221a; --away:#1a1f1c; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#121614; --ink:#e3e8e5; --muted:#9aa39e; --line:#303833;
   --accent:#5cc2ae; --accent-soft:#173a33; --accent-mid:#2f7a6c; --on-accent:#0d1412;
-  --burden:#e98b60; --burden-soft:#3b2519; --away:#1a1f1c; color-scheme:dark }
+  --burden:#e98b60; --burden-soft:#33221a; --away:#1a1f1c; color-scheme:dark }
 
 body{background:var(--bg);color:var(--ink);font-family:var(--ko);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 40px}
@@ -28,127 +28,151 @@ body{background:var(--bg);color:var(--ink);font-family:var(--ko);
 
 svg text{font-family:var(--ko);fill:var(--ink)}
 svg .mut{fill:var(--muted)} svg .acc{fill:var(--accent)} svg .bur{fill:var(--burden)} svg .on{fill:var(--on-accent)}
-svg .bg{fill:var(--bg)}
+svg .en{letter-spacing:.08em}
 svg .away{fill:var(--away)}
 svg .rule{stroke:var(--line);stroke-width:1;fill:none}
 svg .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4;fill:none}
 svg .fillA{fill:var(--accent)} svg .fillS{fill:var(--accent-soft)} svg .fillM{fill:var(--accent-mid)}
-svg .strA{stroke:var(--accent);fill:none;stroke-width:2}
 svg .ring{fill:var(--bg);stroke:var(--accent);stroke-width:2}
 svg .opt{fill:var(--bg);stroke:var(--accent);stroke-width:1.6;stroke-dasharray:3 3}
 svg .ghost{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 4}
-svg .btrack{fill:var(--burden-soft)} svg .bfill{fill:var(--burden)}
+svg .chip{fill:var(--bg);stroke:var(--accent);stroke-width:1.2}
+svg .chipS{fill:var(--accent-soft);stroke:none}
+svg .chipB{fill:var(--burden-soft);stroke:var(--burden);stroke-width:1.2}
+svg .tag{fill:none;stroke:var(--muted);stroke-width:1}
 svg .arrowM{fill:var(--muted)}
 </style>
 
 <div class="fig">
-<svg viewBox="0 0 2100 1100" role="img" aria-label="한 구성원의 12회차 타임라인 위에 네 개의 층이 언제 작동하는지 보여주는 느슨한 소속 프레임워크">
+<svg viewBox="0 0 2100 1100" role="img" aria-label="키워드로 정리한 느슨한 소속 프레임워크: 네 층(기회, 연결, 인정, 선택)이 함께, 쉼, 복귀의 시간 위에서 작동하는 방식">
 <defs>
   <marker id="up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path class="arrowM" d="M0,10 L5,0 L10,10 z"/></marker>
 </defs>
 
 <!-- ===== Title ===== -->
 <text x="90" y="78" font-size="40" font-weight="700">느슨한 소속 프레임워크</text>
-<text x="90" y="114" font-size="17" class="mut">참석은 끊겨도 소속은 이어지도록: 한 구성원의 12회차로 본 네 개의 층</text>
+<text x="90" y="114" font-size="17" class="mut">기회 · 연결 · 인정 · 선택</text>
 <text x="2040" y="78" text-anchor="end" font-size="13" class="mut">설문 N=108 · 면담 5명</text>
-<text x="2040" y="98" text-anchor="end" font-size="13" class="mut">예시 타임라인은 면담 사례(P04)를 재구성한 도식</text>
+<text x="2040" y="98" text-anchor="end" font-size="13" class="mut">타임라인은 P04 사례를 재구성한 예시</text>
 <line class="rule" x1="90" y1="140" x2="2040" y2="140"/>
 
 <!-- ===== Absence shading ===== -->
 <rect class="away" x="615" y="160" width="425" height="690"/>
 
 <!-- ===== Column headers ===== -->
-<g font-size="16" font-weight="700" text-anchor="middle">
-  <text x="487.5" y="186">함께</text>
-  <text x="827.5" y="186">쉼</text>
-  <text x="1082.5" y="186" class="acc">복귀</text>
-  <text x="1252.5" y="186">다시 함께</text>
+<g font-size="18" font-weight="700" text-anchor="middle">
+  <text x="487.5" y="188">함께</text>
+  <text x="827.5" y="188">쉼</text>
+  <text x="1082.5" y="188" class="acc">복귀</text>
+  <text x="1252.5" y="188">함께</text>
 </g>
-<g font-size="11" text-anchor="middle" class="mut">
-  <text x="487.5" y="204" class="mut">1–3회차</text>
-  <text x="827.5" y="204" class="mut">4–8회차 · 한 달 이상</text>
-  <text x="1082.5" y="204" class="mut">9회차</text>
-  <text x="1252.5" y="204" class="mut">10–12회차</text>
+<g font-size="10" text-anchor="middle" class="en">
+  <text x="487.5" y="206" class="en mut">TOGETHER</text>
+  <text x="827.5" y="206" class="en mut">AWAY</text>
+  <text x="1082.5" y="206" class="en mut">RETURN</text>
+  <text x="1252.5" y="206" class="en mut">TOGETHER</text>
 </g>
-<text x="1420" y="186" font-size="16" font-weight="700" class="acc">열어 둘 것</text>
-<text x="1420" y="204" font-size="11" class="mut">모두에게 기회로 제공</text>
-<text x="1720" y="186" font-size="16" font-weight="700" class="bur">의무로 만들지 않을 것</text>
-<text x="1720" y="204" font-size="11" class="mut">의무일 때 높은 부담(4~5점) 비율</text>
+<text x="1420" y="188" font-size="18" font-weight="700" class="acc">열어 두기</text>
+<text x="1420" y="206" font-size="10" class="en mut">OFFER</text>
+<text x="1690" y="188" font-size="18" font-weight="700" class="bur">강요하지 않기</text>
+<text x="1690" y="206" font-size="10" class="en mut">DON'T REQUIRE · 의무 시 부담</text>
 
 <!-- week grid -->
 <g class="grid">
-  <line x1="445" y1="220" x2="445" y2="840"/><line x1="530" y1="220" x2="530" y2="840"/>
-  <line x1="700" y1="220" x2="700" y2="840"/><line x1="785" y1="220" x2="785" y2="840"/>
-  <line x1="870" y1="220" x2="870" y2="840"/><line x1="955" y1="220" x2="955" y2="840"/>
-  <line x1="1125" y1="220" x2="1125" y2="840"/><line x1="1210" y1="220" x2="1210" y2="840"/><line x1="1295" y1="220" x2="1295" y2="840"/>
+  <line x1="445" y1="220" x2="445" y2="822"/><line x1="530" y1="220" x2="530" y2="822"/>
+  <line x1="700" y1="220" x2="700" y2="822"/><line x1="785" y1="220" x2="785" y2="822"/>
+  <line x1="870" y1="220" x2="870" y2="822"/><line x1="955" y1="220" x2="955" y2="822"/>
+  <line x1="1125" y1="220" x2="1125" y2="822"/><line x1="1210" y1="220" x2="1210" y2="822"/><line x1="1295" y1="220" x2="1295" y2="822"/>
 </g>
 <line class="rule" x1="615" y1="160" x2="615" y2="850"/><line class="rule" x1="1040" y1="160" x2="1040" y2="850"/>
 
 <!-- ===== Row: 소속감 ===== -->
-<text x="90" y="241" font-size="18" font-weight="700">소속감</text>
-<text x="90" y="260" font-size="12" class="mut">“나는 여기에 속해 있다” 74.1%</text>
+<text x="90" y="250" font-size="22" font-weight="700">소속감</text>
+<text x="190" y="250" font-size="10" class="en mut">BELONGING</text>
 <rect class="fillA" x="372" y="230" width="996" height="28" rx="14"/>
-<text x="870" y="249" text-anchor="middle" font-size="14" font-weight="600" class="on">내 자리가 남아 있다 · 참석 여부와 무관한 구성원 의식</text>
+<text x="870" y="250" text-anchor="middle" font-size="15" font-weight="700" class="on">남아 있는 자리</text>
 
 <!-- ===== Row: 참석 ===== -->
-<text x="90" y="300" font-size="18" font-weight="700">참석</text>
-<text x="90" y="319" font-size="12" class="mut">출석 지표로만 볼 때</text>
+<text x="90" y="313" font-size="18" font-weight="700" class="mut">참석</text>
+<text x="170" y="313" font-size="10" class="en mut">ATTENDANCE</text>
 <g class="fillM">
   <rect x="390" y="288" width="25" height="34" rx="2"/><rect x="475" y="288" width="25" height="34" rx="2"/><rect x="560" y="288" width="25" height="34" rx="2"/>
   <rect x="1070" y="288" width="25" height="34" rx="2"/><rect x="1155" y="288" width="25" height="34" rx="2"/><rect x="1240" y="288" width="25" height="34" rx="2"/><rect x="1325" y="288" width="25" height="34" rx="2"/>
 </g>
 <line class="ghost" x1="630" y1="321" x2="1025" y2="321"/>
-<text x="827.5" y="310" text-anchor="middle" font-size="12" class="mut">출석만 세면 0 · 이탈과 구분되지 않음</text>
+<text x="827.5" y="310" text-anchor="middle" font-size="14" font-weight="600" class="mut">출석 0 ≠ 이탈</text>
 <line class="rule" x1="90" y1="342" x2="1380" y2="342"/>
 
 <!-- ===== Layer axis ===== -->
 <line x1="62" y1="830" x2="62" y2="372" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#up)"/>
-<text transform="translate(50 600) rotate(-90)" text-anchor="middle" font-size="11" class="mut">운영자가 모두에게 제공 → 구성원이 스스로 고름</text>
+<text transform="translate(50 600) rotate(-90)" text-anchor="middle" font-size="12" class="mut">공동 제공 → 개인 선택</text>
 
-<!-- ===== L4 심화 (y 352–462, mid 407) ===== -->
-<text x="90" y="383" font-size="17" font-weight="700">4층 심화</text>
-<text x="90" y="403" font-size="12" class="mut">강화 요인 · 원하는 사람만</text>
-<text x="90" y="423" font-size="12">사적 교류 · 고른 역할 · 의견 표명</text>
-<text x="90" y="443" font-size="11" class="acc">ρ=.341 · 연락 0명 중 50%도 높은 소속감</text>
+<!-- ===== Layer labels (number · keyword · english · chips · evidence) ===== -->
+<!-- L4 mid 407 -->
+<text x="90" y="376" font-size="12" class="mut">4층 · 심화</text>
+<rect class="tag" x="296" y="365" width="44" height="16" rx="3"/><text x="318" y="377" text-anchor="middle" font-size="10" class="mut">H1</text>
+<text x="90" y="405" font-size="26" font-weight="700">선택</text>
+<text x="152" y="405" font-size="10" class="en mut">CHOICE</text>
+<g font-size="13" font-weight="600" text-anchor="middle">
+  <rect class="chip" x="90" y="418" width="62" height="26" rx="13"/><text x="121" y="436" class="acc">친분</text>
+  <rect class="chip" x="160" y="418" width="62" height="26" rx="13"/><text x="191" y="436" class="acc">역할</text>
+  <rect class="chip" x="230" y="418" width="62" height="26" rx="13"/><text x="261" y="436" class="acc">목소리</text>
+</g>
+<!-- L3 mid 527 -->
+<text x="90" y="496" font-size="12" class="mut">3층 · 확인</text>
+<rect class="tag" x="296" y="485" width="44" height="16" rx="3"/><text x="318" y="497" text-anchor="middle" font-size="10" class="mut">H2</text>
+<text x="90" y="525" font-size="26" font-weight="700">인정</text>
+<text x="152" y="525" font-size="10" class="en mut">RECOGNITION</text>
+<g font-size="13" font-weight="600" text-anchor="middle">
+  <rect class="chip" x="90" y="538" width="62" height="26" rx="13"/><text x="121" y="556" class="acc">의례</text>
+  <rect class="chip" x="160" y="538" width="62" height="26" rx="13"/><text x="191" y="556" class="acc">흔적</text>
+  <rect class="chip" x="230" y="538" width="62" height="26" rx="13"/><text x="261" y="556" class="acc">인사</text>
+</g>
+<!-- L2 mid 647 -->
+<text x="90" y="616" font-size="12" class="mut">2층 · 유지</text>
+<rect class="tag" x="296" y="605" width="44" height="16" rx="3"/><text x="318" y="617" text-anchor="middle" font-size="10" class="mut">81.5%</text>
+<text x="90" y="645" font-size="26" font-weight="700">연결</text>
+<text x="152" y="645" font-size="10" class="en mut">CONNECTION</text>
+<g font-size="13" font-weight="600" text-anchor="middle">
+  <rect class="chip" x="90" y="658" width="62" height="26" rx="13"/><text x="121" y="676" class="acc">소식</text>
+  <rect class="chip" x="160" y="658" width="62" height="26" rx="13"/><text x="191" y="676" class="acc">무해명</text>
+  <rect class="chip" x="230" y="658" width="62" height="26" rx="13"/><text x="261" y="676" class="acc">공지</text>
+</g>
+<!-- L1 mid 767 -->
+<text x="90" y="736" font-size="12" class="mut">1층 · 기반</text>
+<rect class="tag" x="296" y="725" width="44" height="16" rx="3"/><text x="318" y="737" text-anchor="middle" font-size="10" class="mut">H3</text>
+<text x="90" y="765" font-size="26" font-weight="700">기회</text>
+<text x="152" y="765" font-size="10" class="en mut">OPPORTUNITY</text>
+<g font-size="13" font-weight="600" text-anchor="middle">
+  <rect class="chip" x="90" y="778" width="62" height="26" rx="13"/><text x="121" y="796" class="acc">활동</text>
+  <rect class="chip" x="160" y="778" width="62" height="26" rx="13"/><text x="191" y="796" class="acc">일정</text>
+  <rect class="chip" x="230" y="778" width="62" height="26" rx="13"/><text x="261" y="796" class="acc">장소</text>
+</g>
+<g><line class="rule" x1="90" y1="462" x2="1380" y2="462"/><line class="rule" x1="90" y1="582" x2="1380" y2="582"/><line class="rule" x1="90" y1="702" x2="1380" y2="702"/><line class="rule" x1="90" y1="822" x2="1380" y2="822"/></g>
+
+<!-- ===== L4 marks ===== -->
 <rect class="opt" x="477" y="397" width="21" height="21" rx="3" transform="rotate(45 487.5 407.5)"/>
 <rect class="opt" x="1242" y="397" width="21" height="21" rx="3" transform="rotate(45 1252.5 407.5)"/>
-<text x="510" y="412" font-size="12" class="mut">원할 때만</text>
-<text x="1275" y="412" font-size="12" class="mut">원할 때만</text>
-<line class="rule" x1="90" y1="462" x2="1380" y2="462"/>
+<text x="487.5" y="446" text-anchor="middle" font-size="13" font-weight="600" class="mut">원할 때만</text>
+<text x="1252.5" y="446" text-anchor="middle" font-size="13" font-weight="600" class="mut">원할 때만</text>
 
-<!-- ===== L3 확인 (mid 527) ===== -->
-<text x="90" y="503" font-size="17" font-weight="700">3층 확인</text>
-<text x="90" y="523" font-size="12" class="mut">핵심 · 함께하는 순간</text>
-<text x="90" y="543" font-size="12">시작·마무리 · 기록과 흔적 · 복귀 인사</text>
-<text x="90" y="563" font-size="11" class="acc">시작·마무리 OR 1.53, p=.007</text>
-<g>
-  <circle class="ring" cx="402.5" cy="527" r="9"/><circle class="ring" cx="487.5" cy="527" r="9"/><circle class="ring" cx="572.5" cy="527" r="9"/>
-  <circle class="ring" cx="1167.5" cy="527" r="9"/><circle class="ring" cx="1252.5" cy="527" r="9"/><circle class="ring" cx="1337.5" cy="527" r="9"/>
-  <circle class="fillA" cx="1082.5" cy="527" r="18"/>
-</g>
-<text x="487.5" y="560" text-anchor="middle" font-size="12" class="mut">반복되는 시작·마무리</text>
-<text x="1082.5" y="497" text-anchor="middle" font-size="13" font-weight="700" class="acc">알아봐 주는 인사</text>
-<text x="1082.5" y="566" text-anchor="middle" font-size="11" class="mut">이유는 묻지 않고</text>
-<line class="rule" x1="90" y1="582" x2="1380" y2="582"/>
+<!-- ===== L3 marks ===== -->
+<circle class="ring" cx="402.5" cy="527" r="9"/><circle class="ring" cx="487.5" cy="527" r="9"/><circle class="ring" cx="572.5" cy="527" r="9"/>
+<circle class="ring" cx="1167.5" cy="527" r="9"/><circle class="ring" cx="1252.5" cy="527" r="9"/><circle class="ring" cx="1337.5" cy="527" r="9"/>
+<circle class="fillA" cx="1082.5" cy="527" r="18"/>
+<text x="487.5" y="562" text-anchor="middle" font-size="13" font-weight="600" class="mut">의례</text>
+<text x="1082.5" y="496" text-anchor="middle" font-size="15" font-weight="700" class="acc">인사</text>
+<text x="1252.5" y="562" text-anchor="middle" font-size="13" font-weight="600" class="mut">의례</text>
 
-<!-- ===== L2 유지 (mid 647) ===== -->
-<text x="90" y="623" font-size="17" font-weight="700">2층 유지</text>
-<text x="90" y="643" font-size="12" class="mut">핵심 · 쉬는 동안</text>
-<text x="90" y="663" font-size="12">소식 수신 · 결석 사유 묻지 않음</text>
-<text x="90" y="683" font-size="11" class="acc">부재 중 소식 희망 81.5%</text>
+<!-- ===== L2 marks ===== -->
 <line x1="372" y1="647" x2="615" y2="647" stroke="var(--accent-mid)" stroke-width="2"/>
 <line x1="1040" y1="647" x2="1368" y2="647" stroke="var(--accent-mid)" stroke-width="2"/>
 <rect class="fillS" x="625" y="634" width="405" height="26" rx="13"/>
 <g class="fillA"><circle cx="657.5" cy="647" r="5"/><circle cx="742.5" cy="647" r="5"/><circle cx="827.5" cy="647" r="5"/><circle cx="912.5" cy="647" r="5"/><circle cx="997.5" cy="647" r="5"/></g>
-<text x="827.5" y="623" text-anchor="middle" font-size="13" font-weight="700" class="acc">답하지 않아도 되는 소식</text>
-<text x="827.5" y="682" text-anchor="middle" font-size="12" class="mut">읽기만 해도 연결이 유지됨 (P02·P04)</text>
-<line class="rule" x1="90" y1="702" x2="1380" y2="702"/>
+<text x="827.5" y="623" text-anchor="middle" font-size="15" font-weight="700" class="acc">소식 · 읽기만</text>
+<text x="827.5" y="684" text-anchor="middle" font-size="13" font-weight="600" class="mut">무응답 · 무해명</text>
 
-<!-- ===== L1 기반 (mid 767) ===== -->
-<text x="90" y="743" font-size="17" font-weight="700">1층 기반</text>
-<text x="90" y="763" font-size="12" class="mut">전제 조건 · 언제나, 모두에게</text>
-<text x="90" y="783" font-size="12">함께할 활동 · 정기 일정 · 늘 모이는 장소</text>
-<text x="90" y="803" font-size="11" class="acc">사유 묻지 않는 정기 일정 선호 56.5%</text>
+<!-- ===== L1 marks ===== -->
 <line x1="402.5" y1="767" x2="1337.5" y2="767" stroke="var(--accent)" stroke-width="2"/>
 <g class="fillA">
   <rect x="393.5" y="758" width="18" height="18" rx="2"/><rect x="478.5" y="758" width="18" height="18" rx="2"/><rect x="563.5" y="758" width="18" height="18" rx="2"/>
@@ -156,63 +180,64 @@ svg .arrowM{fill:var(--muted)}
   <rect x="903.5" y="758" width="18" height="18" rx="2"/><rect x="988.5" y="758" width="18" height="18" rx="2"/><rect x="1073.5" y="758" width="18" height="18" rx="2"/>
   <rect x="1158.5" y="758" width="18" height="18" rx="2"/><rect x="1243.5" y="758" width="18" height="18" rx="2"/><rect x="1328.5" y="758" width="18" height="18" rx="2"/>
 </g>
-<text x="827.5" y="745" text-anchor="middle" font-size="13" font-weight="700" class="acc">쉬는 동안에도 매회 올라오는 모집 공지</text>
-<text x="827.5" y="800" text-anchor="middle" font-size="12" class="mut">“언제든 다시 갈 수 있구나” (P04)</text>
-<text x="487.5" y="800" text-anchor="middle" font-size="12" class="mut">회차별로 신청</text>
-<line class="rule" x1="90" y1="822" x2="1380" y2="822"/>
-<g font-size="11" text-anchor="middle" class="mut">
+<text x="827.5" y="745" text-anchor="middle" font-size="15" font-weight="700" class="acc">매회 공지</text>
+<text x="827.5" y="800" text-anchor="middle" font-size="13" font-weight="600" class="mut">열린 다음 회차</text>
+<text x="487.5" y="800" text-anchor="middle" font-size="13" font-weight="600" class="mut">회차별 신청</text>
+<text x="1252.5" y="800" text-anchor="middle" font-size="13" font-weight="600" class="mut">회차별 신청</text>
+<g font-size="11" text-anchor="middle">
   <text x="402.5" y="842" class="mut">1</text><text x="487.5" y="842" class="mut">2</text><text x="572.5" y="842" class="mut">3</text><text x="657.5" y="842" class="mut">4</text>
   <text x="742.5" y="842" class="mut">5</text><text x="827.5" y="842" class="mut">6</text><text x="912.5" y="842" class="mut">7</text><text x="997.5" y="842" class="mut">8</text>
-  <text x="1082.5" y="842" class="mut">9</text><text x="1167.5" y="842" class="mut">10</text><text x="1252.5" y="842" class="mut">11</text><text x="1337.5" y="842" class="mut">12</text>
+  <text x="1082.5" y="842" class="mut">9</text><text x="1167.5" y="842" class="mut">10</text><text x="1252.5" y="842" class="mut">11</text><text x="1337.5" y="842" class="mut">12회차</text>
 </g>
 
-<!-- ===== Right margin: offer vs. not mandatory ===== -->
+<!-- ===== Right margin: keyword pairs ===== -->
 <line class="rule" x1="1400" y1="160" x2="1400" y2="850"/>
-<line class="rule" x1="1700" y1="352" x2="1700" y2="822"/>
-<g font-size="13">
-  <text x="1420" y="395">원하는 만큼의 관계</text><text x="1420" y="417">스스로 고른 기여</text>
-  <text x="1420" y="515">반복되는 시작·마무리</text><text x="1420" y="537">기록 열람 · 복귀 인사</text>
-  <text x="1420" y="635">소식 받기(읽기만)</text><text x="1420" y="657">결석을 설명하지 않을 자유</text>
-  <text x="1420" y="755">미리 공지된 정기 일정</text><text x="1420" y="777">회차별 신청 · 정해진 장소</text>
+<g font-size="14" font-weight="600" text-anchor="middle">
+  <!-- L4 -->
+  <rect class="chipS" x="1420" y="377" width="200" height="28" rx="14"/><text x="1520" y="396" class="acc">고른 역할</text>
+  <text x="1655" y="396" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="377" width="200" height="28" rx="14"/><text x="1790" y="396" class="bur">관리 책임</text>
+  <rect class="chipS" x="1420" y="413" width="200" height="28" rx="14"/><text x="1520" y="432" class="acc">원하는 거리</text>
+  <text x="1655" y="432" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="413" width="200" height="28" rx="14"/><text x="1790" y="432" class="bur">친목 강요</text>
+  <!-- L3 -->
+  <rect class="chipS" x="1420" y="497" width="200" height="28" rx="14"/><text x="1520" y="516" class="acc">기록 열람</text>
+  <text x="1655" y="516" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="497" width="200" height="28" rx="14"/><text x="1790" y="516" class="bur">기록 작성</text>
+  <rect class="chipS" x="1420" y="533" width="200" height="28" rx="14"/><text x="1520" y="552" class="acc">이름 공유</text>
+  <text x="1655" y="552" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="533" width="200" height="28" rx="14"/><text x="1790" y="552" class="bur">굿즈 착용</text>
+  <!-- L2 -->
+  <rect class="chipS" x="1420" y="633" width="200" height="28" rx="14"/><text x="1520" y="652" class="acc">소식 수신</text>
+  <text x="1655" y="652" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="633" width="200" height="28" rx="14"/><text x="1790" y="652" class="bur">응답 의무</text>
+  <!-- L1 -->
+  <rect class="chipS" x="1420" y="753" width="200" height="28" rx="14"/><text x="1520" y="772" class="acc">정기 일정</text>
+  <text x="1655" y="772" class="mut">↔</text>
+  <rect class="chipB" x="1690" y="753" width="200" height="28" rx="14"/><text x="1790" y="772" class="bur">필수 출석</text>
 </g>
-<!-- bars: scale 0–60% over 170px from x=1810 -->
-<g font-size="11">
-  <text x="1720" y="383">역할·운영</text><rect class="btrack" x="1810" y="374" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="374" width="147" height="9" rx="2"/><text x="2040" y="383" text-anchor="end" class="bur">51.9%</text>
-  <text x="1720" y="407">뒤풀이·친목</text><rect class="btrack" x="1810" y="398" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="398" width="81.3" height="9" rx="2"/><text x="2040" y="407" text-anchor="end" class="bur">28.7%</text>
-  <text x="1720" y="431">사적 대화</text><rect class="btrack" x="1810" y="422" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="422" width="60.4" height="9" rx="2"/><text x="2040" y="431" text-anchor="end" class="bur">21.3%</text>
-
-  <text x="1720" y="515">굿즈 착용</text><rect class="btrack" x="1810" y="506" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="506" width="102.3" height="9" rx="2"/><text x="2040" y="515" text-anchor="end" class="bur">36.1%</text>
-  <text x="1720" y="539">기록 작성</text><rect class="btrack" x="1810" y="530" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="530" width="99.7" height="9" rx="2"/><text x="2040" y="539" text-anchor="end" class="bur">35.2%</text>
-
-  <text x="1720" y="647">대화방 반응</text><rect class="btrack" x="1810" y="638" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="638" width="68.3" height="9" rx="2"/><text x="2040" y="647" text-anchor="end" class="bur">24.1%</text>
-
-  <text x="1720" y="759">의무 출석</text><rect class="btrack" x="1810" y="750" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="750" width="115.3" height="9" rx="2"/><text x="2040" y="759" text-anchor="end" class="bur">40.7%</text>
-  <text x="1720" y="783">정해진 장소</text><rect class="btrack" x="1810" y="774" width="170" height="9" rx="2"/><rect class="bfill" x="1810" y="774" width="44.5" height="9" rx="2"/><text x="2040" y="783" text-anchor="end" class="bur">15.7%</text>
-</g>
-<g font-size="10" class="mut" text-anchor="middle">
-  <text x="1810" y="842" class="mut">0</text><text x="1866.7" y="842" class="mut">20</text><text x="1923.3" y="842" class="mut">40</text><text x="1980" y="842" class="mut">60%</text>
+<g font-size="13" font-weight="600" text-anchor="end">
+  <text x="2040" y="396" class="bur">51.9%</text><text x="2040" y="432" class="bur">28.7%</text>
+  <text x="2040" y="516" class="bur">35.2%</text><text x="2040" y="552" class="bur">36.1%</text>
+  <text x="2040" y="652" class="bur">24.1%</text>
+  <text x="2040" y="772" class="bur">40.7%</text>
 </g>
 
-<!-- ===== Reading by moment ===== -->
-<g>
-  <text x="372" y="900" font-size="14" font-weight="700">함께하는 동안</text>
-  <text x="372" y="922" font-size="13" class="mut">반복되는 시작·마무리가</text>
-  <text x="372" y="941" font-size="13" class="mut">구성원임을 확인해 준다</text>
-
-  <text x="630" y="900" font-size="14" font-weight="700">쉬는 동안</text>
-  <text x="630" y="922" font-size="13" class="mut">1층 공지와 2층 소식만 작동한다.</text>
-  <text x="630" y="941" font-size="13" class="mut">답할 의무가 없을 때 다시 갈 수 있다는 감각이 남는다</text>
-
-  <text x="1055" y="900" font-size="14" font-weight="700" class="acc">돌아온 순간</text>
-  <text x="1055" y="922" font-size="13" class="mut">해명 대신 인사로 자리를 확인한다.</text>
-  <text x="1055" y="941" font-size="13" class="mut">한 달 이상 쉰 뒤 복귀 경험 50.9%</text>
+<!-- ===== Design verbs by moment ===== -->
+<g text-anchor="middle">
+  <text x="487.5" y="905" font-size="24" font-weight="700">반복하기</text>
+  <text x="487.5" y="930" font-size="13" class="mut">의례 → 확인</text>
+  <text x="827.5" y="905" font-size="24" font-weight="700">열어 두기 · 묻지 않기</text>
+  <text x="827.5" y="930" font-size="13" class="mut">공지 · 소식 → 연결</text>
+  <text x="1167.5" y="905" font-size="24" font-weight="700" class="acc">알아보기</text>
+  <text x="1167.5" y="930" font-size="13" class="mut">인사 → 인정</text>
 </g>
-<text x="1420" y="905" font-size="22" font-weight="700" class="acc">기회는 꾸준히, 거리는 각자</text>
-<text x="1420" y="930" font-size="13" class="mut">운영자는 아래층을 끊김 없이 제공하고,</text>
-<text x="1420" y="949" font-size="13" class="mut">위층으로 얼마나 올라갈지는 구성원이 고른다</text>
+<rect class="fillA" x="1420" y="872" width="620" height="76" rx="38"/>
+<text x="1730" y="910" text-anchor="middle" font-size="24" font-weight="700" class="on">기회는 꾸준히 · 거리는 각자</text>
+<text x="1730" y="934" text-anchor="middle" font-size="11" class="en on">CONSTANT OPPORTUNITY · CHOSEN DISTANCE</text>
 
 <line class="rule" x1="90" y1="1010" x2="2040" y2="1010"/>
-<text x="90" y="1040" font-size="12" class="mut">근거 · H1 사적 교류×소속감 ρ=.341, p&lt;.001 · H2 시작·마무리 누적 OR 1.53 (95% CI 1.12–2.08), p=.007 · H3 사유 묻지 않는 정기 일정 선호 집단의 출석 부담 중앙값 3 vs 2, p&lt;.001 · 모두 단면·탐색적 분석이며 층 사이의 인과는 검증하지 않음</text>
+<text x="90" y="1040" font-size="12" class="mut">H1 사적 교류×소속감 ρ=.341, p&lt;.001 (연락 0명 중 50%도 높은 소속감) · H2 시작·마무리 OR 1.53, p=.007 · H3 사유 묻지 않는 정기 일정 선호 56.5%, 출석 부담 3 vs 2, p&lt;.001 · 81.5% 부재 중 소식 희망 · 오른쪽 % = 의무일 때 높은 부담(4~5점), N=108</text>
 </svg>
 </div>
-<p class="note">가로축은 한 구성원이 참여하고, 한 달 넘게 쉬고, 다시 돌아오는 12회차입니다. 세로축은 아래로 갈수록 운영자가 모두에게 꾸준히 제공하는 층, 위로 갈수록 구성원이 원할 때만 고르는 층입니다. 오른쪽 여백은 층마다 열어 둘 기회와 의무로 만들면 부담이 되는 요소를 짝지었습니다.</p>
+<p class="note">가로축은 한 구성원의 12회차(함께 → 쉼 → 복귀 → 함께), 세로축은 네 층입니다. 아래(기회)일수록 운영자가 모두에게 꾸준히 제공하고, 위(선택)일수록 구성원이 원할 때만 고릅니다. 오른쪽은 층마다 열어 둘 키워드와 강요하지 않을 키워드의 짝입니다.</p>
